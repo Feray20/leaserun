@@ -10,7 +10,8 @@ const STATUSES = ["new", "contacted", "qualified", "won", "lost"];
 
 function cors(req: Request) {
   const origin = req.headers.get("origin") ?? "";
-  const allow = ALLOWED_ORIGINS.includes(origin) || origin.endsWith("-klk19.vercel.app") ? origin : ALLOWED_ORIGINS[0];
+  const preview = /^https:\/\/leaserun-[a-z0-9-]+-(feray20|klk19)\.vercel\.app$/.test(origin);
+  const allow = ALLOWED_ORIGINS.includes(origin) || preview ? origin : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
