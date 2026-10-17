@@ -136,6 +136,8 @@ def main():
             html = html.replace('<a href="#" data-modal class="btn btn-primary btn-sm">', links + '<a href="#" data-modal class="btn btn-primary btn-sm">', 1)
         if '/lr-app.js' not in html and 'nav-app' in html:
             html = html.replace('<script src="/app.js" defer></script>', f'<script src="/app.js" defer></script>\n<script src="/lr-calc.js?v={V}" defer></script>\n<script src="/lr-app.js?v={V}" defer></script>', 1)
+        html = html.replace('<a href="/about-contact#compliance">Privacy</a>', '<a href="/privacy">Privacy</a>')
+        html = html.replace('<a href="/about-contact#compliance">Terms</a>', '<a href="/terms">Terms</a>')
         if f.name == "index.html" and f.parent == DIST and "Investor software" not in html:
             html = html.replace("\n<footer>", teaser + "\n<footer>", 1)
         f.write_text(html, encoding="utf-8")
