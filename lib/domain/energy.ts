@@ -1,0 +1,2 @@
+export type EnergyAssessment={certificateId?:string;primaryDemandKwhM2a?:number;finalEnergyKwhM2a?:number;efficiencyClass?:string;heatingType?:string;heatingYear?:number;buildingYear?:number;modernizationRecommendations:string[];evidence:string[]};
+export function heatingAge(a:EnergyAssessment,year=new Date().getFullYear()){return a.heatingYear&&a.heatingYear>0?Math.max(0,year-a.heatingYear):null;}

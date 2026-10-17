@@ -1,0 +1,2 @@
+export interface RetentionPolicy{dataClass:string;purpose:string;retentionDays:number;deletionStrategy:string;}
+export const DEFAULT_RETENTION_POLICIES:RetentionPolicy[]=[{dataClass:"ORIGINAL_DOCUMENT",purpose:"Due Diligence",retentionDays:3650,deletionStrategy:"OWNER_REQUEST_OR_EXPIRY"},{dataClass:"AUDIT_EVENT",purpose:"Security audit",retentionDays:2555,deletionStrategy:"IMMUTABLE_RETENTION"},{dataClass:"SHARE_SESSION",purpose:"Secure Data Room",retentionDays:30,deletionStrategy:"AUTOMATIC_EXPIRY"}];

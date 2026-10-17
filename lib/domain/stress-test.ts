@@ -1,0 +1,3 @@
+export type StressScenario = "BASE"|"MODERATE"|"SEVERE"|"EXTREME";
+export interface StressAssumptions { interestRateDelta:number; vacancyDelta:number; maintenanceMultiplier:number; rentDelta:number; }
+export const STRESS_SCENARIOS:Record<StressScenario,StressAssumptions>={BASE:{interestRateDelta:0,vacancyDelta:0,maintenanceMultiplier:1,rentDelta:0},MODERATE:{interestRateDelta:.01,vacancyDelta:.03,maintenanceMultiplier:1.15,rentDelta:-.03},SEVERE:{interestRateDelta:.025,vacancyDelta:.08,maintenanceMultiplier:1.4,rentDelta:-.08},EXTREME:{interestRateDelta:.04,vacancyDelta:.15,maintenanceMultiplier:1.8,rentDelta:-.15}};

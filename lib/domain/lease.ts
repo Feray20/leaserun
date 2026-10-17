@@ -1,0 +1,2 @@
+export type LeaseAssessment={contractId:string;startDate?:string;netColdRent:number;livingAreaM2?:number;rentPerM2?:number;indexation:'none'|'index'|'step'|'other';noticeRestriction?:boolean;modernizationIncrease?:number;deposit?:number;legalFlags:string[];evidence:string[]};
+export function calculatedRentPerM2(l:LeaseAssessment){return l.livingAreaM2&&l.livingAreaM2>0?l.netColdRent/l.livingAreaM2:null;}

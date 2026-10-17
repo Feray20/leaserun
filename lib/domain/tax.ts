@@ -1,0 +1,3 @@
+export interface TaxInput { purchasePrice:number; buildingShare:number; relevantRenovationCosts:number; acquisitionAncillaryCosts:number; interest:number; deductibleExpenses:number; }
+export interface TaxResult { buildingBasis:number; fifteenPercentThreshold:number; fifteenPercentCheckRequired:boolean; deductibleInterest:number; deductibleExpenses:number; }
+export function calculateTax(i:TaxInput):TaxResult { const buildingBasis=i.purchasePrice*i.buildingShare; const threshold=buildingBasis*.15; return {buildingBasis,fifteenPercentThreshold:threshold,fifteenPercentCheckRequired:i.relevantRenovationCosts>threshold,deductibleInterest:i.interest,deductibleExpenses:i.deductibleExpenses}; }

@@ -1,0 +1,157 @@
+{
+ "stand": "Oktober 2026",
+ "hinweis": "Alle Preise sind Endpreise inkl. 19 % USt. Kreditmappe und Käufer-Pass sind Einmalkäufe ohne Abo – der Pass endet automatisch nach 90 Tagen. Investor Pro ist monatlich kündbar zum Ende des Abrechnungsmonats.",
+ "kostenlos": {
+  "name": "Kostenlos",
+  "features": [
+   "Alle Standard-Rechner, ohne Anmeldung",
+   "Schnellrechner, Exposé-Scan und Stresstest",
+   "Wissenszentrale in 4 Phasen und Glossar",
+   "2 Objekte im Konto",
+   "Kreditmappe als Vorschau mit Wasserzeichen"
+  ]
+ },
+ "privat": {
+  "name": "Privat",
+  "zielgruppe": "Kein Abo nötig: Kaufen Sie genau das, was Sie für Ihren Kauf brauchen. Investor Pro ist für Vermieter mit Bestand.",
+  "plans": [
+   {
+    "id": "credit-map",
+    "name": "BankReady Kreditmappe",
+    "badge": "Einzelkauf · kein Abo",
+    "highlight": true,
+    "cents": 3900,
+    "intervall": "einmalig je Objekt",
+    "mode": "payment",
+    "features": [
+     "Vollständige 6-seitige PDF-Kreditmappe für die Bank",
+     "Haushaltsrechnung, Objektanalyse und Zins-Stresstest",
+     "Unterlagen-Checkliste und Echtheits-QR-Code",
+     "Kein Abo, keine Folgekosten",
+     "Zufriedenheitsgarantie: Geld zurück, wenn Ihre finanzierende Bank das Mappenformat ablehnt"
+    ]
+   },
+   {
+    "id": "buyer-pass",
+    "name": "Käufer-Pass (3 Monate)",
+    "badge": "Für die Suchphase",
+    "cents": 4900,
+    "intervall": "einmalig für 90 Tage",
+    "mode": "payment",
+    "features": [
+     "90 Tage unbegrenzt Objekte und Exposé-Analysen",
+     "Vergleichsmatrix: Objekte nebeneinander bewerten",
+     "Angebotsvergleich der Bankangebote und Bankgespräch-Vorbereitung",
+     "Kaufpreis-Verhandlung mit Angebotsschreiben und Sondertilgungs-Planer",
+     "Inklusive 1 BankReady Kreditmappe (Wert 39 €)",
+     "Analyse-PDF für jedes Objekt",
+     "Endet automatisch – kein Abo, keine Kündigung nötig"
+    ]
+   },
+   {
+    "id": "pro-monthly",
+    "name": "Investor Pro",
+    "badge": "Für Vermieter",
+    "cents": 2900,
+    "intervall": "pro Monat",
+    "mode": "subscription",
+    "features": [
+     "Unbegrenzt Objekte und Kreditmappen",
+     "Portfolio-Radar: Zinsbindungsenden, Zinsschock und Cashflow aller Objekte",
+     "Fristenwächter mit Erinnerungen per E-Mail",
+     "CSV-Export für die Anlage V und Monatsbericht",
+     "Anschlussfinanzierungs-Rechner mit Forward-Aufschlag",
+     "Betriebskostenabrechnung für Ihre Mieter erstellen",
+     "Monatlich kündbar"
+    ]
+   }
+  ]
+ },
+ "b2b": {
+  "name": "Für Unternehmen",
+  "hinweis": "Nur für Unternehmer im Sinne des § 14 BGB. Alle Preise netto zzgl. 19 % USt. Monatsabos monatlich kündbar, Jahresabos zum Ende der Laufzeit. Kein Widerrufsrecht für Unternehmer.",
+  "plans": [
+   {
+    "id": "b2b-basic-monthly",
+    "tier": "BASIC",
+    "name": "Makler & Vermittler Basic",
+    "netto_cents": 5900,
+    "intervall": "pro Monat",
+    "interval": "month",
+    "seats": 1,
+    "dossiers": 20,
+    "features": [
+     "1 Berater-Zugang",
+     "10 Fall-Analysen pro Monat (Unterlagen-Paket hochladen, sofort geprüft)",
+     "3 Kunden-Präsentationen pro Monat",
+     "20 Kreditmappen (Prüfdossiers) pro Monat",
+     "Software-Tools: Haushaltsrechnung, Unterlagen-Anforderung, Provisionsrechner, GEG-Inseratscheck, Ertragswert",
+     "Website-Widget, Exposé-QR-Codes, Anfragen im Portal",
+     "Praxis-Toolkit für Ihre Branche"
+    ]
+   },
+   {
+    "id": "b2b-basic-yearly",
+    "tier": "BASIC",
+    "name": "Makler & Vermittler Basic (Jahr)",
+    "netto_cents": 59000,
+    "intervall": "pro Jahr",
+    "interval": "year",
+    "seats": 1,
+    "dossiers": 20,
+    "features": [
+     "Wie Basic",
+     "2 Monate geschenkt – entspricht ca. 49 € netto pro Monat"
+    ]
+   },
+   {
+    "id": "b2b-pro-monthly",
+    "tier": "PRO",
+    "name": "Kanzlei & Baufi Pro",
+    "netto_cents": 13900,
+    "intervall": "pro Monat",
+    "interval": "month",
+    "seats": 3,
+    "dossiers": null,
+    "features": [
+     "Bis zu 3 Berater-Zugänge",
+     "100 Fall-Analysen pro Monat",
+     "Kunden-Präsentationen unbegrenzt – mit Ihrem Logo, Ihren Farben und Ihrer Schrift",
+     "Alle Software-Tools, zusätzlich Beratungsprotokoll (§ 511 BGB), Bankangebote vergleichen, Vorfälligkeit & Anschluss",
+     "Bestandskunden-Radar: Kunden mit Zinsbindungsende in den nächsten 36 Monaten (mit deren Einwilligung)",
+     "Kreditmappen ohne Monatslimit, Gesamtdossier mit Unterlagen",
+     "Eigene Partnerseite mit Terminlink"
+    ]
+   },
+   {
+    "id": "b2b-pro-yearly",
+    "tier": "PRO",
+    "name": "Kanzlei & Baufi Pro (Jahr)",
+    "netto_cents": 139000,
+    "intervall": "pro Jahr",
+    "interval": "year",
+    "seats": 3,
+    "dossiers": null,
+    "features": [
+     "Wie Pro",
+     "2 Monate geschenkt – entspricht ca. 116 € netto pro Monat"
+    ]
+   }
+  ],
+  "enterprise": {
+   "tier": "ENTERPRISE",
+   "name": "Bank & Filiale Enterprise",
+   "preis": "ab 349 € netto pro Monat",
+   "seats": 10,
+   "features": [
+    "Bis zu 10 Berater-Zugänge (erweiterbar)",
+    "Fall-Analysen und Präsentationen unbegrenzt",
+    "Alle Software-Tools für jeden Berater",
+    "White-Label: Unterlagen komplett im Erscheinungsbild Ihres Hauses – Logo, Farben, Schrift, Absender, Fußzeile, ohne ImmoAdv",
+    "Teamverwaltung mit Berater-Zuordnung, Bestandskunden-Radar",
+    "Kauf auf Rechnung möglich",
+    "Individuelles Angebot nach Filialgröße"
+   ]
+  }
+ }
+}

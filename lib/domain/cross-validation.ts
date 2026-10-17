@@ -1,0 +1,3 @@
+export type ConflictSeverity = "INFO" | "WARNING" | "MATERIAL" | "CRITICAL";
+export interface CrossDocumentConflict { id:string; propertyId:string; field:string; leftEvidenceId:string; rightEvidenceId:string; leftValue:unknown; rightValue:unknown; severity:ConflictSeverity; financialImpact?:number; recommendation:string; vetoLevel:"NONE"|"WARNING"|"CONDITIONAL_VETO"|"HARD_VETO"; }
+export function classifyConflict(severity:ConflictSeverity):CrossDocumentConflict["vetoLevel"] { if(severity==="CRITICAL") return "HARD_VETO"; if(severity==="MATERIAL") return "CONDITIONAL_VETO"; if(severity==="WARNING") return "WARNING"; return "NONE"; }

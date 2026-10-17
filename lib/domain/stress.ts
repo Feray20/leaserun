@@ -1,0 +1,4 @@
+import { calculateUnderwriting, UnderwritingInput, UnderwritingMetrics } from './underwriting';
+export type StressScenario='BASE'|'MODERATE'|'SEVERE'|'EXTREME';
+export interface StressResult extends UnderwritingMetrics { scenario:StressScenario; annualDeficit:number; }
+export function runStress(i:UnderwritingInput,s:StressScenario):StressResult { const f=s==='BASE'?{r:1,v:1,c:1}:{r:s==='MODERATE'?.98:s==='SEVERE'?.93:.85,v:s==='MODERATE'?1.03:s==='SEVERE'?1.1:1.2,c:s==='MODERATE'?1.1:s==='SEVERE'?1.25:1.5}; const x=calculateUnderwriting({...i,netRent:i.netRent*f.r,vacancy:i.vacancy*f.v,nonRecoverableCosts:i.nonRecoverableCosts*f.c,maintenance:i.maintenance*f.c,operatingCashCosts:i.operatingCashCosts*f.c,interest:i.interest*(s==='BASE'?1:s==='MODERATE'?1.1:s==='SEVERE'?1.25:1.5)}); return {...x,scenario:s,annualDeficit:Math.max(0,-x.cfads)}; }

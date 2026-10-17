@@ -1,0 +1,3 @@
+import type {RiskFlag,RiskLevel} from './risk';
+export type DecisionState={risk:RiskLevel;bankReadyScore:number;blockingFlags:RiskFlag[];warnings:RiskFlag[];missingDocuments:string[];nextActions:string[];calculatedAt:string};
+export function buildDecisionState(score:number,flags:RiskFlag[],missingDocuments:string[],nextActions:string[]):DecisionState{const blockingFlags=flags.filter(f=>f.level==='veto');return {risk:blockingFlags.length?'veto':flags.some(f=>f.level==='high')?'high':flags.some(f=>f.level==='medium')?'medium':'low',bankReadyScore:Math.max(0,Math.min(100,score)),blockingFlags,warnings:flags.filter(f=>f.level!=='veto'),missingDocuments,nextActions,calculatedAt:new Date().toISOString()};}

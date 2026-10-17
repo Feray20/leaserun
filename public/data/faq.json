@@ -1,0 +1,514 @@
+{
+  "version": "2026-10-17",
+  "disclaimer": "Reines technisches Analyse-, Informations- und Vorbereitungsinstrument. Keine Kreditvermittlung oder Darlehensberatung (§ 34i GewO, KWG), keine Steuerberatung (StBerG), keine Rechtsdienstleistung (RDG).",
+  "levels": {
+    "l1": "Ich brauche Orientierung",
+    "l2": "Ich möchte alle Details wissen"
+  },
+  "entries": [
+    {
+      "id": 1,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Wie viel Immobilie kann ich mir leisten?",
+      "level1": "Entscheidend ist nicht der Kaufpreis, sondern die monatliche Rate, die nach allen Lebenshaltungskosten dauerhaft übrig bleibt. Banken rechnen dafür mit Pauschalen, nicht mit Ihrem Wunschbudget.",
+      "nextStep": "Nettoeinkommen und Eigenkapital im kostenlosen Konto hinterlegen; die Haushaltsrechnung der Mustermappe zeigt das Schema.",
+      "level2": "Bankpraxis: Nettoeinkommen minus Lebenshaltungspauschale (häufig 800–1.200 € für die erste Person, 300–400 € je weitere Person), minus Warmmiete bzw. künftige Bewirtschaftungskosten, minus bestehende Raten = maximal tragbare Rate. Daraus ergibt sich über die Annuität das Darlehen: Darlehen = Rate × 12 ÷ (Sollzins + anfängliche Tilgung). Beispiel (fiktiv): 900 € Rate, 3,8 % Zins, 2 % Tilgung → 900 × 12 ÷ 0,058 ≈ 186.207 € Darlehen. Die genauen Pauschalen legt jede Bank selbst fest."
+    },
+    {
+      "id": 2,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Wie viel Eigenkapital brauche ich?",
+      "level1": "Als Faustregel sollten mindestens die Kaufnebenkosten aus Eigenkapital bezahlt werden, besser zusätzlich 10–20 % des Kaufpreises. Eine Notfallreserve von 3–6 Monatsausgaben gehört nicht in die Finanzierung.",
+      "nextStep": "Eigenkapital im Rechner auf der Startseite eintragen und die Reserve getrennt einplanen.",
+      "level2": "Je höher der Beleihungsauslauf (Darlehen ÷ Beleihungswert), desto höher meist der Zinsaufschlag. Vollfinanzierungen (110 %) sind möglich, verlangen aber in der Regel sehr gute Bonität und kosten spürbar mehr Zins. ImmoAdv-Scorecard: Grün nur, wenn Nebenkosten + 10 % Kaufpreis gedeckt sind und die Reserve erhalten bleibt."
+    },
+    {
+      "id": 3,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Welche Nebenkosten kommen zum Kaufpreis dazu?",
+      "level1": "Grunderwerbsteuer, Notar und Grundbuch sowie ggf. Maklerprovision. Je nach Bundesland sind das zusammen rund 7–15 % des Kaufpreises.",
+      "nextStep": "Den Nebenkosten-Prozentsatz Ihres Bundeslands im Rechner auf der Startseite eintragen.",
+      "level2": "Grunderwerbsteuer: 3,5–6,5 % je nach Bundesland (z. B. Hessen 6,0 %, Bayern 3,5 %). Notar und Grundbuch: rund 1,5–2,0 %. Maklerprovision bei Wohnungen und Einfamilienhäusern für Verbraucher: höchstens hälftige Teilung (§§ 656a ff. BGB), üblich bis 3,57 % inkl. USt je Seite. Beispiel (fiktiv, Hessen, ohne Makler): 300.000 € × (6,0 % + 1,8 %) = 23.400 €."
+    },
+    {
+      "id": 4,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Was bedeuten Zins, Tilgung, Annuität und Zinsbindung?",
+      "level1": "Die Annuität ist Ihre gleichbleibende Rate aus Zins und Tilgung. Mit jeder Rate sinkt die Restschuld, dadurch wird der Zinsanteil kleiner und der Tilgungsanteil größer.",
+      "nextStep": "Zins und Tilgung im Rechner auf der Startseite variieren.",
+      "level2": "Jahresrate = Darlehen × (Sollzins + anfängliche Tilgung). Die Zinsbindung (z. B. 10 oder 15 Jahre) legt fest, wie lange der Zins fest ist; danach wird die Restschuld zu neuen Konditionen weiterfinanziert. Restschuld nach n Jahren (monatlich): K·(1+i)^m − R·((1+i)^m − 1)/i mit i = Monatszins, m = Monate, R = Monatsrate."
+    },
+    {
+      "id": 5,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Warum unterscheidet die Bank nach Beruf und Einkommensart?",
+      "level1": "Die Bank bewertet, wie sicher Ihr Einkommen in den nächsten Jahren ist. Beamte und unbefristet Angestellte gelten als planbar, Selbstständige und Befristete als schwankender.",
+      "nextStep": "In der Unterlagen-Checkliste nach Ihrem Erwerbsstatus filtern.",
+      "level2": "Angestellte: Probezeit beendet, variable Anteile nur mit Historie. Befristete: oft zweiter Darlehensnehmer nötig. Beamte: PKV-Beiträge werden abgezogen. Selbstständige: in der Regel 2–3 Jahresabschlüsse/Steuerbescheide und aktuelle BWA, Mindestbestehensdauer meist 2–3 Jahre. Studierende/Arbeitslose: ohne solventen Mitantragsteller in der Regel nicht finanzierbar. Rentner: Altersgrenzen und Restlaufzeit begrenzen Laufzeit und Höhe."
+    },
+    {
+      "id": 6,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Was ist eine Haushaltsrechnung und was gehört hinein?",
+      "level1": "Eine Gegenüberstellung aller monatlichen Einnahmen und Ausgaben nach Bankschema. Sie zeigt, ob die neue Rate dauerhaft tragbar ist.",
+      "nextStep": "Haushaltsrechnung der Mustermappe als Vorlage nutzen.",
+      "level2": "Einnahmen: Nettogehälter (12 oder 13/14 Gehälter laut Bank), Kindergeld, künftige Mieteinnahmen (meist nur 70–80 % angesetzt). Ausgaben: Lebenshaltungspauschale, Warmmiete oder Hausgeld, Versicherungen, PKV, Kfz, bestehende Kredite, neue Rate. Der Überschuss sollte deutlich positiv bleiben; die genaue Mindestgröße legt jede Bank selbst fest."
+    },
+    {
+      "id": 7,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Wie hoch darf die monatliche Belastung sein?",
+      "level1": "Als grobe Orientierung gilt: Die Rate sollte nicht mehr als etwa 35–40 % des Haushaltsnettos betragen. Entscheidend bleibt aber der Überschuss nach der Haushaltsrechnung.",
+      "nextStep": "Rate im Rechner ermitteln und durch Ihr Haushaltsnetto teilen.",
+      "level2": "Belastungsquote = Monatsrate ÷ Haushaltsnetto. Eine Quote ist nur eine Faustregel; bei hohem Einkommen ist mehr tragbar, bei Familien mit Kindern weniger. Banken prüfen zusätzlich den Anschlusszins (siehe Anschlusszins-Kipp-Punkt)."
+    },
+    {
+      "id": 8,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Was ist der Beleihungswert?",
+      "level1": "Der Wert, den die Bank dauerhaft für sicher hält. Er liegt meist unter dem Kaufpreis und bestimmt, wie viel Kredit zu guten Konditionen möglich ist.",
+      "nextStep": "Darlehen und Beleihungswert im Cockpit eintragen – der Beleihungsauslauf wird berechnet.",
+      "level2": "Grundlage ist die Beleihungswertermittlungsverordnung (BelWertV) bzw. bankinterne Verfahren. Typisch sind Abschläge von 10–20 % auf den Marktwert. Beleihungsauslauf = Darlehen ÷ Beleihungswert. Bis 60 % gilt als erstrangig (Pfandbrief-fähig), darüber wird es teurer; der Teil über dem Beleihungswert heißt Blankoanteil."
+    },
+    {
+      "id": 9,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Eigentumswohnung: Was sagen Teilungserklärung, Protokolle und Rücklage?",
+      "level1": "Diese Unterlagen zeigen, was Ihnen gehört, welche Sanierungen anstehen und ob genug Geld dafür da ist. Sie sind für die Bank und für Sie Pflichtlektüre.",
+      "nextStep": "WEG-Unterlagen in der Checkliste abhaken.",
+      "level2": "Teilungserklärung: Sondereigentum, Sondernutzungsrechte, Kostenverteilung. Protokolle der letzten 3 Eigentümerversammlungen: beschlossene Sonderumlagen, Streit, Sanierungsstau. Wirtschaftsplan und Erhaltungsrücklage: Als grobe Orientierung gelten mindestens 1,00–1,50 € je m² Wohnfläche und Monat, bei älteren Gebäuden mehr."
+    },
+    {
+      "id": 10,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Wie prüfe ich eine Eigentumswohnung?",
+      "level1": "In drei Schritten: Lage und Miete, Zustand von Wohnung und Gemeinschaftseigentum, Zahlen der Eigentümergemeinschaft. Erst danach lohnt die Finanzierungsanfrage.",
+      "nextStep": "Objektunterlagen in der Checkliste abhaken (Filter „Eigentumswohnung“).",
+      "level2": "Lage: Mietspiegel, Leerstand, Infrastruktur. Zustand: Baujahr, Dach, Fenster, Heizung, Energieausweis (seit 29.07.2026 nach dem Gebäudemodernisierungsgesetz, zuvor GEG). WEG: Rücklage, Hausgeld, Sonderumlagen, Protokolle. Rechtliches: Grundbuch Abt. II (Lasten, Wegerechte) und Abt. III (Grundpfandrechte)."
+    },
+    {
+      "id": 11,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Wie kann ich mehrere Objekte vergleichen?",
+      "level1": "Vergleichen Sie nie nur Kaufpreise, sondern Kaufpreis je m², Mietrendite und Cashflow nach allen Kosten. Erfassen Sie alle Objekte mit denselben Annahmen.",
+      "nextStep": "Bis zu 2 Objekte im kostenlosen Konto speichern und jeweils im Rechner prüfen.",
+      "level2": "Vergleichsgrößen: Kaufpreis je m², Kaufpreisfaktor (Kaufpreis ÷ Jahreskaltmiete), Nettomietrendite, Cashflow vor/nach Steuern, Instandhaltungsbedarf, Rücklage je m². Gleiche Annahmen für Zins, Leerstand und Instandhaltung sind Voraussetzung für einen fairen Vergleich."
+    },
+    {
+      "id": 12,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Welche Unterlagen fehlen typischerweise?",
+      "level1": "Am häufigsten fehlen aktuelle Grundbuchauszüge, Wohnflächenberechnungen, WEG-Protokolle und bei Selbstständigen die aktuelle BWA. Fehlende Unterlagen verzögern die Bankprüfung.",
+      "nextStep": "Unterlagen-Checkliste nach Ihrem Erwerbsstatus filtern.",
+      "level2": "Die Checkliste unterscheidet „erforderlich“ und „fallweise“. Grundbuchauszug: meist nicht älter als 3 Monate. Gehaltsnachweise: die letzten 3 Monate. Steuerbescheide: die letzten 2–3 Jahre. Was eine Bank konkret verlangt, entscheidet sie selbst."
+    },
+    {
+      "id": 13,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Brutto-, Netto- und Eigenkapitalrendite: Was ist der Unterschied?",
+      "level1": "Die Bruttorendite schaut nur auf Miete und Kaufpreis. Die Nettorendite zieht Kosten ab, die Eigenkapitalrendite zeigt, was Ihr eingesetztes Geld verdient.",
+      "nextStep": "Alle drei Werte im Rechner vergleichen.",
+      "level2": "Bruttomietrendite = Jahreskaltmiete ÷ Kaufpreis. Nettomietrendite = (Jahreskaltmiete − nicht umlagefähige Kosten − Instandhaltung − Mietausfall) ÷ (Kaufpreis + Nebenkosten). Eigenkapitalrendite = jährlicher Überschuss nach Zins (ggf. nach Steuern, ggf. inkl. Tilgung) ÷ eingesetztes Eigenkapital."
+    },
+    {
+      "id": 14,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist die Nettomietrendite?",
+      "level1": "Die Rendite nach den Kosten, die Sie als Vermieter selbst tragen. Sie liegt immer unter der Bruttorendite aus dem Exposé.",
+      "nextStep": "Bewirtschaftungskosten und Leerstand im Rechner auf der Startseite eintragen.",
+      "level2": "Formel: (Jahreskaltmiete − nicht umlagefähige Bewirtschaftungskosten − Instandhaltung − Mietausfallwagnis) ÷ Gesamtinvestition inkl. Nebenkosten. Beispiel (fiktiv): (9.360 − 576 − 1.020 − 187) ÷ 189.783 ≈ 3,99 %."
+    },
+    {
+      "id": 15,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was bedeutet Cashflow vor und nach Steuern?",
+      "level1": "Cashflow vor Steuern ist, was nach Miete, Kosten und Kreditrate monatlich übrig bleibt oder fehlt. Nach Steuern kommt die Steuerwirkung aus AfA und Zinsen hinzu.",
+      "nextStep": "Grenzsteuersatz, Gebäudeanteil und AfA-Satz im Rechner eintragen.",
+      "level2": "Cashflow v. St. = Miete − Bewirtschaftung − Instandhaltung − Mietausfall − Zins − Tilgung. Steuerliches Ergebnis = Miete − Werbungskosten (Zins, Bewirtschaftung, AfA). Ist es negativ, mindert es das zu versteuernde Einkommen. Cashflow n. St. = Cashflow v. St. − (steuerliches Ergebnis × persönlicher Grenzsteuersatz). Tilgung ist nicht steuerlich abziehbar, AfA nicht liquiditätswirksam."
+    },
+    {
+      "id": 16,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie funktioniert die AfA?",
+      "level1": "Die Absetzung für Abnutzung verteilt die Gebäudekosten über die Nutzungsdauer und mindert jährlich Ihre Steuerlast. Grund und Boden wird nicht abgeschrieben.",
+      "nextStep": "Gebäudeanteil und AfA-Satz im Rechner eintragen; Details mit Steuerberatung klären.",
+      "level2": "Linear nach § 7 Abs. 4 EStG: 3 % bei Fertigstellung ab 2023, 2 % bei Fertigstellung 1925–2022, 2,5 % vor 1925. Degressiv nach § 7 Abs. 5a EStG: 5 % vom Restwert für neue Wohngebäude mit Baubeginn zwischen 01.10.2023 und 30.09.2029. Bemessungsgrundlage ist nur der Gebäudeanteil; die Aufteilung kann mit der Arbeitshilfe des BMF erfolgen. Die steuerliche Wirkung hängt vom persönlichen Steuersatz ab – bitte mit Steuerberatung abstimmen."
+    },
+    {
+      "id": 17,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist die 15-%-Grenze bei Renovierungen?",
+      "level1": "Wer innerhalb von drei Jahren nach dem Kauf mehr als 15 % des Gebäudewerts netto renoviert, kann diese Kosten nicht sofort absetzen. Sie werden dann über die AfA verteilt.",
+      "nextStep": "Grenze im Rechner unter „Kaufpreisaufteilung und 15-%-Grenze“ berechnen.",
+      "level2": "Anschaffungsnahe Herstellungskosten nach § 6 Abs. 1 Nr. 1a EStG: Instandsetzungs- und Modernisierungskosten innerhalb von 3 Jahren nach Anschaffung, die ohne USt 15 % der Gebäude-Anschaffungskosten übersteigen. Beispiel (fiktiv, Mustermappe): Gebäude-Anschaffungskosten 151.826,40 € (80 % von 189.783 €) → Grenze 22.773,96 € netto."
+    },
+    {
+      "id": 18,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wann ist ein Verkauf steuerfrei?",
+      "level1": "Bei vermieteten Immobilien ist der Gewinn aus einem Verkauf nach mehr als zehn Jahren zwischen Kauf und Verkauf in der Regel steuerfrei. Selbstgenutzte Immobilien haben eigene Regeln.",
+      "nextStep": "Kaufdatum unter „Fristen“ eintragen und die Termine als Kalenderdatei speichern.",
+      "level2": "Private Veräußerungsgeschäfte nach § 23 Abs. 1 Nr. 1 EStG. Ausnahme bei Selbstnutzung im Verkaufsjahr und den beiden Vorjahren. Bei Verkauf innerhalb der Frist wird der Gewinn mit dem persönlichen Steuersatz versteuert; die AfA erhöht dabei den Gewinn."
+    },
+    {
+      "id": 19,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie funktioniert die Mietpreisbremse?",
+      "level1": "In ausgewiesenen Gebieten darf die Miete bei Neuvermietung höchstens 10 % über der ortsüblichen Vergleichsmiete liegen. Es gibt Ausnahmen, etwa für Neubauten und umfassend modernisierte Wohnungen.",
+      "nextStep": "Ortsübliche Vergleichsmiete im Mietspiegel Ihrer Gemeinde nachschlagen.",
+      "level2": "§ 556d BGB; Ausnahmen in §§ 556e, 556f BGB (höhere Vormiete, Modernisierung, Erstbezug nach dem 01.10.2014). Welche Gemeinden betroffen sind, legen die Landesregierungen per Verordnung fest. Die Grenze ist rechtlich bindend, eine zu hohe Miete kann zurückgefordert werden."
+    },
+    {
+      "id": 20,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist die Kappungsgrenze?",
+      "level1": "Bei bestehenden Mietverhältnissen darf die Miete innerhalb von drei Jahren um höchstens 20 % steigen, in angespannten Märkten um höchstens 15 %. Zusätzlich gilt die ortsübliche Vergleichsmiete als Obergrenze.",
+      "nextStep": "Kappungsgrenze, Index- und Staffelmiete im Rechner prüfen.",
+      "level2": "§ 558 Abs. 3 BGB. Die abgesenkte Grenze von 15 % gilt in Gebieten, die die Länder per Verordnung bestimmen. Modernisierungsmieterhöhungen nach § 559 BGB folgen eigenen Regeln."
+    },
+    {
+      "id": 21,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie funktioniert eine Staffelmiete?",
+      "level1": "Die künftigen Mieterhöhungen werden schon im Mietvertrag mit festen Beträgen und Terminen vereinbart. Dazwischen sind weitere Erhöhungen auf die Vergleichsmiete ausgeschlossen.",
+      "nextStep": "Staffeln aus dem Mietvertrag mit dem Mietspiegel abgleichen.",
+      "level2": "§ 557a BGB: Die Miete muss jeweils mindestens ein Jahr unverändert bleiben und die Erhöhung als Geldbetrag ausgewiesen sein. In Gebieten mit Mietpreisbremse muss jede Staffel für sich die Grenze des § 556d BGB einhalten."
+    },
+    {
+      "id": 22,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist ein Mietausfallwagnis?",
+      "level1": "Ein kalkulatorischer Abschlag für Leerstand und ausbleibende Mietzahlungen. Er gehört in jede seriöse Renditerechnung, auch wenn die Wohnung aktuell vermietet ist.",
+      "nextStep": "Leerstand in Prozent im Rechner auf der Startseite eintragen.",
+      "level2": "Üblich sind 2 % der Jahresnettokaltmiete für Wohnraum (angelehnt an § 29 II. BV), bei schwierigen Lagen oder Gewerbe mehr. Beispiel (fiktiv): 9.360 € × 2 % = 187,20 € pro Jahr."
+    },
+    {
+      "id": 23,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie bewerte ich ein Portfolio?",
+      "level1": "Ein Portfolio bewerten Sie über Gesamt-Cashflow, gesamte Restschuld und die Termine, an denen Zinsbindungen auslaufen. Ein einzelnes schwaches Objekt kann die ganze Finanzierungsfähigkeit belasten.",
+      "nextStep": "Objekte im Konto speichern; die Portfolio-Übersicht zeigt Summen und das Zins-Szenario.",
+      "level2": "Kennzahlen: Summe Cashflow v./n. St., gewichteter Zins, Gesamt-LTV (Restschuld ÷ Marktwerte), DSCR (Überschuss vor Kapitaldienst ÷ Kapitaldienst), Fälligkeitsprofil der Zinsbindungen. Banken bewerten bei Folgefinanzierungen die Gesamtverschuldung."
+    },
+    {
+      "id": 24,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was passiert, wenn die Zinsbindung endet?",
+      "level1": "Die Restschuld muss zu den dann gültigen Zinsen weiterfinanziert werden. Steigen die Zinsen, steigt Ihre Rate oder die Laufzeit verlängert sich.",
+      "nextStep": "Anschlusszins-Tabelle in der Mustermappe ansehen.",
+      "level2": "Optionen: Prolongation bei der bisherigen Bank, Umschuldung zu einer anderen Bank, Forward-Darlehen (bis zu ca. 5 Jahre vorher gegen Zinsaufschlag). Nach 10 Jahren ab Vollauszahlung besteht ein gesetzliches Kündigungsrecht mit 6 Monaten Frist (§ 489 Abs. 1 Nr. 2 BGB)."
+    },
+    {
+      "id": 25,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was ist ein Anschlusszins-Kipp-Punkt?",
+      "level1": "Der Zinssatz, ab dem Ihr Objekt nach Ende der Zinsbindung keinen positiven Cashflow mehr erwirtschaftet. Je weiter er über dem heutigen Zins liegt, desto robuster ist die Finanzierung.",
+      "nextStep": "Stresstest im Cockpit nutzen.",
+      "level2": "Berechnung: Restschuld nach Zinsbindung × (Anschlusszins + Tilgung) = verfügbarer Überschuss vor Kapitaldienst, aufgelöst nach dem Zins. In der fiktiven Mustermappe kippt der Cashflow zwischen 4 % und 5 %."
+    },
+    {
+      "id": 26,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was ist die Kreditmappe?",
+      "level1": "Ein strukturiertes PDF mit Vorhaben, Objektdaten, Haushaltsrechnung, Kennzahlen und Unterlagenstatus. Sie hilft Ihnen, gut vorbereitet ins Bankgespräch zu gehen.",
+      "nextStep": "Mustermappe ansehen.",
+      "level2": "Die Mappe enthält Rechenwege und den Status jeder Unterlage (liegt vor, angefordert, fehlt, ungeprüft). Sie ist keine Finanzierungszusage und ersetzt nicht die Prüfung durch die Bank. Die Kreditmappe kostet 39,00 € je Objekt (Einmalkauf, inkl. 19 % USt); im Käufer-Pass ist eine enthalten, in Investor Pro beliebig viele. Heute verfügbar sind die fiktive Mustermappe und, nach Anmeldung, eine kostenfreie Vorschau der eigenen Kreditmappe (mit Wasserzeichen, ohne Echtheits-QR)."
+    },
+    {
+      "id": 27,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was gehört in eine Kreditmappe?",
+      "level1": "Selbstauskunft, Einkommens- und Eigenkapitalnachweise sowie alle Objektunterlagen. Je vollständiger, desto schneller kann die Bank prüfen.",
+      "nextStep": "Unterlagen-Checkliste durchgehen.",
+      "level2": "Person: Ausweis, Selbstauskunft, Gehaltsnachweise, Steuerbescheide, Eigenkapitalnachweis, bestehende Kredite. Objekt: Exposé, Grundbuchauszug, Flurkarte, Grundrisse, Wohnflächenberechnung, Energieausweis, bei ETW Teilungserklärung, Protokolle, Wirtschaftsplan, Rücklagenstand, Kaufvertragsentwurf."
+    },
+    {
+      "id": 28,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was macht der Banken-Ready-Score?",
+      "level1": "Er fasst zusammen, wie vollständig und plausibel Ihr Fall für ein Bankgespräch vorbereitet ist. Er ist eine interne ImmoAdv-Einstufung, keine Bankbewertung und keine Zusage.",
+      "nextStep": "Score im Cockpit prüfen und offene Punkte abarbeiten.",
+      "level2": "Gewichtet werden Kapitaldienstdeckung (DSCR), Zinsdeckung, Beleihungsauslauf, Dokumentationsstand, rechtliche und technische Risiken sowie die Liquiditätsreserve. Liegt der DSCR unter 1,00 (die Miete deckt den Kapitaldienst nicht), wird der Score gedeckelt und ein Veto angezeigt."
+    },
+    {
+      "id": 29,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Vermittelt ImmoAdv Kredite?",
+      "level1": "Nein. ImmoAdv ist ein technisches Analyse- und Vorbereitungswerkzeug und hat keine Erlaubnis nach § 34i oder § 34c GewO. Wir vermitteln keine Darlehen und sagen keine Konditionen zu.",
+      "nextStep": "Mit der vorbereiteten Mappe zur Bank oder zum Berater Ihrer Wahl gehen.",
+      "level2": "ImmoAdv erhält keine erfolgsabhängigen Provisionen von Banken. Mögliche Kooperationen mit Banken beschränken sich auf Empfehlungen (Co-Branding) oder feste technische Servicepauschalen für die Aufbereitung von Unterlagen. Es bestehen keine Partnerschaften mit Plattformen wie Europace, eHyp oder Finmas."
+    },
+    {
+      "id": 30,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Welche Daten speichert ImmoAdv?",
+      "level1": "Mit Konto speichern wir E-Mail, Passwort-Hash sowie die Finanz- und Objektwerte, die Sie eingeben. Dateien werden nur gespeichert, wenn Sie sie selbst im Konto hochladen.",
+      "nextStep": "Details auf der Seite „Sicherheit“ ansehen.",
+      "level2": "Hosting über Vercel, Konto und Daten über Supabase. Für künftige Zahlungen ist Stripe vorgesehen; Kartendaten würden ImmoAdv dabei nie erreichen. Fortschritt von Checkliste und Pro-Begleiter wird ohne Konto nur im Speicher Ihres Browsers abgelegt. Einzelheiten in der Datenschutzerklärung."
+    },
+    {
+      "id": 31,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Wer kann meine Daten sehen?",
+      "level1": "Nur Sie. Banken oder Berater sehen nur, was Sie selbst weitergeben: die Kreditmappe oder eine befristete Freigabe ausgewählter Unterlagen.",
+      "nextStep": "Datenschutzerklärung lesen.",
+      "level2": "Technische Dienstleister (Hosting, Datenbank, Zahlung) verarbeiten Daten nur im Auftrag. Mit einem befristeten Freigabelink können Sie ausgewählte Kategorien für eine Bank oder einen Berater öffnen; jeder Abruf wird protokolliert, ein Widerruf wirkt sofort. Eine Ende-zu-Ende-Verschlüsselung besteht nicht: Dateien sind verschlüsselt gespeichert, für den Betrieb aber technisch zugänglich."
+    },
+    {
+      "id": 32,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Was kostet ImmoAdv?",
+      "level1": "Alle Rechner, der Schnellrechner, der Exposé-Scan und das Wissen sind kostenlos, ohne Anmeldung. Kostenpflichtig sind nur: BankReady Kreditmappe 39,00 € je Objekt (Einmalkauf), Käufer-Pass 49,00 € für 90 Tage (inkl. 1 Kreditmappe, endet automatisch) und Investor Pro 29,00 € pro Monat. Alle Preise inkl. 19 % USt.",
+      "nextStep": "Angebote ansehen.",
+      "level2": "Ein Abo brauchen Sie nur, wenn Sie vermieten und Ihren Bestand laufend im Blick behalten wollen (Investor Pro, monatlich kündbar, ohne Anmeldung über „Verträge hier kündigen“). Für den Kauf reichen Kreditmappe oder Käufer-Pass – beide sind Einmalkäufe. Für die Kreditmappe gilt eine Zufriedenheitsgarantie: Lehnt Ihre Bank das Format ab, gibt es den Kaufpreis zurück. Die Ansicht Einsteiger oder Profi wählen Sie unabhängig vom Tarif."
+    },
+    {
+      "id": 33,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Wie lösche ich meine Daten?",
+      "level1": "Gespeicherte Objekte löschen Sie direkt in Ihrem Konto. Das gesamte Konto löschen Sie im Konto unter „Daten & Konto“ oder per E-Mail an support@immoadv.de.",
+      "nextStep": "E-Mail an support@immoadv.de senden.",
+      "level2": "Recht auf Löschung nach Art. 17 DSGVO und auf Datenübertragbarkeit nach Art. 20 DSGVO. Gesetzliche Aufbewahrungspflichten (z. B. Rechnungen, 10 Jahre nach § 147 AO) bleiben unberührt. Browser-Daten löschen Sie über die Einstellungen Ihres Browsers."
+    },
+    {
+      "id": 34,
+      "category": "Vermieten & Absicherung",
+      "question": "Was tun, wenn der Mieter nicht pünktlich zahlt?",
+      "level1": "Die Miete ist meist bis zum dritten Werktag des Monats fällig (§ 556b BGB). Zahlt der Mieter nicht, ist er auch ohne Mahnung im Verzug. Erst freundlich nachfragen, dann schriftlich mahnen – mit Betrag, Monat und Frist. So haben Sie einen sauberen Nachweis.",
+      "nextStep": "Zahlungseingänge monatlich prüfen und bei Ausfall eine schriftliche Mahnung mit Frist von 7 bis 14 Tagen versenden.",
+      "level2": "Weil der Zahltermin nach dem Kalender bestimmt ist, tritt Verzug ohne Mahnung ein (§ 286 Abs. 2 Nr. 1 BGB). Ab Verzug können Verzugszinsen verlangt werden: bei Wohnraummietern 5 Prozentpunkte über dem Basiszinssatz (§ 288 Abs. 1 BGB). Dokumentieren Sie Fälligkeit, Zahlungseingang und jede Mahnung. Oft hilft ein offenes Gespräch – eine Ratenvereinbarung schriftlich festhalten."
+    },
+    {
+      "id": 35,
+      "category": "Vermieten & Absicherung",
+      "question": "Wie funktioniert das gerichtliche Mahnverfahren?",
+      "level1": "Zahlt der Mieter trotz Mahnung nicht, können Sie beim Mahngericht einen Mahnbescheid beantragen – online über das offizielle Portal der Justiz unter https://www.online-mahnantrag.de, ohne Anwalt. Widerspricht der Mieter nicht, folgt der Vollstreckungsbescheid; damit kann vollstreckt werden.",
+      "nextStep": "Mahnantrag online stellen: https://www.online-mahnantrag.de (offizielles Portal der Justiz).",
+      "level2": "Das Mahnverfahren prüft nicht, ob die Forderung besteht – es ist schnell und günstig. Ablauf: Antrag → Mahnbescheid wird zugestellt → der Mieter hat zwei Wochen für einen Widerspruch → ohne Widerspruch beantragen Sie den Vollstreckungsbescheid → danach Vollstreckung, z. B. durch Gerichtsvollzieher oder Kontopfändung. Bei Widerspruch geht die Sache ins normale Gerichtsverfahren. Die Gerichtsgebühr richtet sich nach der Forderungshöhe, wird zunächst von Ihnen vorgestreckt und ist vom Schuldner zu erstatten. Für eine Räumung reicht das Mahnverfahren nicht – dafür braucht es eine Räumungsklage."
+    },
+    {
+      "id": 36,
+      "category": "Vermieten & Absicherung",
+      "question": "Wann darf ich wegen Mietrückstand kündigen?",
+      "level1": "Fristlos kündigen können Sie, wenn der Mieter für zwei aufeinanderfolgende Termine mit der Miete oder einem Betrag von mehr als einer Monatsmiete im Rückstand ist – oder über einen längeren Zeitraum mit insgesamt zwei Monatsmieten (§ 543 Abs. 2 Nr. 3, § 569 Abs. 3 Nr. 1 BGB).",
+      "nextStep": "Rückstand genau aufstellen, schriftlich und begründet kündigen, vorsorglich zusätzlich ordentlich – im Zweifel anwaltlich prüfen lassen.",
+      "level2": "Achtung Schonfrist (§ 569 Abs. 3 Nr. 2 BGB): Zahlt der Mieter den gesamten Rückstand spätestens zwei Monate nach Zustellung der Räumungsklage oder übernimmt eine öffentliche Stelle die Zahlung, wird die fristlose Kündigung unwirksam – einmal innerhalb von zwei Jahren. Vermieter kündigen deshalb häufig zusätzlich ordentlich wegen erheblicher Pflichtverletzung (§ 573 Abs. 2 Nr. 1 BGB); diese wird nach der Rechtsprechung des BGH durch die Nachzahlung nicht automatisch geheilt. Zieht der Mieter nicht aus, ist eine Räumungsklage nötig. Selbst räumen oder Schlösser austauschen ist verboten."
+    },
+    {
+      "id": 37,
+      "category": "Vermieten & Absicherung",
+      "question": "Wie sichere ich mich gegen Mietausfall ab?",
+      "level1": "Vor dem Vertrag die Bonität prüfen (Einkommensnachweise, Mietschuldenfreiheitsbescheinigung, Selbstauskunft, ggf. Bonitätsauskunft des Mieters). Im Vertrag eine Kaution von bis zu drei Nettokaltmieten vereinbaren (§ 551 BGB). Laufend Zahlungseingänge prüfen und früh reagieren.",
+      "nextStep": "In der Analyse ein Mietausfallwagnis von 2 bis 4 % ansetzen und eine Reserve von mindestens drei Monatsraten halten.",
+      "level2": "Die Kaution darf in drei Monatsraten gezahlt werden und ist getrennt vom eigenen Vermögen anzulegen. Während des laufenden Mietverhältnisses ist der Zugriff darauf stark eingeschränkt, etwa nicht wegen bestrittener Forderungen (BGH). Eine Mietausfallversicherung kann sinnvoll sein – Bedingungen und Wartezeiten genau lesen. Für Kapitalanleger wichtig: Bleibt die Miete aus, läuft die Rate an die Bank weiter. Deshalb Reserve einplanen."
+    },
+    {
+      "id": 38,
+      "category": "Geld & Vermögen",
+      "question": "Was ist Geld – und wie entsteht es?",
+      "level1": "Geld ist ein allgemein akzeptiertes Tauschmittel, ein Wertmaßstab und ein Mittel zur Wertaufbewahrung. Bargeld gibt im Euroraum das Eurosystem aus (in Deutschland die Bundesbank). Der weitaus größte Teil des Geldes ist aber Buchgeld auf Konten – und das entsteht vor allem, wenn Geschäftsbanken Kredite vergeben: Die Bank schreibt Ihnen den Kreditbetrag gut, gleichzeitig entsteht Ihre Schuld. Wird der Kredit getilgt, verschwindet dieses Geld wieder.",
+      "nextStep": "Sehen Sie den Zins als Preis für Zeit: Wer heute Geld nutzt, das er erst später verdient, bezahlt dafür. Ein Immobilienkredit ist genau das – deshalb lohnt sich jeder Zehntelprozentpunkt beim Zins.",
+      "level2": "Die Europäische Zentralbank steuert über ihre Leitzinsen, wie teuer Zentralbankgeld für Banken ist. Bauzinsen folgen vor allem den Kapitalmarktzinsen (etwa Renditen von Bundesanleihen und Pfandbriefen) plus Marge der Bank. Weil Banken Kredite mit eigenem Kapital unterlegen müssen und die Wohnimmobilienkreditrichtlinie (§ 505a BGB) eine Kreditwürdigkeitsprüfung verlangt, prüfen sie Einkommen, Ausgaben und Sicherheiten so genau. Geld hat keinen Wert an sich – sein Wert hängt am Vertrauen und daran, was man dafür kaufen kann."
+    },
+    {
+      "id": 39,
+      "category": "Geld & Vermögen",
+      "question": "Was ist Inflation – und warum betrifft sie mich?",
+      "level1": "Inflation bedeutet: Das allgemeine Preisniveau steigt, dasselbe Geld kauft weniger. In Deutschland misst das Statistische Bundesamt sie mit dem Verbraucherpreisindex (VPI). Die EZB strebt mittelfristig 2 % pro Jahr an. Schon 2 % wirken stark: 100 € haben nach 10 Jahren nur noch die Kaufkraft von rund 82 € (100 ÷ 1,02¹⁰).",
+      "nextStep": "Rechnen Sie immer real, also nach Inflation: 1 % Zinsen auf dem Konto bei 2 % Inflation bedeuten real rund −1 % pro Jahr. Ein Ziel einer Geldanlage ist, die Inflation dauerhaft zu schlagen.",
+      "level2": "Realzins genau: (1 + Nominalzins) ÷ (1 + Inflation) − 1. Beispiel: (1,01 ÷ 1,02) − 1 = −0,98 %. 2022 lag die Inflation in Deutschland im Jahresdurchschnitt bei 6,9 %, 2023 bei 5,9 % (Destatis). Für Immobilien wirkt Inflation in mehrere Richtungen: Die Schuld bleibt nominal gleich und wird real kleiner, Mieten können über Index- oder Staffelmiete mitwachsen (§§ 557a, 557b BGB) – aber auch Baukosten, Instandhaltung und meist die Zinsen steigen. Inflation ist deshalb kein Freifahrtschein, sondern eine Rechengröße."
+    },
+    {
+      "id": 40,
+      "category": "Geld & Vermögen",
+      "question": "Wie entsteht Vermögen? Sparquote, Rendite und Zinseszins",
+      "level1": "Vermögen wächst über drei Hebel: mehr einnehmen, weniger ausgeben (die Sparquote) und das Ersparte rentabel und lange arbeiten lassen. Der Zinseszins macht Zeit zum stärksten Hebel: Wer 25 Jahre lang 300 € im Monat anlegt und 5 % pro Jahr erzielt, hat rund 178.650 € – eingezahlt sind 90.000 €, der Rest sind Erträge auf Erträge.",
+      "nextStep": "Legen Sie eine feste Sparquote fest (zum Beispiel 10 bis 20 % des Nettoeinkommens) und überweisen Sie sie per Dauerauftrag am Monatsanfang – nicht mit dem, was am Monatsende übrig bleibt.",
+      "level2": "Faustregel 72: Verdopplungszeit ≈ 72 ÷ Rendite in Prozent (bei 5 % rund 14,4 Jahre, exakt 14,2). Kosten und Steuern bremsen den Zinseszins: Kapitalerträge unterliegen der Abgeltungsteuer von 25 % plus Solidaritätszuschlag und ggf. Kirchensteuer; frei bleiben jährlich 1.000 € (Zusammenveranlagte 2.000 €, Sparer-Pauschbetrag, § 20 Abs. 9 EStG). Höhere erwartete Rendite gibt es nur gegen höheres Risiko oder geringere Verfügbarkeit."
+    },
+    {
+      "id": 41,
+      "category": "Geld & Vermögen",
+      "question": "In welcher Reihenfolge baue ich meine Finanzen auf?",
+      "level1": "Bewährt hat sich diese Reihenfolge: 1. Notgroschen von drei bis sechs Monatsausgaben auf dem Tagesgeldkonto. 2. Teure Konsumschulden (Dispo, Kreditkarte, Ratenkredite) zurückzahlen. 3. Existenzrisiken absichern (Privathaftpflicht, bei Bedarf Berufsunfähigkeit). 4. Langfristig und breit gestreut anlegen. 5. Eine Immobilie kaufen, wenn Eigenkapital, Rate und Reserve zusammenpassen.",
+      "nextStep": "Prüfen Sie im Budget-Rechner, ob nach der künftigen Rate noch eine Reserve bleibt – Banken achten genau darauf.",
+      "level2": "Ein Dispokredit kostet oft über 10 % Zinsen; keine Anlage schlägt das verlässlich – Tilgen ist hier die beste „Rendite“. Einlagen sind in der EU bis 100.000 € je Kunde und Bank gesetzlich gesichert. Als Vermieter brauchen Sie zusätzlich eine Objektreserve für Leerstand und Reparaturen (Faustwert: mindestens drei Monatsraten plus Instandhaltungsrücklage), denn die Bank will ihre Rate auch dann."
+    },
+    {
+      "id": 42,
+      "category": "Geld & Vermögen",
+      "question": "Wie verdient eine vermietete Immobilie Geld?",
+      "level1": "Eine Kapitalanlage-Immobilie kann auf vier Wegen Vermögen bilden: 1. Mietüberschuss (Miete minus Kosten und Zins). 2. Tilgung: Der Mieter zahlt über die Miete einen Teil Ihres Kredits ab. 3. Wertentwicklung von Gebäude und Grundstück. 4. Steuerwirkung über Abschreibung (AfA) und abziehbare Zinsen.",
+      "nextStep": "Prüfen Sie jedes Objekt erst ohne Wertsteigerung: Trägt es sich mit Tilgung, realistischen Kosten und Reserve? Dann ist eine Wertsteigerung ein Bonus und keine Voraussetzung.",
+      "level2": "Häufig ist der Cashflow anfangs negativ, während die Tilgung Vermögen aufbaut – entscheidend ist, dass Sie die Zuzahlung dauerhaft tragen können. Die AfA beträgt meist 2 % (Baujahr 1925–2022), 2,5 % (vor 1925) bzw. 3 % (ab 2023) des Gebäudeanteils (§ 7 Abs. 4 EStG). Wertsteigerung ist nie garantiert: Lage, Zustand, Zinsniveau und Nachfrage entscheiden, und Preise können auch fallen."
+    },
+    {
+      "id": 43,
+      "category": "Geld & Vermögen",
+      "question": "Hebel (Leverage): Warum ein Kredit Chancen und Risiken vergrößert",
+      "level1": "Mit Kredit kaufen Sie mehr Immobilie, als Ihr eigenes Geld hergibt. Das wirkt wie ein Hebel: Bei 20 % Eigenkapital und 10 % Wertsteigerung wächst Ihr Eigenkapital um rund 50 % (vor Kosten) – bei 10 % Wertverlust schrumpft es um die Hälfte. Lohnend ist der Hebel nur, wenn das Objekt mehr abwirft, als der Kredit kostet.",
+      "nextStep": "Schauen Sie in der Analyse auf Eigenkapitalrendite, Kipp-Zins und den Stresstest mit 2 Prozentpunkten höherem Zins.",
+      "level2": "Formel: Eigenkapitalrendite = Gesamtkapitalrendite + (Gesamtkapitalrendite − Fremdkapitalzins) × Fremdkapital ÷ Eigenkapital. Liegt der Kreditzins über der Objektrendite, kehrt sich der Hebel um (negativer Leverage). Kaufnebenkosten senken die Rendite am Anfang, weil sie Kapital binden, ohne Wert zu schaffen. Ein hoher Hebel erhöht außerdem das Risiko bei der Anschlussfinanzierung."
+    },
+    {
+      "id": 44,
+      "category": "Geld & Vermögen",
+      "question": "Klug investieren: Worauf kommt es an?",
+      "level1": "Fünf Grundsätze: Investieren Sie nur in das, was Sie verstehen. Entscheiden Sie nach Zahlen, nicht nach Gefühl oder Zeitdruck. Streuen Sie – eine Immobilie ist ein großes, schwer verkäufliches Einzelinvestment, das übrige Vermögen sollte breit verteilt sein. Halten Sie Kosten niedrig. Planen Sie lange und mit Reserve.",
+      "nextStep": "Legen Sie sich vor der Suche Ausschlusskriterien fest (zum Beispiel: trägt sich nicht bei Zins +2 %, keine Reserve für drei Monate Leerstand) und prüfen Sie jedes Angebot mit der Deal-Scorecard.",
+      "level2": "Jede Anlage bewegt sich im Dreieck aus Rendite, Sicherheit und Verfügbarkeit (Liquidität) – alle drei zugleich maximieren geht nicht. Typische Denkfehler: Verlustangst (zu spät verkaufen), Bestätigungsfehler (nur Argumente für den Wunschkauf sehen), Herdentrieb und Zeitdruck („nur heute“). Gegenmittel: schriftliche Kriterien, Zweitmeinung, Bedenkzeit. ImmoAdv ist ein Rechen- und Lernwerkzeug und ersetzt keine Anlage-, Steuer- oder Rechtsberatung."
+    },
+    {
+      "id": 45,
+      "category": "Steuern & Werbungskosten",
+      "question": "Welche Werbungskosten kann ich bei einer vermieteten Wohnung absetzen?",
+      "level1": "Absetzbar ist fast alles, was Sie für die Vermietung ausgeben: Schuldzinsen, Abschreibung (AfA), Hausgeld ohne die Zuführung zur Rücklage, Grundsteuer, Versicherungen, Reparaturen, Verwaltung, Fahrten zum Objekt, Steuerberatung und Kosten der Mietersuche. Nicht absetzbar sind Tilgung und Ihre eigene Arbeitszeit.",
+      "nextStep": "Die Werbungskosten-Checkliste im Bereich Steuer ausfüllen und die Belege des Jahres sammeln (Kontoauszüge, Zinsbescheinigung, Hausgeldabrechnung, Rechnungen).",
+      "level2": "Werbungskosten sind alle Aufwendungen zur Erzielung der Mieteinnahmen (§ 9 Abs. 1 EStG). Typisch sofort absetzbar: 1. Schuldzinsen und Finanzierungskosten (Zinsen, Bereitstellungszinsen, Disagio im marktüblichen Rahmen, Notar- und Grundbuchkosten für die Grundschuld, Schätzkosten der Bank). 2. AfA auf das Gebäude (nicht auf Grund und Boden), ggf. auf mitgekaufte Einbauküche (eigenes Wirtschaftsgut, meist 10 Jahre). 3. Laufende Bewirtschaftung: Hausgeld der Eigentümergemeinschaft (ohne Zuführung zur Erhaltungsrücklage), Grundsteuer, Gebäude- und Haftpflichtversicherung, Müll, Wasser, Hausstrom, Hausmeister, Verwaltergebühr. Wichtig: Die Nebenkosten-Vorauszahlungen des Mieters sind Einnahmen – die umlagefähigen Kosten selbst sind im Gegenzug Werbungskosten. 4. Erhaltungsaufwand: Reparaturen, Wartung, Schönheitsreparaturen, Austausch vorhandener Bauteile (Fenster, Heizung, Bad gleicher Standard) – Material und Handwerkerlohn, nicht Ihre eigene Arbeitszeit. 5. Verwaltung und Vermietung: Fahrten zum Objekt (0,30 € je gefahrenem Kilometer), Porto, Telefon, Kontoführung des Mietkontos, Inserate und Makler bei der Mietersuche, Mietvertragsformulare, Rechtsschutz- und Prozesskosten aus dem Mietverhältnis, Mitgliedsbeitrag Haus & Grund, Steuerberatung für die Anlage V. 6. Vorab entstandene Werbungskosten: Fahrten zu Besichtigungen, Finanzierungskosten und Leerstandskosten vor der ersten Vermietung, wenn die Vermietungsabsicht feststeht. Nicht sofort absetzbar sind Anschaffungskosten (Kaufpreis, Grunderwerbsteuer, Notar für den Kaufvertrag, Makler beim Kauf) – sie fließen über die AfA ein – und Herstellungskosten bzw. anschaffungsnahe Herstellungskosten (15-%-Grenze). Keine Werbungskosten: Tilgung, eigene Arbeitsleistung, private Nutzung, ausgefallene Miete (sie ist einfach keine Einnahme). Rechtsgrundlagen: §§ 9, 21 EStG, § 82b EStDV. Für Ihren Einzelfall: Steuerberatung."
+    },
+    {
+      "id": 46,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was kann ich bei der Vermietung nicht absetzen?",
+      "level1": "Nicht absetzbar sind die Tilgung, der Kaufpreis von Grund und Boden, die Zuführung zur Erhaltungsrücklage (erst wenn das Geld ausgegeben wird), Ihre eigene Arbeitszeit und alles Private. Anschaffungsnebenkosten wirken nur über die Abschreibung.",
+      "nextStep": "Prüfen Sie bei jedem Beleg: Dient er der Vermietung – und ist er sofort Aufwand oder Teil der Anschaffung?",
+      "level2": "Tilgung ist Rückzahlung eines Kredits, kein Aufwand. Grund und Boden nutzt sich nicht ab und wird nicht abgeschrieben. Grunderwerbsteuer, Notar und Grundbuch für den Eigentumserwerb sowie Makler beim Kauf sind Anschaffungsnebenkosten: Sie erhöhen die Anschaffungskosten und werden – soweit sie auf das Gebäude entfallen – über die AfA abgesetzt. Zahlungen in die Erhaltungsrücklage der Eigentümergemeinschaft sind nach der Rechtsprechung des Bundesfinanzhofs (BFH, Urteil vom 20.09.2022 – IX R 19/21) erst abziehbar, wenn die Gemeinschaft das Geld für Erhaltungsmaßnahmen ausgibt; maßgeblich ist die Jahresabrechnung. Eigene Arbeitsleistung ist nicht absetzbar, nur Material und fremde Leistungen. Bei teilweiser Eigennutzung (z. B. eine Wohnung im selbst bewohnten Haus) werden gemeinsame Kosten anteilig aufgeteilt. Mietausfall ist kein Werbungskostenabzug, sondern fehlende Einnahme. Strafen und Bußgelder sind nicht abziehbar. Bei Vermietung unter 50 % der ortsüblichen Miete sind Werbungskosten nur anteilig absetzbar (§ 21 Abs. 2 EStG)."
+    },
+    {
+      "id": 47,
+      "category": "Steuern & Werbungskosten",
+      "question": "Gehören die Kaufnebenkosten zu den Werbungskosten?",
+      "level1": "Nur teilweise. Grunderwerbsteuer, Notar und Grundbuch für den Kaufvertrag und der Makler beim Kauf zählen zu den Anschaffungskosten und werden über die AfA abgeschrieben. Notar und Grundbuch für die Grundschuld sowie Bankgebühren sind Finanzierungskosten und sofort absetzbar.",
+      "nextStep": "Notarrechnung aufteilen lassen: Kaufvertrag und Eigentumsumschreibung einerseits, Grundschuld andererseits.",
+      "level2": "Anschaffungskosten (§ 255 Abs. 1 HGB entsprechend): Kaufpreis plus Anschaffungsnebenkosten – Grunderwerbsteuer, Notar für Beurkundung des Kaufvertrags und Vollzug, Grundbuchamt für Auflassungsvormerkung und Eigentumsumschreibung, Maklerprovision. Sie werden nach dem Verhältnis von Gebäude zu Grund und Boden aufgeteilt; nur der Gebäudeanteil geht in die AfA-Bemessungsgrundlage. Finanzierungskosten: Notar und Grundbuch für die Bestellung der Grundschuld, Bewertungs- oder Schätzgebühren der Bank, Bereitstellungszinsen, Disagio im marktüblichen Rahmen (bis 5 % bei mindestens 5 Jahren Zinsbindung, § 11 Abs. 2 EStG) – diese sind im Jahr der Zahlung als Werbungskosten absetzbar. Mitgekauftes Inventar (z. B. Einbauküche) wird gesondert erfasst: kein Grunderwerbsteuer-Anteil und eigene AfA (Einbauküche in der Regel 10 Jahre)."
+    },
+    {
+      "id": 48,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was ist der Unterschied zwischen Erhaltungsaufwand und Herstellungskosten?",
+      "level1": "Erhaltungsaufwand erhält das Gebäude im bisherigen Zustand und ist sofort absetzbar – zum Beispiel Reparaturen oder der Austausch alter Fenster. Herstellungskosten schaffen etwas Neues oder heben den Standard deutlich an und werden nur über die AfA abgeschrieben.",
+      "nextStep": "Bei größeren Maßnahmen vorher die 15-%-Grenze prüfen (Bereich Steuer) und mit Steuerberatung abstimmen.",
+      "level2": "Erhaltungsaufwand: Ersatz vorhandener Teile in zeitgemäßer Form (Heizung, Fenster, Dach, Bad im bisherigen Standard), Instandsetzung, Wartung, Schönheitsreparaturen – sofort abziehbar; größere Beträge bei Wohngebäuden auf Antrag gleichmäßig auf 2 bis 5 Jahre verteilbar (§ 82b EStDV). Herstellungskosten (§ 255 Abs. 2 HGB): Erweiterung (Anbau, Dachausbau, zusätzliche Fläche), über den ursprünglichen Zustand hinausgehende wesentliche Verbesserung (Hebung des Standards in mindestens drei der vier zentralen Ausstattungsbereiche Heizung, Sanitär, Elektro, Fenster) – werden über die Restnutzungsdauer mit der Gebäude-AfA abgeschrieben. Sonderfall anschaffungsnahe Herstellungskosten (§ 6 Abs. 1 Nr. 1a EStG): Instandsetzungen innerhalb von drei Jahren nach dem Kauf, die netto 15 % der Gebäude-Anschaffungskosten übersteigen, werden insgesamt zu Herstellungskosten. Ausgenommen sind jährlich übliche Erhaltungsarbeiten."
+    },
+    {
+      "id": 49,
+      "category": "Steuern & Werbungskosten",
+      "question": "Kann ich größere Reparaturen auf mehrere Jahre verteilen?",
+      "level1": "Ja. Größeren Erhaltungsaufwand an einem Wohngebäude können Sie auf Antrag gleichmäßig auf zwei bis fünf Jahre verteilen. Das lohnt sich, wenn Ihr Steuersatz in einem Jahr sonst nicht voll ausgenutzt würde.",
+      "nextStep": "Im Bereich Steuer den Verteilungsrechner nutzen und das Wahlrecht in der Anlage V ausüben.",
+      "level2": "Rechtsgrundlage ist § 82b EStDV: Das Wahlrecht gilt für Gebäude im Privatvermögen, die überwiegend Wohnzwecken dienen. Verteilt wird gleichmäßig auf 2 bis 5 Jahre; wird das Gebäude während des Zeitraums verkauft oder nicht mehr vermietet, ist der Rest im Jahr der Veräußerung bzw. Nutzungsänderung abzuziehen. Sinnvoll ist die Verteilung bei hohen Einmalkosten, wenn sonst ein Verlust entstünde, der sich steuerlich nicht voll auswirkt, oder wenn in den Folgejahren ein höherer Grenzsteuersatz erwartet wird."
+    },
+    {
+      "id": 50,
+      "category": "Steuern & Werbungskosten",
+      "question": "Wie setze ich Fahrten zu meiner vermieteten Wohnung ab?",
+      "level1": "Fahrten zur Wohnung, etwa für Besichtigungen, Übergaben, Reparaturen oder Eigentümerversammlungen, setzen Sie mit 0,30 € je gefahrenem Kilometer ab (Hin- und Rückweg). Notieren Sie Datum, Anlass und Kilometer.",
+      "nextStep": "Ein einfaches Fahrtenbuch für die Vermietung führen (Datum, Anlass, km).",
+      "level2": "Für gelegentliche Fahrten gelten die Reisekostengrundsätze: 0,30 € je tatsächlich gefahrenem Kilometer mit dem eigenen Pkw (§ 9 Abs. 1 Satz 3 Nr. 4a EStG), alternativ tatsächliche Kosten öffentlicher Verkehrsmittel. Fährt jemand sehr häufig und regelmäßig zum Objekt (z. B. mehrmals pro Woche zur eigenen Hausverwaltung), kann das Finanzamt das Objekt als regelmäßige Tätigkeitsstätte ansehen – dann gilt nur die Entfernungspauschale. Fahrten zu Besichtigungen vor dem Kauf sind als vorab entstandene Werbungskosten absetzbar, wenn tatsächlich gekauft und vermietet wird. Nachweise: Fahrtenliste, Termine, Rechnungen."
+    },
+    {
+      "id": 51,
+      "category": "Steuern & Werbungskosten",
+      "question": "Welcher Teil des Hausgelds ist absetzbar?",
+      "level1": "Absetzbar ist das Hausgeld ohne den Anteil, der in die Erhaltungsrücklage fließt. Die umlagefähigen Kosten setzen Sie ab und geben im Gegenzug die Nebenkosten-Vorauszahlungen des Mieters als Einnahme an.",
+      "nextStep": "In der Jahresabrechnung der Verwaltung die Zuführung zur Rücklage und die tatsächlich aus der Rücklage bezahlten Maßnahmen heraussuchen.",
+      "level2": "Das Hausgeld setzt sich zusammen aus umlagefähigen Betriebskosten (z. B. Wasser, Müll, Hausmeister, Versicherung – Betriebskostenverordnung), nicht umlagefähigen Kosten (z. B. Verwaltergebühr, Kontoführung der Gemeinschaft, Instandhaltung) und der Zuführung zur Erhaltungsrücklage. Werbungskosten sind die umlagefähigen und nicht umlagefähigen Kosten. Die Zuführung zur Rücklage ist erst absetzbar, wenn die Gemeinschaft das Geld für Erhaltung ausgibt (BFH IX R 19/21) – dann Ihr Anteil laut Jahresabrechnung. Einnahmen: Kaltmiete plus Nebenkosten-Vorauszahlungen des Mieters, abzüglich Erstattungen bzw. zuzüglich Nachzahlungen aus der Nebenkostenabrechnung."
+    },
+    {
+      "id": 52,
+      "category": "Steuern & Werbungskosten",
+      "question": "Kann ich Kosten absetzen, wenn die Wohnung leer steht?",
+      "level1": "Ja, solange Sie ernsthaft vermieten wollen und das belegen können, etwa mit Inseraten, Maklerauftrag oder Besichtigungsterminen. Bei längerem Leerstand ohne erkennbare Bemühungen kann das Finanzamt den Abzug versagen.",
+      "nextStep": "Inserate, Anfragen und Besichtigungen mit Datum dokumentieren.",
+      "level2": "Leerstandskosten (Zinsen, Hausgeld, Grundsteuer, AfA) sind Werbungskosten, wenn die Einkünfteerzielungsabsicht fortbesteht (BFH-Rechtsprechung zu § 21 EStG). Indizien: aktive Vermarktung, marktgerechte Miete, Renovierung zur Vermietung. Kritisch: jahrelanger Leerstand, überhöhte Mietforderung, gleichzeitige Verkaufsabsicht oder Selbstnutzung. Bei Renovierungsleerstand vor der ersten Vermietung sind die Kosten vorab entstandene Werbungskosten."
+    },
+    {
+      "id": 53,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was gilt bei Vermietung an Angehörige?",
+      "level1": "Liegt die Miete bei mindestens 66 % der ortsüblichen Miete, sind die Werbungskosten voll absetzbar. Zwischen 50 und 66 % entscheidet eine Prognose über die Vollabsetzbarkeit, unter 50 % nur anteilig. Der Mietvertrag muss wie unter Fremden geschlossen und gelebt werden.",
+      "nextStep": "Mit dem 66-%-Check im Bereich Steuer prüfen; Mietspiegel als Nachweis aufbewahren.",
+      "level2": "§ 21 Abs. 2 EStG (seit 2021): Beträgt die Miete mindestens 66 % der ortsüblichen Marktmiete (Kaltmiete plus umlagefähige Nebenkosten), gilt die Vermietung als voll entgeltlich. Zwischen 50 % und 66 % voller Abzug nur bei positiver Totalüberschussprognose, sonst Aufteilung. Unter 50 % Aufteilung in einen entgeltlichen und einen unentgeltlichen Teil; Werbungskosten nur anteilig. Fremdvergleich: schriftlicher Vertrag, tatsächliche Zahlung auf ein Konto, Nebenkostenabrechnung wie bei Fremden."
+    },
+    {
+      "id": 54,
+      "category": "Steuern & Werbungskosten",
+      "question": "Wie ermittle ich den Gebäudeanteil am Kaufpreis?",
+      "level1": "Nur der Gebäudeanteil wird abgeschrieben. Er ergibt sich aus Kaufpreis minus Bodenwert. Den Bodenwert schätzen Sie mit dem Bodenrichtwert (BORIS) mal Grundstücksfläche bzw. Ihrem Miteigentumsanteil.",
+      "nextStep": "Bodenrichtwert auf boris.de bzw. dem Portal Ihres Bundeslands nachschlagen und die Arbeitshilfe des Bundesfinanzministeriums zur Kaufpreisaufteilung nutzen.",
+      "level2": "Die Finanzverwaltung teilt nach dem Verhältnis der Verkehrswerte von Boden und Gebäude auf (BFH-Rechtsprechung); Hilfsmittel ist die „Arbeitshilfe zur Aufteilung eines Gesamtkaufpreises für ein bebautes Grundstück“ des BMF. Bodenwert = Bodenrichtwert × Grundstücksfläche (bei Eigentumswohnungen × Miteigentumsanteil). Eine Aufteilung im Kaufvertrag wird grundsätzlich anerkannt, wenn sie die realen Wertverhältnisse nicht grundlegend verfehlt (BFH, Urteil vom 16.09.2015 – IX R 12/14). In teuren Lagen ist der Bodenanteil hoch, entsprechend sinkt die AfA. Ein Gutachten eines Sachverständigen kann sich lohnen, wenn die Arbeitshilfe einen unplausibel hohen Bodenwert ergibt."
+    },
+    {
+      "id": 55,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was ist mein Grenzsteuersatz und wo finde ich ihn?",
+      "level1": "Der Grenzsteuersatz ist der Steuersatz auf den nächsten verdienten (oder abgesetzten) Euro. Er bestimmt, wie viel Steuer Sie durch Werbungskosten sparen. In Deutschland liegt er zwischen 14 % und 42 % (45 % für sehr hohe Einkommen), plus ggf. Solidaritätszuschlag und Kirchensteuer.",
+      "nextStep": "Letzten Steuerbescheid nehmen und das zu versteuernde Einkommen in einen Einkommensteuerrechner (z. B. des Bundesfinanzministeriums) eingeben; der Grenzsteuersatz wird dort angezeigt.",
+      "level2": "Der Durchschnittssteuersatz (Steuer ÷ Einkommen) ist immer niedriger als der Grenzsteuersatz. Für die Wirkung von Werbungskosten zählt der Grenzsteuersatz: 1.000 € zusätzliche Werbungskosten sparen bei 35 % rund 350 € Einkommensteuer. Der Tarif steigt progressiv (§ 32a EStG); die Eckwerte werden jährlich angepasst. Bei Zusammenveranlagung gilt das Splittingverfahren. Kirchensteuer (8–9 % der Einkommensteuer) und der Solidaritätszuschlag (nur bei höheren Einkommen) erhöhen die Ersparnis leicht. ImmoAdv rechnet mit dem Satz, den Sie eintragen."
+    },
+    {
+      "id": 56,
+      "category": "Steuern & Werbungskosten",
+      "question": "Wie trage ich meine Vermietung in die Anlage V ein?",
+      "level1": "In die Anlage V gehören je Objekt die Einnahmen (Kaltmiete, Nebenkosten-Vorauszahlungen, Nachzahlungen) und die Werbungskosten (AfA, Schuldzinsen, Erhaltungsaufwand, sonstige Kosten). Für jedes Objekt wird eine eigene Anlage V abgegeben.",
+      "nextStep": "Im Profi-Monatsbericht die Anlage-V-Hilfe als CSV herunterladen und mit den Belegen abgleichen.",
+      "level2": "Aufbau der Anlage V (Zeilennummern ändern sich von Jahr zu Jahr): Angaben zum Objekt (Lage, Anschaffung, Wohnfläche), Mieteinnahmen für Wohnungen, Umlagen (Nebenkosten-Vorauszahlungen und Nachzahlungen abzüglich Erstattungen), Werbungskosten: AfA (Bemessungsgrundlage, Satz), Schuldzinsen und Geldbeschaffungskosten, Erhaltungsaufwand (sofort bzw. verteilt nach § 82b EStDV), Grundsteuer, Hausgeld/Verwaltung, Versicherungen, sonstige Werbungskosten (Fahrten, Porto, Kontoführung, Steuerberatung). Ergänzend ggf. die Anlage V-Sonstiges und die Anlage V-FeWo. Abgabe elektronisch über ELSTER; Belege aufbewahren (in der Regel 10 Jahre). Keine Steuerberatung – im Zweifel Steuerberater oder Lohnsteuerhilfeverein (für Vermietung nur eingeschränkt zuständig) fragen."
+    },
+    {
+      "id": 57,
+      "category": "Steuern & Werbungskosten",
+      "question": "Kann ich die Kosten einer neuen Einbauküche absetzen?",
+      "level1": "Ja, aber nicht auf einmal: Eine neue Einbauküche in einer vermieteten Wohnung ist ein eigenes Wirtschaftsgut und wird in der Regel über 10 Jahre abgeschrieben. Einzelne Reparaturen an der Küche sind dagegen sofort absetzbar.",
+      "nextStep": "Rechnung aufbewahren und die Küche in der Anlage V als eigene AfA erfassen.",
+      "level2": "Nach BFH (Urteil vom 03.08.2016 – IX R 14/15) ist die Einbauküche (Spüle, Herd, Einbaumöbel, Elektrogeräte) ein einheitliches Wirtschaftsgut mit einer Nutzungsdauer von 10 Jahren. Kostet sie netto bis 800 € (geringwertiges Wirtschaftsgut), ist ein Sofortabzug möglich. Mitgekaufte Küchen werden beim Kauf separat bewertet und mindern die Grunderwerbsteuer-Bemessungsgrundlage (Rechner „Inventar“ im Bereich Steuer)."
+    },
+    {
+      "id": 58,
+      "category": "Steuern & Werbungskosten",
+      "question": "Sind Schuldzinsen auch nach dem Verkauf noch absetzbar?",
+      "level1": "Unter Umständen ja: Reicht der Verkaufserlös nicht, um das Darlehen abzulösen, können die weiter anfallenden Zinsen als nachträgliche Werbungskosten absetzbar bleiben. Vorfälligkeitsentschädigungen beim Verkauf sind dagegen in der Regel Veräußerungskosten.",
+      "nextStep": "Beim Verkauf mit Steuerberatung klären, wie Erlös und Restschuld verrechnet werden.",
+      "level2": "Nach der Rechtsprechung (BFH, Urteil vom 08.04.2014 – IX R 45/13) sind Schuldzinsen für ein Darlehen, das zur Anschaffung einer vermieteten Immobilie aufgenommen wurde, nach deren Veräußerung als nachträgliche Werbungskosten abziehbar, soweit der Veräußerungserlös nicht zur Tilgung ausreicht. Eine Vorfälligkeitsentschädigung, die wegen des Verkaufs anfällt, zählt grundsätzlich zu den Veräußerungskosten (relevant bei Verkauf innerhalb der 10-Jahres-Frist, § 23 EStG) und nicht zu den Werbungskosten aus Vermietung."
+    },
+    {
+      "id": 59,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was trage ich bei Nettoeinkommen und Eigenkapital ein?",
+      "level1": "Nettoeinkommen ist das, was monatlich auf Ihrem Konto ankommt (bei Paaren beide zusammen), ohne Kindergeld und Einmalzahlungen. Eigenkapital ist das Geld, das Sie für den Kauf einsetzen können, ohne Ihren Notgroschen anzutasten.",
+      "nextStep": "Gehaltsabrechnung (Auszahlungsbetrag) und Kontoauszüge bzw. Depotauszug bereitlegen.",
+      "level2": "Nettoeinkommen: Auszahlungsbetrag der letzten Gehaltsabrechnungen; 13./14. Gehalt nur als Zwölftel, wenn vertraglich gesichert; Selbstständige: Durchschnitt des Gewinns nach Steuern der letzten zwei bis drei Jahre ÷ 12. Banken setzen Kindergeld und Elterngeld teils, Boni und Überstunden oft nur eingeschränkt an. Eigenkapital: Bankguthaben, Tagesgeld, Wertpapiere (Banken rechnen bei Aktien oft mit Abschlag), Bausparguthaben, Schenkung mit Nachweis. Nicht dazu: Notgroschen (Faustregel 3–6 Monatsausgaben), gebundene Altersvorsorge ohne Beleihungsmöglichkeit. ImmoAdv nutzt die Werte für Budget, Haushaltsrechnung und Bankreife."
+    },
+    {
+      "id": 60,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was bedeuten die Felder Sollzins, Tilgung und Zinsbindung?",
+      "level1": "Sollzins ist der vereinbarte Zinssatz pro Jahr, Tilgung der Prozentsatz, mit dem Sie den Kredit im ersten Jahr zurückzahlen, und Zinsbindung die Zahl der Jahre, für die der Zins fest ist. Aus Sollzins plus Tilgung ergibt sich Ihre Monatsrate.",
+      "nextStep": "Die Werte aus dem Angebot bzw. ESIS-Merkblatt der Bank übernehmen.",
+      "level2": "Monatsrate = Darlehen × (Sollzins + anfängliche Tilgung) ÷ 12. Der Effektivzins (aus dem ESIS-Merkblatt) enthält zusätzlich Kosten und ist für den Vergleich von Angeboten maßgeblich, für die Rate aber nicht. Die Zinsbindung bestimmt, wie lange Ihre Rate sicher ist; danach wird die Restschuld zum dann aktuellen Zins weiterfinanziert. Nach 10 Jahren ab Vollauszahlung können Sie mit 6 Monaten Frist kündigen (§ 489 Abs. 1 Nr. 2 BGB). Höhere Tilgung = schnellere Entschuldung und geringeres Anschlussrisiko."
+    },
+    {
+      "id": 61,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was sind nicht umlagefähige Kosten und Instandhaltung pro Monat?",
+      "level1": "Nicht umlagefähige Kosten zahlen Sie als Vermieter selbst, etwa Verwaltergebühr und Kontoführung der Eigentümergemeinschaft. Die Instandhaltung ist eine Rücklage für Reparaturen, typischerweise 0,80 bis 1,50 € je Quadratmeter und Monat, bei älteren Gebäuden mehr.",
+      "nextStep": "In der Hausgeldabrechnung bzw. im Wirtschaftsplan die nicht umlagefähigen Positionen heraussuchen.",
+      "level2": "Umlagefähig sind die Betriebskosten nach der Betriebskostenverordnung (Grundsteuer, Wasser, Müll, Hausmeister, Versicherungen …) – diese zahlt der Mieter über die Nebenkosten. Nicht umlagefähig: Verwaltung, Bankgebühren der Gemeinschaft, Instandhaltung und Instandsetzung, Zuführung zur Erhaltungsrücklage. Für die Instandhaltung im eigenen Sondereigentum (z. B. Bad, Böden) zusätzlich eine eigene Rücklage einplanen. Die Peterssche Formel und die II. Berechnungsverordnung (§ 28) liefern Anhaltswerte; ImmoAdv nutzt Ihre Angabe für den Cashflow."
+    },
+    {
+      "id": 62,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Welches Datum trage ich bei Kaufvertrag und Darlehensauszahlung ein?",
+      "level1": "Kaufvertrag ist der Tag der notariellen Beurkundung. Darlehensauszahlung ist der Tag, an dem die Bank das Darlehen vollständig ausgezahlt hat. Daraus berechnet ImmoAdv Spekulationsfrist, 15-%-Frist und das Ende der Zinsbindung.",
+      "nextStep": "Datum aus der Notarurkunde und aus der Auszahlungsbestätigung bzw. dem ersten Kontoauszug des Darlehens übernehmen.",
+      "level2": "Die 10-Jahres-Frist für private Veräußerungsgeschäfte (§ 23 EStG) läuft ab dem Datum des notariellen Kaufvertrags bis zum Datum des Verkaufsvertrags. Die 3-Jahres-Frist der anschaffungsnahen Herstellungskosten beginnt mit dem Übergang von Besitz, Nutzen und Lasten – ImmoAdv nutzt vereinfacht das Kaufvertragsdatum. Die Zinsbindung und das Kündigungsrecht nach § 489 BGB knüpfen an die Vollauszahlung des Darlehens an."
+    },
+    {
+      "id": 63,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was sind Beleihungswert, Marktwert und Miteigentumsanteil?",
+      "level1": "Marktwert ist der Preis, der heute am Markt erzielbar wäre. Der Beleihungswert ist der vorsichtigere Wert, mit dem die Bank rechnet, meist 10 bis 20 % darunter. Der Miteigentumsanteil (MEA) beschreibt bei einer Eigentumswohnung Ihren Anteil am gemeinsamen Grundstück und Gebäude, z. B. 85/1.000.",
+      "nextStep": "Beleihungswert aus dem Bankangebot, MEA aus Teilungserklärung oder Grundbuch übernehmen.",
+      "level2": "Marktwert (Verkehrswert) nach § 194 BauGB; Beleihungswert nach der Beleihungswertermittlungsverordnung (BelWertV), dauerhaft erzielbar, ohne spekulative Elemente. Der Beleihungsauslauf (Darlehen ÷ Beleihungswert) bestimmt die Zinsstufe. Der MEA steht in der Teilungserklärung und im Wohnungsgrundbuch (Bestandsverzeichnis); nach ihm werden Kosten und Rücklage in der Gemeinschaft verteilt, sofern nichts anderes vereinbart ist, und Ihr Anteil an Sonderumlagen berechnet."
+    }
+  ]
+}

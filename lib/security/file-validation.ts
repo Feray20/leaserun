@@ -1,0 +1,3 @@
+export const ALLOWED_DOCUMENT_MIME_TYPES=["application/pdf","image/jpeg","image/png","image/tiff"] as const;
+export interface FileValidationResult{valid:boolean;reason?:"MIME_NOT_ALLOWED"|"EMPTY_FILE"|"TOO_LARGE"|"SIGNATURE_MISMATCH";}
+export function validateUpload(input:{mimeType:string;sizeBytes:number;maxBytes:number;signatureMatches:boolean}):FileValidationResult{if(input.sizeBytes<=0)return{valid:false,reason:"EMPTY_FILE"};if(input.sizeBytes>input.maxBytes)return{valid:false,reason:"TOO_LARGE"};if(!(ALLOWED_DOCUMENT_MIME_TYPES as readonly string[]).includes(input.mimeType))return{valid:false,reason:"MIME_NOT_ALLOWED"};if(!input.signatureMatches)return{valid:false,reason:"SIGNATURE_MISMATCH"};return{valid:true};}

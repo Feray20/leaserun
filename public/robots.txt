@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /app/
+Disallow: /auth/
+Disallow: /datenraum
+Disallow: /pruefen
+Disallow: /verify/
+Disallow: /p/
+Disallow: /partner
+Disallow: /intern
+Disallow: /b2b-portal
+
+Sitemap: https://immoadv.de/sitemap.xml
