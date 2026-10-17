@@ -79,21 +79,53 @@
     return Promise.all([
       db('entitlements?select=*'),
       db('financial_profiles?select=*'),
-      db('properties?select=*&order=updated_at.desc')
+      db('properties?select=*&order=updated_at.desc'),
+      db('business_profiles?select=*').catch(function () { return []; }),
+      db('clients?select=*&order=updated_at.desc').catch(function () { return []; })
     ]).then(function (a) {
       var ent = a[0][0] || { plan: 'free', loan_packages_left: 0 };
-      ctx = { ent: ent, profile: a[1][0] || null, props: a[2] || [], tier: tierOf(ent) };
+      ctx = { ent: ent, profile: a[1][0] || null, props: a[2] || [], tier: tierOf(ent), b2b: /^b2b_/.test(ent.plan || ''), biz: a[3][0] || null, clients: a[4] || [] };
       return ctx;
     });
   }
   function tierOf(e) {
     if (!e) return 0;
-    if (e.plan === 'pro') return 2;
+    if (e.plan === 'pro' || /^b2b_/.test(e.plan || '')) return 2;
     if (e.plan === 'buyer_pass' && e.pass_until && new Date(e.pass_until) > new Date()) return 1;
     return 0;
   }
   var PLAN_NAME = ['Free', 'Buyer Pass', 'Investor Pro'];
+  var B2B_NAME = { b2b_basic: 'Business Basic', b2b_pro: 'Business Pro', b2b_enterprise: 'Business Enterprise' };
   function mode() { return (ctx && ctx.profile && ctx.profile.mode) || store('lr-mode') || 'beginner'; }
+
+
+  // ---------------------------------------------------------------- charts (inline SVG, no library)
+  function kfmt(v) { var a = Math.abs(v); return (v < 0 ? '−' : '') + '$' + (a >= 1e6 ? (a / 1e6).toFixed(1) + 'M' : a >= 1e3 ? Math.round(a / 1e3) + 'k' : Math.round(a)); }
+  function niceMax(v) { if (v <= 0) return 1; var e = Math.pow(10, Math.floor(Math.log10(v))), n = v / e; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * e; }
+  function lineChart(labels, series, title) {
+    var W = 600, H = 230, L = 52, R = 12, T = 14, B = 28;
+    var all = []; series.forEach(function (s) { all = all.concat(s.values); });
+    var mx = niceMax(Math.max.apply(null, all.concat([0]))), mn = Math.min.apply(null, all.concat([0]));
+    mn = mn < 0 ? -niceMax(-mn) : 0;
+    var X = function (i) { return L + (labels.length < 2 ? 0 : i * (W - L - R) / (labels.length - 1)); };
+    var Y = function (v) { return T + (mx - v) / (mx - mn) * (H - T - B); };
+    var g = '';
+    for (var t = 0; t <= 4; t++) { var v = mn + (mx - mn) * t / 4; g += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#EEF1F6"/><text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end" font-size="11" fill="#5A6782">' + kfmt(v) + '</text>'; }
+    var step = Math.max(1, Math.ceil(labels.length / 8));
+    labels.forEach(function (l, i) { if (i % step === 0 || i === labels.length - 1) g += '<text x="' + X(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#5A6782">' + esc(l) + '</text>'; });
+    series.forEach(function (s) {
+      var d = s.values.map(function (v, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); }).join(' ');
+      g += '<path d="' + d + '" fill="none" stroke="' + s.color + '" stroke-width="2.5" stroke-linejoin="round"' + (s.dash ? ' stroke-dasharray="6 4"' : '') + '/>';
+    });
+    return '<figure class="chart"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(title || 'Chart') + '">' + g + '</svg><figcaption class="legend">' + series.map(function (s) { return '<span style="--c:' + s.color + '">' + esc(s.name) + '</span>'; }).join('') + '</figcaption></figure>';
+  }
+  function barChart(items, title) {
+    var mx = niceMax(Math.max.apply(null, items.map(function (i) { return Math.abs(i.value); }).concat([1])));
+    return '<figure class="chart hbars" aria-label="' + esc(title || 'Chart') + '">' + items.map(function (i) {
+      var w = Math.abs(i.value) / mx * 100;
+      return '<div class="hb"><span class="hl">' + esc(i.label) + '</span><span class="ht"><i style="width:' + w.toFixed(1) + '%;background:' + (i.color || (i.value < 0 ? '#E5484D' : '#1AC585')) + '"></i></span><b>' + usd(i.value) + '</b></div>';
+    }).join('') + '</figure>';
+  }
 
   // ---------------------------------------------------------------- form spec
   var STATES = Object.keys(C.STATE_NAMES).sort(function (a, b) { return C.STATE_NAMES[a] < C.STATE_NAMES[b] ? -1 : 1; });
@@ -236,7 +268,7 @@
 
     // Projection
     var rows = r.projection.filter(function (x, i) { return beginner ? [0, 4, 9].indexOf(i) >= 0 || i === r.projection.length - 1 : true; });
-    h += '<div class="box"><h2>' + (beginner ? 'The picture over time' : p.holdYears + '-year projection') + '</h2><div class="scroll-x"><table class="tbl"><thead><tr><th>Year</th><th>Rent / mo</th><th>Cash flow / yr</th><th>Loan balance</th><th>Value</th><th>Equity</th></tr></thead><tbody>' + rows.map(function (x) { return '<tr><td>' + x.year + '</td><td>' + usd(x.rent) + '</td><td class="' + sign(x.cashFlow) + '">' + usd(x.cashFlow) + '</td><td>' + usd(x.balance) + '</td><td>' + usd(x.value) + '</td><td>' + usd(x.equity) + '</td></tr>'; }).join('') + '</tbody></table></div>' + explain(beginner, 'Equity grows in two ways: tenants pay down your loan, and the home may gain value. Appreciation is never guaranteed – the deal should work on cash flow alone.') + '<p class="hint" style="margin:8px 0 0">Net proceeds if sold in year ' + p.holdYears + ' after ' + pct(p.sellingCostPct, 0) + ' selling costs and loan payoff: <b>' + usd(r.saleNet) + '</b> (before capital gains and depreciation recapture tax).</p></div>';
+    h += '<div class="box"><h2>' + (beginner ? 'The picture over time' : p.holdYears + '-year projection') + '</h2>' + lineChart(r.projection.map(function (x) { return 'Y' + x.year; }), [{ name: 'Property value', color: '#1290E7', values: r.projection.map(function (x) { return x.value; }) }, { name: 'Loan balance', color: '#0C1A35', values: r.projection.map(function (x) { return x.balance; }), dash: 1 }, { name: 'Your equity', color: '#1AC585', values: r.projection.map(function (x) { return x.equity; }) }], 'Value, loan and equity over time') + '<div class="scroll-x"><table class="tbl"><thead><tr><th>Year</th><th>Rent / mo</th><th>Cash flow / yr</th><th>Loan balance</th><th>Value</th><th>Equity</th></tr></thead><tbody>' + rows.map(function (x) { return '<tr><td>' + x.year + '</td><td>' + usd(x.rent) + '</td><td class="' + sign(x.cashFlow) + '">' + usd(x.cashFlow) + '</td><td>' + usd(x.balance) + '</td><td>' + usd(x.value) + '</td><td>' + usd(x.equity) + '</td></tr>'; }).join('') + '</tbody></table></div>' + explain(beginner, 'Equity grows in two ways: tenants pay down your loan, and the home may gain value. Appreciation is never guaranteed – the deal should work on cash flow alone.') + '<p class="hint" style="margin:8px 0 0">Net proceeds if sold in year ' + p.holdYears + ' after ' + pct(p.sellingCostPct, 0) + ' selling costs and loan payoff: <b>' + usd(r.saleNet) + '</b> (before capital gains and depreciation recapture tax).</p></div>';
 
     // Tax
     var t = r.tax;
@@ -418,6 +450,10 @@
 
   // ---------------------------------------------------------------- app chrome
   function tabs(active) {
+    if (ctx && ctx.b2b) {
+      var g = [['Daily work', [['/business/portal', 'Overview'], ['/business/portal?v=clients', 'Clients']]], ['Tools & knowledge', [['/app/tools', 'Tools'], ['/business/portal?v=playbook', 'Advisor playbook'], ['/learn', 'Learn']]], ['Account', [['/business/portal?v=company', 'Company'], ['/business', 'Plan']]]];
+      return '<nav class="app-tabs biz no-print">' + g.map(function (grp) { return '<span class="tg">' + grp[0] + '</span>' + grp[1].map(function (x) { return '<a href="' + x[0] + '"' + (x[0] === active ? ' class="on"' : '') + '>' + x[1] + '</a>'; }).join(''); }).join('<i class="sep"></i>') + '<a href="#" id="lr-logout" style="margin-left:auto">Sign out</a></nav>';
+    }
     var t = [['/app', 'Dashboard'], ['/analyzer', 'Analyzer'], ['/app/tools', 'Tools'], ['/app/profile', 'Investor profile'], ['/pricing', 'Plans']];
     return '<nav class="app-tabs no-print">' + t.map(function (x) { return '<a href="' + x[0] + '"' + (x[0] === active ? ' class="on"' : '') + '>' + x[1] + '</a>'; }).join('') + '<a href="#" id="lr-logout" style="margin-left:auto">Sign out</a></nav>';
   }
@@ -442,6 +478,7 @@
   ];
   function pageDashboard() {
     requireAuth(function (c) {
+      if (c.b2b) { location.replace('/business/portal'); return; }
       var beginner = mode() === 'beginner', pf = c.profile || {};
       var profDone = !!(pf.annual_income && pf.liquid_reserves != null && pf.credit_band);
       var st = c.props.map(function (p) { return p.status; });
@@ -490,8 +527,10 @@
       if (!prop && c.tier === 0 && c.props.length >= 2) { location.replace('/pricing?limit=1'); return; }
       var data = prop ? prop.data || {} : { state: (c.profile && c.profile.state) || '' , name: '' };
       if (!prop) { data = { name: '', state: data.state || 'TX', price: '', rent: '' }; }
-      var beginner = mode() === 'beginner';
-      var head = '<div class="app-bar" style="margin-bottom:12px"><h2 style="margin:0">' + (prop ? esc(prop.name) : 'New property') + '</h2>' + (prop ? '<select id="lr-status" class="no-print" style="width:auto;padding:7px 10px;border-radius:9px;border:1px solid #D5DBE7">' + ['analyzing', 'offer', 'under_contract', 'owned', 'passed'].map(function (s) { return '<option value="' + s + '"' + (s === prop.status ? ' selected' : '') + '>' + statusLabel(s) + '</option>'; }).join('') + '</select>' : '') + '</div>' + (beginner ? '<p class="hint">Fill in what you know. Empty taxes and insurance use typical values for the state – replace them with real quotes before you make an offer.</p>' : '');
+      var beginner = c.b2b ? false : mode() === 'beginner';
+      var clientId = prop ? prop.client_id : qs('client');
+      var clientSel = c.b2b && c.clients.length ? '<label class="fl" style="margin-bottom:12px">Client<select id="lr-client"><option value="">\u2013 no client \u2013</option>' + c.clients.map(function (cl) { return '<option value="' + esc(cl.id) + '"' + (cl.id === clientId ? ' selected' : '') + '>' + esc(cl.name) + '</option>'; }).join('') + '</select></label>' : '';
+      var head = clientSel + '<div class="app-bar" style="margin-bottom:12px"><h2 style="margin:0">' + (prop ? esc(prop.name) : 'New property') + '</h2>' + (prop ? '<select id="lr-status" class="no-print" style="width:auto;padding:7px 10px;border-radius:9px;border:1px solid #D5DBE7">' + ['analyzing', 'offer', 'under_contract', 'owned', 'passed'].map(function (s) { return '<option value="' + s + '"' + (s === prop.status ? ' selected' : '') + '>' + statusLabel(s) + '</option>'; }).join('') + '</select>' : '') + '</div>' + (beginner ? '<p class="hint">Fill in what you know. Empty taxes and insurance use typical values for the state – replace them with real quotes before you make an offer.</p>' : '');
       root.innerHTML = tabs('') + '<div id="lr-an"></div>';
       bindChrome();
       var dirty = false;
@@ -513,8 +552,10 @@
       function save() {
         var d = A.read(); var name = (d.name || '').slice(0, 120) || 'Untitled property';
         var b = $('#lr-save'); if (b) b.disabled = true;
-        var req = prop ? db('properties?id=eq.' + encodeURIComponent(prop.id), { method: 'PATCH', body: JSON.stringify({ name: name, data: d }) })
-          : db('properties', { method: 'POST', body: JSON.stringify({ name: name, data: d }) });
+        var row = { name: name, data: d }, cs = $('#lr-client');
+        if (cs) row.client_id = cs.value || null;
+        var req = prop ? db('properties?id=eq.' + encodeURIComponent(prop.id), { method: 'PATCH', body: JSON.stringify(row) })
+          : db('properties', { method: 'POST', body: JSON.stringify(row) });
         req.then(function (rows) { dirty = false; toast('Saved'); if (!prop) location.replace('/app/property?id=' + encodeURIComponent(rows[0].id)); else { prop.data = d; prop.name = name; if (b) b.disabled = false; } })
           .catch(function (e) { if (b) b.disabled = false; if (/FREE_LIMIT/.test(e.message)) location.href = '/pricing?limit=1'; else toast(e.message); });
       }
@@ -541,8 +582,12 @@
         '<label class="fl">Federal tax bracket<div class="suf"><input name="marginal_rate" type="number" min="0" max="50" value="' + esc(p.marginal_rate == null ? '' : p.marginal_rate) + '"><span>%</span></div></label>' +
         '<label class="fl">Rental units you own<input name="doors_owned" type="number" min="0" value="' + esc(p.doors_owned == null ? '' : p.doors_owned) + '"></label>' +
         '<label class="fl">View' + sel('mode', [['beginner', 'Beginner – guide me'], ['pro', 'Pro – show everything']], p.mode || mode()) + '</label>' +
-        '</div><button class="btn btn-primary" style="margin-top:16px">Save profile</button></form><div><div class="box"><h2>Your buying power</h2><div id="bp"></div></div><div class="box"><h2>Account</h2><p class="hint" style="margin:0">' + esc(u.email || '') + '<br>Plan: <b>' + PLAN_NAME[c.tier] + '</b></p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn btn-line btn-sm" href="/pricing">Plans</a><a class="btn btn-line btn-sm" href="mailto:invest@leaserun.com?subject=Delete%20my%20LeaseRun%20account">Request account deletion</a></div></div></div></div>';
+        '</div><button class="btn btn-primary" style="margin-top:16px">Save profile</button></form><div><div class="box"><h2>Your buying power</h2><div id="bp"></div></div><div class="box"><h2>Account</h2><p class="hint" style="margin:0">' + esc(u.email || '') + '<br>Plan: <b>' + PLAN_NAME[c.tier] + '</b></p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn btn-line btn-sm" href="/pricing">Plans</a><button type="button" class="btn btn-line btn-sm" id="exp">Download my data</button><a class="btn btn-line btn-sm" href="mailto:invest@leaserun.com?subject=Delete%20my%20LeaseRun%20account">Request account deletion</a></div></div></div></div>';
       bindChrome();
+      $('#exp').onclick = function () {
+        var dump = { exported_at: new Date().toISOString(), email: claims().email, plan: c.ent.plan, investor_profile: c.profile, properties: c.props, business_profile: c.biz, clients: c.clients };
+        var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' })); a.download = 'leaserun-my-data.json'; a.click();
+      };
       var f = $('#pf');
       function bp() {
         var d = {}; $$('input,select', f).forEach(function (i) { d[i.name] = i.value; });
@@ -617,7 +662,7 @@
       return function () {
         var price = num('a'); if (!price) { OUT.innerHTML = '<p class="hint" style="margin:0">Enter a purchase price.</p>'; return; }
         var r = C.analyze({ price: price, downPct: num('b') == null ? 25 : num('b'), rate: num('r') || 7, pointsPct: num('pt') || 0, state: $('#s').value, transferTaxPct: num('tt') || 0, rent: 0 });
-        OUT.innerHTML = '<h2>Cash to close</h2><table class="tbl"><tbody><tr><td>Down payment</td><td>' + usd(r.down) + '</td></tr>' + r.closing.items.map(function (i) { return '<tr><td>' + esc(i.label) + '</td><td>' + usd(i.amount) + '</td></tr>'; }).join('') + '<tr class="tot"><td>Cash to close</td><td>' + usd(r.cashToClose) + '</td></tr></tbody></table><p class="hint" style="margin:8px 0 0">Closing costs ≈ ' + pct(r.closing.pctOfPrice) + ' of the price (' + usd(r.closing.total) + '). Taxes use the ' + esc(C.STATE_NAMES[r.input.state]) + ' average. Your Loan Estimate (page 2) shows the lender’s real figures.</p>';
+        OUT.innerHTML = '<h2>Cash to close</h2><table class="tbl"><tbody><tr><td>Down payment</td><td>' + usd(r.down) + '</td></tr>' + r.closing.items.map(function (i) { return '<tr><td>' + esc(i.label) + '</td><td>' + usd(i.amount) + '</td></tr>'; }).join('') + '<tr class="tot"><td>Cash to close</td><td>' + usd(r.cashToClose) + '</td></tr></tbody></table>' + barChart(r.closing.items.slice().sort(function (a, b) { return b.amount - a.amount; }).map(function (i) { return { label: i.label, value: i.amount, color: '#1290E7' }; }), 'Closing costs') + '<p class="hint" style="margin:8px 0 0">Closing costs ≈ ' + pct(r.closing.pctOfPrice) + ' of the price (' + usd(r.closing.total) + '). Taxes use the ' + esc(C.STATE_NAMES[r.input.state]) + ' average. Your Loan Estimate (page 2) shows the lender’s real figures.</p>';
       };
     },
     price: function (c, d, IN, OUT) {
@@ -643,6 +688,9 @@
         var base = C.amortize(l, r, y, 0, 0), ex = C.amortize(l, r, y, num('x') || 0, num('ls') || 0);
         var saved = base.months - ex.months, end = new Date(); end.setMonth(end.getMonth() + ex.months);
         var h = '<h2>Result</h2><div class="kpis"><div class="kp"><div class="k">Interest saved</div><div class="v pos">' + usd(base.interest - ex.interest) + '</div></div><div class="kp"><div class="k">Paid off earlier by</div><div class="v">' + Math.floor(saved / 12) + 'y ' + saved % 12 + 'm</div></div><div class="kp"><div class="k">New payoff</div><div class="v">' + end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) + '</div></div></div><p class="hint" style="margin:10px 0 0">Monthly payment stays ' + usd(base.payment) + '. Ask your servicer to apply extra money to principal; most US mortgages have no prepayment penalty, but some DSCR loans do (check your note).</p>';
+        var yrs = Math.ceil(base.months / 12), lab = [], b1 = [], b2 = [], bb = l, be = l - (num('ls') || 0), rr = r / 100 / 12;
+        for (var yy = 0; yy <= yrs; yy++) { lab.push('Y' + yy); b1.push(Math.max(0, bb)); b2.push(Math.max(0, be)); for (var mm = 0; mm < 12; mm++) { bb = bb * (1 + rr) - base.payment; be = be > 0 ? be * (1 + rr) - base.payment - (num('x') || 0) : 0; } }
+        h += lineChart(lab, [{ name: 'Without extra payments', color: '#8A97B4', values: b1 }, { name: 'With extra payments', color: '#1AC585', values: b2 }], 'Loan balance');
         var alt = num('alt');
         if (alt != null) h += '<div class="explain">Paying down debt earns a guaranteed ' + pct(r, 2) + '. Investing at ' + pct(alt) + ' earns more on paper but with risk. On a rental, mortgage interest is deductible, so the after-tax cost of the loan is lower than the rate.</div>';
         OUT.innerHTML = h;
@@ -657,7 +705,7 @@
         for (var i = 1; i <= 3; i++) if (num('r' + i) != null) offers.push({ name: ($('#n' + i).value || 'Offer ' + i), rate: num('r' + i), pointsPct: num('p' + i) || 0, fees: num('f' + i) || 0, credits: num('cr' + i) || 0, termYears: 30 });
         if (!l || offers.length < 2) { OUT.innerHTML = '<p class="hint" style="margin:0">Enter the loan amount and at least two offers from your Loan Estimates.</p>'; return; }
         var res = C.compareOffers(l, offers, h), best = res.reduce(function (a, b) { return a.costOverHorizon < b.costOverHorizon ? a : b; });
-        OUT.innerHTML = '<h2>True cost over ' + h + ' years</h2><div class="scroll-x"><table class="tbl"><thead><tr><th>Lender</th><th>Payment</th><th>Upfront</th><th>Total cost</th></tr></thead><tbody>' + res.map(function (r) { return '<tr' + (r === best ? ' style="background:#E3F7EE"' : '') + '><td>' + esc(r.name) + (r === best ? ' ✓' : '') + '</td><td>' + usd(r.payment) + '</td><td>' + usd(r.upfront) + '</td><td>' + usd(r.costOverHorizon) + '</td></tr>'; }).join('') + '</tbody></table></div><p class="hint" style="margin:8px 0 0">Total cost = upfront costs + interest paid over the period. Points only pay off if you keep the loan long enough. Compare Loan Estimates issued on the same day – rates change daily.</p>';
+        OUT.innerHTML = '<h2>True cost over ' + h + ' years</h2><div class="scroll-x"><table class="tbl"><thead><tr><th>Lender</th><th>Payment</th><th>Upfront</th><th>Total cost</th></tr></thead><tbody>' + res.map(function (r) { return '<tr' + (r === best ? ' style="background:#E3F7EE"' : '') + '><td>' + esc(r.name) + (r === best ? ' ✓' : '') + '</td><td>' + usd(r.payment) + '</td><td>' + usd(r.upfront) + '</td><td>' + usd(r.costOverHorizon) + '</td></tr>'; }).join('') + '</tbody></table></div>' + barChart(res.map(function (r) { return { label: r.name, value: r.costOverHorizon, color: r === best ? '#1AC585' : '#8A97B4' }; }), 'Total cost') + '<p class="hint" style="margin:8px 0 0">Total cost = upfront costs + interest paid over the period. Points only pay off if you keep the loan long enough. Compare Loan Estimates issued on the same day – rates change daily.</p>';
       };
     },
     meeting: function (c, d, IN, OUT) {
@@ -700,7 +748,7 @@
           return { n: p.name, b: b, s: s };
         });
         var sum = function (f) { return rows.reduce(function (a, r) { return a + f(r); }, 0); };
-        OUT.innerHTML = '<h2>Portfolio</h2><div class="scroll-x"><table class="tbl"><thead><tr><th>Property</th><th>Cash flow / mo</th><th>Stressed</th><th>DSCR</th><th>Stressed</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + esc(r.n) + '</td><td class="' + sign(r.b.cashFlowM) + '">' + usd(r.b.cashFlowM) + '</td><td class="' + sign(r.s.cashFlowM) + '">' + usd(r.s.cashFlowM) + '</td><td>' + (r.b.dscr == null ? 'n/a' : x2(r.b.dscr)) + '</td><td>' + (r.s.dscr == null ? 'n/a' : x2(r.s.dscr)) + '</td></tr>'; }).join('') + '<tr class="tot"><td>Total</td><td>' + usd(sum(function (r) { return r.b.cashFlowM; })) + '</td><td class="' + sign(sum(function (r) { return r.s.cashFlowM; })) + '">' + usd(sum(function (r) { return r.s.cashFlowM; })) + '</td><td></td><td></td></tr></tbody></table></div><p class="hint" style="margin:8px 0 0">Equity: ' + usd(sum(function (r) { return (r.b.input.arv || r.b.input.price) - r.b.loan; })) + ' · Debt: ' + usd(sum(function (r) { return r.b.loan; })) + '. Keep enough reserves to cover the stressed shortfall for at least 12 months: ' + usd(Math.max(0, -sum(function (r) { return r.s.cashFlowM; })) * 12) + '.</p>';
+        OUT.innerHTML = '<h2>Portfolio</h2><div class="scroll-x"><table class="tbl"><thead><tr><th>Property</th><th>Cash flow / mo</th><th>Stressed</th><th>DSCR</th><th>Stressed</th></tr></thead><tbody>' + rows.map(function (r) { return '<tr><td>' + esc(r.n) + '</td><td class="' + sign(r.b.cashFlowM) + '">' + usd(r.b.cashFlowM) + '</td><td class="' + sign(r.s.cashFlowM) + '">' + usd(r.s.cashFlowM) + '</td><td>' + (r.b.dscr == null ? 'n/a' : x2(r.b.dscr)) + '</td><td>' + (r.s.dscr == null ? 'n/a' : x2(r.s.dscr)) + '</td></tr>'; }).join('') + '<tr class="tot"><td>Total</td><td>' + usd(sum(function (r) { return r.b.cashFlowM; })) + '</td><td class="' + sign(sum(function (r) { return r.s.cashFlowM; })) + '">' + usd(sum(function (r) { return r.s.cashFlowM; })) + '</td><td></td><td></td></tr></tbody></table></div>' + barChart([].concat.apply([], rows.map(function (r) { return [{ label: r.n.slice(0, 22) + ' \u00b7 now', value: r.b.cashFlowM, color: r.b.cashFlowM < 0 ? '#E5484D' : '#1AC585' }, { label: r.n.slice(0, 22) + ' \u00b7 stressed', value: r.s.cashFlowM, color: r.s.cashFlowM < 0 ? '#E5484D' : '#F5B544' }]; })), 'Monthly cash flow') + '<p class="hint" style="margin:8px 0 0">Equity: ' + usd(sum(function (r) { return (r.b.input.arv || r.b.input.price) - r.b.loan; })) + ' · Debt: ' + usd(sum(function (r) { return r.b.loan; })) + '. Keep enough reserves to cover the stressed shortfall for at least 12 months: ' + usd(Math.max(0, -sum(function (r) { return r.s.cashFlowM; })) * 12) + '.</p>';
       };
     },
     refi: function (c, d, IN, OUT) {
@@ -737,7 +785,9 @@
       var p = c.props.filter(function (x) { return x.id === qs('id'); })[0];
       if (!p) { root.innerHTML = tabs('') + '<div class="box"><h2>Property not found</h2><a class="btn btn-line" href="/app">Back</a></div>'; bindChrome(); return; }
       var paid = c.tier >= 1 || c.ent.loan_packages_left > 0;
-      renderPackage(p.data || {}, c.profile || {}, { paid: paid, id: p.id.slice(0, 8).toUpperCase(), status: p.status });
+      var client = p.client_id ? c.clients.filter(function (x) { return x.id === p.client_id; })[0] : null;
+      var pf = client ? { full_name: client.name } : (c.profile || {});
+      renderPackage(p.data || {}, pf, { paid: paid, id: p.id.slice(0, 8).toUpperCase(), status: p.status, brand: c.b2b ? c.biz : null, client: !!client });
     });
   }
   function renderPackage(d, pf, o) {
@@ -750,10 +800,12 @@
     var bar = '<div class="no-print" style="max-width:860px;margin:0 auto 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
       (o.sample ? '<span class="pill">Sample with fictional numbers</span><a class="btn btn-primary btn-sm" href="/signup">Create your own – free</a>' :
         '<a class="btn btn-line btn-sm" href="/app/property?id=' + encodeURIComponent(qs('id')) + '">← Back to property</a>' + (o.paid ? '<button class="btn btn-pay btn-sm" onclick="window.print()">Save as PDF / Print</button><span class="hint" style="margin:0;font-size:13px">In the print dialog choose “Save as PDF”.</span>' : '<span class="pill mid">Preview – printing is part of the Loan Package, Buyer Pass and Investor Pro</span><a class="btn btn-pay btn-sm" href="/pricing">See plans</a>')) + '</div>';
-    var h = bar + '<article class="report">' + (mark ? '<div class="wm"><span>' + mark + '</span></div>' : '') +
+    var br = o.brand && o.brand.company ? o.brand : null;
+    var bcol = br && /^#[0-9A-Fa-f]{6}$/.test(br.brand_color || '') ? br.brand_color : null;
+    var h = bar + '<article class="report"' + (bcol ? ' style="border-top:6px solid ' + bcol + '"' : '') + '>' + (br ? '<div class="meta" style="margin-bottom:12px;font-weight:700;color:' + (bcol || 'inherit') + '">Prepared by ' + esc(br.company) + (br.license_no ? ' \u00b7 License ' + esc(br.license_no) : '') + (br.phone ? ' \u00b7 ' + esc(br.phone) : '') + (br.email ? ' \u00b7 ' + esc(br.email) : '') + '</div>' : '') + (mark ? '<div class="wm"><span>' + mark + '</span></div>' : '') +
       '<div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><div class="meta">INVESTMENT PROPERTY LOAN PACKAGE</div><h1>' + esc(p.name || 'Subject property') + '</h1><div class="meta">Prepared for ' + esc(pf.full_name || 'Borrower') + (pf.buy_as === 'llc' ? ' (purchasing through an LLC)' : '') + ' · ' + today + ' · Report ' + esc(o.id) + '</div></div><img src="/logo-mark.png" alt="" width="44" height="44" style="border-radius:8px"></div>' +
       '<h2>1. Summary</h2><div class="kpis"><div class="kp"><div class="k">Loan request</div><div class="v">' + usd(r.loan) + '</div><div class="x">' + pct(r.ltv, 0) + ' LTV</div></div><div class="kp"><div class="k">DSCR (rent ÷ PITIA)</div><div class="v">' + (r.dscrLender == null ? 'n/a' : x2(r.dscrLender)) + '</div><div class="x">NOI basis: ' + (r.dscr == null ? 'n/a' : x2(r.dscr)) + '</div></div><div class="kp"><div class="k">Reserves after closing</div><div class="v">' + (reservesAfter == null ? '–' : usd(reservesAfter)) + '</div><div class="x">' + (reservesAfter == null ? '' : (reservesAfter / r.pitia).toFixed(1) + ' months PITIA') + '</div></div></div>' +
-      '<h2>2. Borrower</h2>' + rows([['Name', esc(pf.full_name || '–')], ['Vesting', pf.buy_as === 'llc' ? 'LLC (personal guarantee expected)' : 'Individual'], ['State of residence', esc(C.STATE_NAMES[pf.state] || '–')], ['Credit score (self-reported)', esc(pf.credit_band || '–')], ['Gross annual income', usd(+pf.annual_income || null)], ['Monthly debt payments', usd(pf.monthly_debts == null ? null : +pf.monthly_debts)], ['Estimated DTI incl. this property (75% of rent)', dti == null ? '–' : pct(dti)], ['Liquid assets', usd(pf.liquid_reserves == null ? null : +pf.liquid_reserves)], ['Rental units owned', pf.doors_owned == null ? '–' : String(pf.doors_owned)]]) +
+      '<h2>2. Borrower</h2>' + rows([['Name', esc(pf.full_name || '–')], ['Vesting', pf.buy_as === 'llc' ? 'LLC (personal guarantee expected)' : pf.buy_as === 'individual' ? 'Individual' : '\u2013'], ['State of residence', esc(C.STATE_NAMES[pf.state] || '–')], ['Credit score (self-reported)', esc(pf.credit_band || '–')], ['Gross annual income', usd(+pf.annual_income || null)], ['Monthly debt payments', usd(pf.monthly_debts == null ? null : +pf.monthly_debts)], ['Estimated DTI incl. this property (75% of rent)', dti == null ? '–' : pct(dti)], ['Liquid assets', usd(pf.liquid_reserves == null ? null : +pf.liquid_reserves)], ['Rental units owned', pf.doors_owned == null ? '–' : String(pf.doors_owned)]]) +
       '<h2>3. Subject property</h2>' + rows([['Location', esc(C.STATE_NAMES[p.state])], ['Type / units', esc((TYPES.filter(function (t) { return t[0] === p.type; })[0] || ['', ''])[1]) + ' / ' + p.units], ['Living area', p.sqft ? p.sqft.toLocaleString('en-US') + ' sq ft' : '–'], ['Year built', String(p.yearBuilt || '–')], ['Purchase price', usd(p.price)], ['Price per sq ft', p.sqft ? usd(r.pricePerSqft) : '–'], ['Planned repairs', usd(p.rehab)], ['Flood zone / HOA rental limits', (p.floodZone ? 'Yes' : 'No') + ' / ' + (p.hoaRentalLimits ? 'Yes' : 'No')]]) +
       '<h2>4. Sources and uses</h2>' + rows([['Purchase price', usd(p.price)], ['Closing costs & prepaids (est.)', usd(r.closing.total)], ['Repairs', usd(p.rehab)], ['Total uses', usd(p.price + r.closing.total + p.rehab), 1], ['Loan', usd(r.loan)], ['Borrower funds', usd(r.cashInvested)], ['Total sources', usd(r.loan + r.cashInvested), 1]]) +
       '<h2>5. Proposed financing</h2>' + rows([['Loan type', esc((LOANS.filter(function (l) { return l[0] === p.loanType; })[0] || ['', ''])[1])], ['Rate / term', pct(p.rate, 3) + ' / ' + p.termYears + ' years'], ['Principal & interest', usd(r.pi, 2)], ['Mortgage insurance', usd(r.pmi, 2)], ['Property taxes', usd(r.taxesM, 2)], ['Hazard insurance', usd(r.insuranceM, 2)], ['HOA', usd(p.hoaMonthly, 2)], ['PITIA', usd(r.pitia, 2), 1]]) +
@@ -761,8 +813,9 @@
       '<h2>7. Stress test</h2><table class="tbl"><thead><tr><th>Scenario</th><th>Cash flow / mo</th><th>DSCR</th></tr></thead><tbody>' + r.stress.map(function (s) { return '<tr><td>' + esc(s.label) + '</td><td>' + usd(s.cashFlowM) + '</td><td>' + (s.dscr == null ? 'n/a' : x2(s.dscr)) + '</td></tr>'; }).join('') + '</tbody></table>' +
       '<h2>8. Notes for the underwriter</h2><ul style="padding-left:18px;font-size:13px;display:grid;gap:4px">' + (r.warnings.length ? r.warnings.map(function (w) { return '<li><b>' + esc(w.title) + ':</b> ' + esc(w.text) + '</li>'; }).join('') : '<li>No exceptions identified by the borrower’s analysis.</li>') + '</ul>' +
       '<h2>9. Document checklist</h2><ul style="list-style:none;font-size:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 16px">' + ['Photo ID', 'Two years of federal tax returns', 'W-2s / 1099s and recent pay stubs', 'Two months of bank & brokerage statements', 'Executed purchase contract', 'Rent comps or appraiser rent schedule (Form 1007)', 'Existing leases (if occupied)', 'Landlord insurance quote (DP-3)', 'LLC articles, operating agreement, EIN letter', 'Schedule of real estate owned'].map(function (x) { return '<li>☐ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
-      '<p class="meta" style="margin-top:18px;font-size:11px">Figures are estimates prepared by the borrower from self-reported data and typical cost assumptions. This document is not a loan application, loan approval, appraisal or tax advice. The lender’s Loan Estimate, appraisal and underwriting determine the final terms.</p>' +
-      '<div class="rfoot"><span>Created with LeaseRun · leaserun.com</span><span>Report ' + esc(o.id) + ' · ' + today + '</span></div></article>';
+      '<p class="meta" style="margin-top:18px;font-size:11px">Figures are estimates prepared ' + (br ? 'by ' + esc(br.company) + ' from information provided by the borrower' : 'by the borrower from self-reported data') + ' and typical cost assumptions. This document is not a loan application, loan approval, appraisal or tax advice. The lender’s Loan Estimate, appraisal and underwriting determine the final terms.</p>' +
+      (br && br.disclaimer ? '<p class="meta" style="font-size:11px">' + esc(br.disclaimer) + '</p>' : '') +
+      '<div class="rfoot"><span>' + (br ? esc(br.company) + ' \u00b7 ' : '') + 'Created with LeaseRun \u00b7 leaserun.com</span><span>Report ' + esc(o.id) + ' · ' + today + '</span></div></article>';
     root.innerHTML = h;
   }
 
@@ -785,9 +838,256 @@
     });
   }
 
+
+  // ---------------------------------------------------------------- dates
+  function nthWeekday(y, m, wd, n) { var d = new Date(Date.UTC(y, m, 1)); var add = (wd - d.getUTCDay() + 7) % 7 + (n - 1) * 7; d.setUTCDate(1 + add); return d; }
+  function lastWeekday(y, m, wd) { var d = new Date(Date.UTC(y, m + 1, 0)); d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() - wd + 7) % 7)); return d; }
+  function holidays(y) {
+    return [new Date(Date.UTC(y, 0, 1)), nthWeekday(y, 0, 1, 3), nthWeekday(y, 1, 1, 3), lastWeekday(y, 4, 1), new Date(Date.UTC(y, 5, 19)),
+      new Date(Date.UTC(y, 6, 4)), nthWeekday(y, 8, 1, 1), nthWeekday(y, 9, 1, 2), new Date(Date.UTC(y, 10, 11)), nthWeekday(y, 10, 4, 4), new Date(Date.UTC(y, 11, 25))]
+      .map(function (d) { return d.toISOString().slice(0, 10); });
+  }
+  function parseD(v) { if (!v) return null; var d = new Date(v + 'T00:00:00Z'); return isNaN(d) ? null : d; }
+  function addDays(d, n) { var x = new Date(d.getTime()); x.setUTCDate(x.getUTCDate() + n); return x; }
+  function iso(d) { return d.toISOString().slice(0, 10); }
+  function fmtD(d) { return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }); }
+  // TRID "precise" business day: every day except Sundays and federal legal public holidays.
+  function minusBizDays(d, n) { var x = new Date(d.getTime()); while (n > 0) { x = addDays(x, -1); if (x.getUTCDay() !== 0 && holidays(x.getUTCFullYear()).indexOf(iso(x)) < 0) n--; } return x; }
+  function ics(events) {
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//LeaseRun//Deadlines//EN', 'CALSCALE:GREGORIAN'];
+    events.forEach(function (e, i) {
+      var d = iso(e.date).replace(/-/g, ''), n = iso(addDays(e.date, 1)).replace(/-/g, '');
+      lines.push('BEGIN:VEVENT', 'UID:lr-' + d + '-' + i + '@leaserun.com', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z', 'DTSTART;VALUE=DATE:' + d, 'DTEND;VALUE=DATE:' + n,
+        'SUMMARY:' + e.title.replace(/[,;]/g, ' '), 'BEGIN:VALARM', 'TRIGGER:-P3D', 'ACTION:DISPLAY', 'DESCRIPTION:' + e.title.replace(/[,;]/g, ' '), 'END:VALARM', 'END:VEVENT');
+    });
+    lines.push('END:VCALENDAR');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar' })); a.download = 'leaserun-deadlines.ics'; a.click();
+  }
+
+  function pageDeadlines() {
+    var today = iso(new Date());
+    root.innerHTML = '<div class="cols"><div><div class="box"><h2>Purchase timeline</h2><p class="hint">Enter the day the seller accepted your offer. Use the periods from your signed purchase agreement.</p><div class="fg">' +
+      '<label class="fl">Offer accepted<input type="date" id="acc" value="' + today + '"></label>' + inp('insd', 'Inspection period (days)', 10) + inp('find', 'Financing contingency (days)', 21) + inp('apd', 'Appraisal contingency (days)', 17) + inp('cld', 'Days to closing', 30) + '</div></div>' +
+      '<div class="box"><h2>1031 exchange</h2><p class="hint">Only if you are selling investment property and reinvesting through a qualified intermediary.</p><div class="fg"><label class="fl">Relinquished property closed on<input type="date" id="sold"></label><label class="chk full"><input type="checkbox" id="ext"><span>I will extend my tax return (otherwise the April 15 due date can cut the 180 days short)</span></label></div></div></div>' +
+      '<div class="sticky"><div class="box" id="dl-out"></div></div></div>';
+    var out = $('#dl-out'), ev = [];
+    function row(t, d, note) { ev.push({ title: t, date: d }); return '<tr><td><b>' + esc(t) + '</b>' + (note ? '<br><span class="hint" style="font-size:12px">' + esc(note) + '</span>' : '') + '</td><td>' + fmtD(d) + '</td></tr>'; }
+    function run() {
+      ev = [];
+      var acc = parseD($('#acc').value), h = '';
+      if (acc) {
+        var close = addDays(acc, num('cld') || 30), cd = minusBizDays(close, 3);
+        var first = new Date(Date.UTC(close.getUTCFullYear(), close.getUTCMonth() + 2, 1));
+        h += '<h2>Your purchase deadlines</h2><table class="tbl"><tbody>' +
+          row('Earnest money due (check your contract, often 1–3 days)', addDays(acc, 3)) +
+          row('Inspection period ends', addDays(acc, num('insd') || 10), 'Repair requests or cancellation must be delivered before this date.') +
+          row('Appraisal contingency ends', addDays(acc, num('apd') || 17)) +
+          row('Financing contingency ends', addDays(acc, num('find') || 21), 'Ask your lender for loan approval in writing before this date.') +
+          row('Closing Disclosure must be received by', cd, 'At least 3 business days before closing (Sundays and federal holidays do not count).') +
+          row('Closing', close) + row('First mortgage payment (typical)', first, 'Usually due on the 1st of the second month after closing.') + '</tbody></table>';
+      }
+      var sold = parseD($('#sold').value);
+      if (sold) {
+        var id45 = addDays(sold, 45), d180 = addDays(sold, 180), due = new Date(Date.UTC(sold.getUTCFullYear() + 1, 3, 15));
+        var end = !$('#ext').checked && due < d180 ? due : d180;
+        h += '<h2 style="margin-top:18px">1031 exchange deadlines</h2><table class="tbl"><tbody>' + row('1031: identify replacement properties', id45, 'Written, signed identification delivered to your qualified intermediary by midnight. Weekends and holidays count.') +
+          row('1031: close on replacement property', end, end < d180 ? 'Your tax return due date comes first. File an extension to keep the full 180 days.' : '180 calendar days after the sale closed.') + '</tbody></table>';
+      }
+      out.innerHTML = (h || '<p class="hint" style="margin:0">Enter a date to see your deadlines.</p>') + (ev.length ? '<button class="btn btn-primary btn-sm" id="ics" style="margin-top:14px">Add to my calendar (.ics)</button><p class="hint" style="margin:8px 0 0">Each entry comes with a reminder three days before. Your contract and your qualified intermediary are the binding source.</p>' : '');
+      var b = $('#ics'); if (b) b.onclick = function () { ics(ev); };
+    }
+    root.addEventListener('input', run); root.addEventListener('change', run); run();
+  }
+
+  // ---------------------------------------------------------------- sell or hold (public)
+  function pageScenarios() {
+    root.innerHTML = '<div class="cols"><div class="box"><h2>Your property today</h2><div class="fg">' +
+      inp('v', 'Current market value', 320000, 'usd') + inp('b', 'Loan balance', 180000, 'usd') + inp('basis', 'Original price + improvements', 230000, 'usd') + inp('dep', 'Depreciation taken so far', 40000, 'usd') +
+      inp('sc', 'Selling costs', 7, 'pct') + inp('rent', 'Monthly rent', 2300, 'usd') + inp('noi', 'Yearly net operating income', 17000, 'usd') + inp('rate', 'Current loan rate', 4.25, 'pct') +
+      '<label class="fl">Capital gains rate<select id="cg"><option value="0">0%</option><option value="15" selected>15%</option><option value="20">20%</option></select><small>Depends on your taxable income.</small></label>' +
+      '<label class="chk"><input type="checkbox" id="niit"><span>Net investment income tax 3.8% applies</span></label>' + inp('st', 'State income tax rate', 5, 'pct') + inp('sus', 'Suspended passive losses', 0, 'usd') +
+      inp('nr', 'Cash-out refinance rate', 7.25, 'pct') + inp('ltv', 'Cash-out LTV', 75, 'pct') + '</div></div><div class="sticky"><div class="box" id="sc-out"></div></div></div>' + DISC;
+    var out = $('#sc-out');
+    function run() {
+      var v = num('v') || 0, b = num('b') || 0, basis = num('basis') || 0, dep = num('dep') || 0, sc = (num('sc') || 0) / 100;
+      var cost = v * sc, adj = basis - dep, gain = v - cost - adj;
+      var recap = Math.max(0, Math.min(dep, gain)), cap = Math.max(0, gain - recap);
+      var fed = recap * 0.25 + cap * (+$('#cg').value) / 100;
+      var niit = $('#niit').checked ? Math.max(0, gain) * 0.038 : 0, state = Math.max(0, gain) * (num('st') || 0) / 100;
+      var susBen = Math.min(num('sus') || 0, Math.max(0, gain)) * 0.24;
+      var tax = Math.max(0, fed + niit + state - susBen), net = v - cost - b - tax;
+      var newLoan = v * (num('ltv') || 0) / 100, cashOut = Math.max(0, newLoan - b - newLoan * 0.025);
+      var oldPmt = b > 0 ? C.payment(b, num('rate') || 0, 25) : 0, newPmt = C.payment(newLoan, num('nr') || 0, 30);
+      out.innerHTML = '<h2>Compare your options</h2><table class="tbl"><thead><tr><th>Option</th><th>Cash to you now</th><th>Tax now</th></tr></thead><tbody>' +
+        '<tr><td><b>Sell</b></td><td>' + usd(net) + '</td><td>' + usd(tax) + '</td></tr>' +
+        '<tr><td><b>Sell with a 1031 exchange</b><br><span class="hint" style="font-size:12px">All equity must be reinvested</span></td><td>' + usd(0) + '</td><td>' + usd(0) + ' (deferred ' + usd(tax) + ')</td></tr>' +
+        '<tr><td><b>Cash-out refinance</b><br><span class="hint" style="font-size:12px">Payment ' + usd(oldPmt) + ' → ' + usd(newPmt) + '/mo (est.)</span></td><td>' + usd(cashOut) + '</td><td>' + usd(0) + '</td></tr>' +
+        '<tr><td><b>Keep</b><br><span class="hint" style="font-size:12px">Equity keeps working</span></td><td>' + usd(0) + '</td><td>' + usd(0) + '</td></tr></tbody></table>' +
+        barChart([{ label: 'Sell – net cash', value: net, color: '#1290E7' }, { label: 'Sell – taxes', value: tax, color: '#E5484D' }, { label: 'Cash-out refinance', value: cashOut, color: '#1AC585' }, { label: 'Equity if you keep', value: v - b, color: '#0C1A35' }], 'Options') +
+        '<table class="tbl" style="margin-top:12px"><tbody><tr><td>Gain on sale</td><td>' + usd(gain) + '</td></tr><tr><td>of which depreciation recapture (up to 25%)</td><td>' + usd(recap) + '</td></tr><tr><td>of which capital gain</td><td>' + usd(cap) + '</td></tr><tr><td>Return on equity if you keep (NOI ÷ equity)</td><td>' + pct((num('noi') || 0) / Math.max(1, v - b) * 100) + '</td></tr></tbody></table>' +
+        '<div class="explain">If the return on your equity is low, selling or a 1031 into a better property may make sense. A cash-out refinance raises your payment and your risk. Suspended losses are valued at a 24% rate here for simplicity.</div>';
+    }
+    root.addEventListener('input', run); root.addEventListener('change', run); run();
+  }
+
+  // ---------------------------------------------------------------- checklist (public, saved in this browser)
+  var CHECK = {
+    'Everyone': ['Government photo ID', 'Last 2 years of federal tax returns, all schedules', 'W-2s and 1099s for 2 years', 'Pay stubs for the last 30 days', 'Bank and brokerage statements, last 2 months, all pages', 'Explanation and source for large deposits', 'Gift letter if a family member helps (owner-occupied loans only)'],
+    'Self-employed': ['Business tax returns for 2 years (1120S, 1065 or Schedule C)', 'Year-to-date profit and loss statement', 'Business bank statements', 'K-1s for every partnership or S corporation'],
+    'Properties you already own': ['Schedule of real estate owned (address, value, loan, payment, rent)', 'Current mortgage statements', 'Signed leases', 'Insurance declarations and property tax bills', 'HOA statements'],
+    'The property you are buying': ['Signed purchase agreement and addenda', 'Earnest money receipt', 'Inspection report', 'Landlord insurance quote (DP-3) and flood quote if needed', 'HOA documents and resale certificate', 'Existing leases and rent roll if occupied'],
+    'Buying in an LLC (DSCR)': ['Articles of organization', 'Operating agreement', 'EIN confirmation letter (IRS CP 575)', 'Certificate of good standing', 'Personal guarantee information']
+  };
+  function pageChecklist() {
+    var saved = store('lr-checklist') || {};
+    root.innerHTML = '<div class="no-print" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap"><button class="btn btn-line btn-sm" onclick="window.print()">Print / save as PDF</button><button class="btn btn-line btn-sm" id="ck-reset">Clear all ticks</button><span class="hint" style="margin:0;align-self:center">Your ticks are saved in this browser only.</span></div><div class="cols-3" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">' + Object.keys(CHECK).map(function (g, gi) {
+      return '<div class="box"><h2 style="font-size:17px">' + esc(g) + '</h2><div style="display:grid;gap:8px;margin-top:10px">' + CHECK[g].map(function (it, i) { var k = gi + '-' + i; return '<label class="chk"><input type="checkbox" data-k="' + k + '"' + (saved[k] ? ' checked' : '') + '><span>' + esc(it) + '</span></label>'; }).join('') + '</div></div>';
+    }).join('') + '</div><div class="explain">Never email Social Security numbers or bank account numbers. Upload them only through your lender’s secure portal.</div>';
+    root.addEventListener('change', function (e) { var k = e.target.getAttribute('data-k'); if (!k) return; saved[k] = e.target.checked; store('lr-checklist', saved); });
+    $('#ck-reset').onclick = function () { store('lr-checklist', null); location.reload(); };
+  }
+
+  // ---------------------------------------------------------------- investor profiler (public)
+  var QUIZ = [
+    ['How much cash could you invest without touching your emergency fund?', [['Under $25k', { hack: 3, turnkey: 0, brrrr: 0, dscr: 0, hold: 1 }], ['$25k–$75k', { hack: 2, turnkey: 2, brrrr: 1, dscr: 0, hold: 3 }], ['$75k–$200k', { hack: 0, turnkey: 3, brrrr: 2, dscr: 2, hold: 3 }], ['Over $200k', { hack: 0, turnkey: 2, brrrr: 2, dscr: 3, hold: 2 }]]],
+    ['How many hours a month can you spend on it?', [['Almost none', { turnkey: 3, dscr: 1 }], ['A few hours', { hold: 2, turnkey: 1, hack: 1 }], ['10+ hours', { brrrr: 3, hold: 2, hack: 2 }]]],
+    ['Would you live in the property yourself?', [['Yes, I would live in one unit', { hack: 4 }], ['No', { turnkey: 1, hold: 1, brrrr: 1, dscr: 1 }]]],
+    ['How do you feel about renovation projects?', [['I avoid them', { turnkey: 2, hack: 1 }], ['Small cosmetic work is fine', { hold: 2, hack: 1 }], ['I like managing contractors', { brrrr: 3 }]]],
+    ['How is your income documented?', [['W-2 salary', { hold: 1, hack: 1, turnkey: 1 }], ['Self-employed, low on tax returns', { dscr: 3 }], ['I already own several financed rentals', { dscr: 2, brrrr: 1 }]]],
+    ['What matters most?', [['Steady monthly cash flow', { turnkey: 2, hold: 2 }], ['Building equity fast', { brrrr: 3 }], ['Lowest entry cost', { hack: 3 }], ['Scaling to many doors', { dscr: 3, brrrr: 1 }]]]
+  ];
+  var STRAT = {
+    hack: ['House hack', 'Buy a 2–4 unit property, live in one unit and rent the others. FHA or VA loans keep the down payment low.', '/learn/house-hacking-fha-va'],
+    turnkey: ['Turnkey rental', 'Buy a renovated, often already rented home in a cash-flow market and use a professional manager.', '/learn/investor-strategies-turnkey-brrrr'],
+    hold: ['Classic buy and hold', 'Find a solid home in a market you know, make it rent-ready and hold it for the long term.', '/learn/first-rental-step-by-step'],
+    brrrr: ['BRRRR', 'Buy below value, renovate, rent, refinance to pull cash out and repeat. Highest effort and risk.', '/learn/refinance-and-cash-out'],
+    dscr: ['DSCR / LLC scaling', 'Qualify loans on the property’s rent instead of your income and hold properties in LLCs.', '/learn/dscr-loans-explained']
+  };
+  function pageProfiler() {
+    var ans = {};
+    function draw() {
+      var done = Object.keys(ans).length === QUIZ.length, sc = { hack: 0, turnkey: 0, hold: 0, brrrr: 0, dscr: 0 };
+      Object.keys(ans).forEach(function (q) { var w = QUIZ[q][1][ans[q]][1]; for (var k in w) sc[k] += w[k]; });
+      var rank = Object.keys(sc).sort(function (a, b) { return sc[b] - sc[a]; });
+      root.innerHTML = '<div class="cols"><div>' + QUIZ.map(function (q, qi) {
+        return '<div class="box"><h3>' + (qi + 1) + '. ' + esc(q[0]) + '</h3><div style="display:grid;gap:8px">' + q[1].map(function (o, oi) { return '<label class="chk"><input type="radio" name="q' + qi + '" data-q="' + qi + '" data-o="' + oi + '"' + (ans[qi] === oi ? ' checked' : '') + '><span>' + esc(o[0]) + '</span></label>'; }).join('') + '</div></div>';
+      }).join('') + '</div><div class="sticky"><div class="box">' + (done ? '<span class="pill good">Your best fit</span><h2 style="margin-top:8px">' + STRAT[rank[0]][0] + '</h2><p class="hint">' + STRAT[rank[0]][1] + '</p><a class="btn btn-primary btn-sm" href="' + STRAT[rank[0]][2] + '">Learn how it works</a><h3 style="margin-top:18px">Also worth a look</h3><p class="hint" style="margin:0">' + STRAT[rank[1]][0] + ': ' + STRAT[rank[1]][1] + '</p><div style="margin-top:16px"><a class="btn btn-line btn-sm" href="/start">Run your first numbers</a></div>' : '<h2>Answer ' + (QUIZ.length - Object.keys(ans).length) + ' more question' + (QUIZ.length - Object.keys(ans).length === 1 ? '' : 's') + '</h2><p class="hint" style="margin:0">There is no wrong answer. The result is a starting point, not advice.</p>') + '</div></div></div>';
+    }
+    root.addEventListener('change', function (e) { var q = e.target.getAttribute('data-q'); if (q == null) return; ans[q] = +e.target.getAttribute('data-o'); draw(); });
+    draw();
+  }
+  var DISC = '<p class="hint" style="margin-top:18px;font-size:13px">Estimates for education only – not tax, legal or investment advice. Confirm with your CPA and qualified intermediary.</p>';
+
+
+  // ---------------------------------------------------------------- business portal
+  var STAGES = [['new', 'New'], ['qualifying', 'Qualifying'], ['searching', 'Searching'], ['under_contract', 'Under contract'], ['closed', 'Closed'], ['inactive', 'Inactive']];
+  function stageLabel(v) { return (STAGES.filter(function (x) { return x[0] === v; })[0] || ['', v])[1]; }
+  var PLAYBOOK = [
+    ['First-time investor', 'Wants to buy a first rental but has never run the numbers.', [
+      'Start with the investor profile: cash, debts, credit range. Agree on a price ceiling from cash and DTI before showing homes.',
+      'Walk through one property in the analyzer together in beginner view; let the client enter rent comps themselves.',
+      'Explain reserves early: six months of PITIA is commonly required and often forgotten.',
+      'Use the stress test as the decision rule: the deal should survive rent −10% and a repair shock.'], '/start'],
+    ['Self-employed borrower', 'Strong business, low taxable income on returns.', [
+      'Compare a DSCR loan with a conventional loan: rate, points, prepayment penalty and down payment.',
+      'Check the lender DSCR (rent ÷ PITIA) against the lender’s minimum before writing an offer.',
+      'Ask whether the client wants to close in an LLC; it narrows the loan options.'], '/learn/dscr-loans-explained'],
+    ['1031 exchange buyer', 'Sold or is selling investment property and must reinvest.', [
+      'Put the 45-day and 180-day dates in the client file on day one (deadline calculator, calendar file).',
+      'Confirm a qualified intermediary is engaged before the sale closes.',
+      'Replacement value and debt must at least match the relinquished property to avoid taxable boot – coordinate with the client’s CPA.'], '/deadlines'],
+    ['House hacker', 'Wants to live in a 2–4 unit property.', [
+      'Check FHA self-sufficiency on 3–4 units: 75% of rent must cover PITI.',
+      'Run the numbers as a full rental too, for the day the client moves out.',
+      'Review occupancy rules: owner-occupant loans require moving in within the stated period.'], '/learn/house-hacking-fha-va'],
+    ['Landlord who wants to refinance or sell', 'Owns rentals with built-up equity.', [
+      'Compare sell, 1031, cash-out and keep in the scenarios tool, including depreciation recapture.',
+      'For refinances, show the break-even month and the new stressed cash flow.',
+      'Hand over the Schedule E export to the client’s CPA rather than giving tax advice.'], '/scenarios']
+  ];
+  var COMPLIANCE = [
+    '<b>Fair housing:</b> describe properties and numbers, never people or neighborhoods’ demographics. Do not steer.',
+    '<b>RESPA Section 8:</b> no fees, kickbacks or things of value for referrals of settlement services. LeaseRun does not pay referral fees.',
+    '<b>Licensing:</b> show your state license or NMLS number on documents you send; the company profile adds it to every lender package.',
+    '<b>No tax or legal advice:</b> the tax figures are estimates; refer clients to a CPA, attorney or qualified intermediary.',
+    '<b>Data:</b> never collect Social Security or bank account numbers in client notes.'
+  ];
+  function pageB2B() {
+    requireAuth(function (c) {
+      var v = qs('v') || 'overview';
+      if (!c.b2b) {
+        root.innerHTML = tabs('') + '<div class="box"><h2>Business portal</h2><p class="hint">Your account does not have a LeaseRun for Business plan yet. Business plans add client files, branded lender packages, the advisor playbook and all Pro tools.</p><a class="btn btn-pay btn-sm" href="/business">See business plans</a></div>';
+        bindChrome(); return;
+      }
+      var act = v === 'overview' ? '/business/portal' : '/business/portal?v=' + (v === 'client' ? 'clients' : v);
+      var plan = B2B_NAME[c.ent.plan] || 'Business';
+      var head = '<div class="app-bar"><div><h1>' + esc((c.biz && c.biz.company) || 'Business portal') + '</h1><div class="sub">' + plan + (c.ent.plan === 'b2b_basic' ? ' · ' + c.clients.filter(function (x) { return x.stage !== 'inactive'; }).length + ' of 25 active client files' : '') + '</div></div><a class="btn btn-primary btn-sm" href="/business/portal?v=clients#new">New client</a></div>';
+      var H = tabs(act) + head;
+      if (v === 'overview') {
+        var by = {}; c.clients.forEach(function (x) { by[x.stage] = (by[x.stage] || 0) + 1; });
+        var clientProps = c.props.filter(function (p) { return p.client_id; });
+        H += '<div class="kpis" style="margin-bottom:16px">' + [['Active clients', c.clients.filter(function (x) { return x.stage !== 'inactive' && x.stage !== 'closed'; }).length], ['Searching', by.searching || 0], ['Under contract', by.under_contract || 0], ['Closed', by.closed || 0], ['Client analyses', clientProps.length], ['Lender packages ready', clientProps.length]].map(function (k) { return '<div class="kp"><div class="k">' + k[0] + '</div><div class="v">' + k[1] + '</div></div>'; }).join('') + '</div>';
+        if (!c.biz || !c.biz.company) H += '<div class="gate">Add your <a href="/business/portal?v=company" style="font-weight:700;text-decoration:underline">company details</a> so your name, license and brand color appear on every lender package.</div>';
+        H += '<div class="box"><h2>Pipeline</h2><div class="pipe">' + STAGES.filter(function (st) { return st[0] !== 'inactive'; }).map(function (st) {
+          var list = c.clients.filter(function (x) { return x.stage === st[0]; });
+          return '<div class="pcol"><b>' + st[1] + ' <span class="pill">' + list.length + '</span></b>' + list.slice(0, 6).map(function (x) { return '<a class="pcard" href="/business/portal?v=client&id=' + encodeURIComponent(x.id) + '">' + esc(x.name) + '</a>'; }).join('') + (list.length > 6 ? '<span class="hint">+' + (list.length - 6) + ' more</span>' : '') + '</div>';
+        }).join('') + '</div></div>';
+        H += '<div class="box"><h2>Recent analyses</h2>' + (clientProps.length ? '<div class="scroll-x"><table class="tbl"><thead><tr><th>Property</th><th>Client</th><th>Cash flow / mo</th><th>DSCR</th><th></th></tr></thead><tbody>' + clientProps.slice(0, 8).map(function (p) { var r = C.analyze(p.data || {}), cl = c.clients.filter(function (x) { return x.id === p.client_id; })[0]; return '<tr><td><a href="/app/property?id=' + encodeURIComponent(p.id) + '" style="color:#0E7A53;font-weight:600">' + esc(p.name) + '</a></td><td>' + esc(cl ? cl.name : '') + '</td><td class="' + sign(r.cashFlowM) + '">' + usd(r.cashFlowM) + '</td><td>' + (r.dscr == null ? 'n/a' : x2(r.dscr)) + '</td><td><a href="/app/loan-package?id=' + encodeURIComponent(p.id) + '" style="color:#0E7A53;font-weight:600">Package</a></td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="hint" style="margin:0">No client analyses yet. Open a client and start an analysis.</p>') + '</div>';
+      } else if (v === 'clients') {
+        H += '<div class="cols"><div class="box"><h2>Clients</h2>' + (c.clients.length ? '<div class="scroll-x"><table class="tbl"><thead><tr><th>Name</th><th>Stage</th><th>Analyses</th><th>Updated</th></tr></thead><tbody>' + c.clients.map(function (x) { return '<tr><td><a href="/business/portal?v=client&id=' + encodeURIComponent(x.id) + '" style="color:#0E7A53;font-weight:600">' + esc(x.name) + '</a></td><td>' + stageLabel(x.stage) + '</td><td>' + c.props.filter(function (p) { return p.client_id === x.id; }).length + '</td><td>' + new Date(x.updated_at).toLocaleDateString('en-US') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '<p class="hint" style="margin:0">No clients yet.</p>') + '</div>' +
+          '<form class="box" id="new"><h2>New client</h2><div class="fg"><label class="fl full">Name<input name="name" required maxlength="120"></label><label class="fl">Email<input name="email" type="email" maxlength="254"></label><label class="fl">Phone<input name="phone" maxlength="40"></label><label class="fl full">Stage<select name="stage">' + STAGES.map(function (st) { return '<option value="' + st[0] + '">' + st[1] + '</option>'; }).join('') + '</select></label><label class="fl full">Notes<textarea name="notes" rows="4" maxlength="4000" placeholder="Goals, budget, markets, timeline. No SSN or bank numbers."></textarea></label></div><button class="btn btn-primary" style="margin-top:12px">Create client file</button></form></div>';
+      } else if (v === 'client') {
+        var cl = c.clients.filter(function (x) { return x.id === qs('id'); })[0];
+        if (!cl) { H += '<div class="box"><h2>Client not found</h2></div>'; }
+        else {
+          var cp = c.props.filter(function (p) { return p.client_id === cl.id; });
+          H += '<div class="cols"><form class="box" id="cl-edit"><h2>' + esc(cl.name) + '</h2><div class="fg"><label class="fl full">Name<input name="name" required maxlength="120" value="' + esc(cl.name) + '"></label><label class="fl">Email<input name="email" type="email" value="' + esc(cl.email || '') + '"></label><label class="fl">Phone<input name="phone" value="' + esc(cl.phone || '') + '"></label><label class="fl full">Stage<select name="stage">' + STAGES.map(function (st) { return '<option value="' + st[0] + '"' + (st[0] === cl.stage ? ' selected' : '') + '>' + st[1] + '</option>'; }).join('') + '</select></label><label class="fl full">Notes<textarea name="notes" rows="6" maxlength="4000">' + esc(cl.notes || '') + '</textarea></label></div><div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">Save</button><button type="button" class="btn btn-danger btn-sm" id="cl-del">Delete client</button></div></form>' +
+            '<div><div class="box"><div class="app-bar" style="margin:0 0 10px"><h2>Analyses</h2><a class="btn btn-primary btn-sm" href="/app/property?new=1&client=' + encodeURIComponent(cl.id) + '">New analysis</a></div>' + (cp.length ? cp.map(function (p) { var r = C.analyze(p.data || {}); return '<div class="warn"><i class="dot ' + (r.verdict.tone === 'good' ? 'low' : r.verdict.tone === 'mid' ? 'medium' : 'high') + '"></i><div><b><a href="/app/property?id=' + encodeURIComponent(p.id) + '">' + esc(p.name) + '</a></b><span>' + usd(r.input.price) + ' · cash flow ' + usd(r.cashFlowM) + '/mo · DSCR ' + (r.dscr == null ? 'n/a' : x2(r.dscr)) + ' · <a href="/app/loan-package?id=' + encodeURIComponent(p.id) + '" style="color:#0E7A53;font-weight:600">Lender package</a></span></div></div>'; }).join('') : '<p class="hint" style="margin:0">No analyses for this client yet.</p>') + '</div>' +
+            '<div class="box"><h2>Next step</h2><p class="hint" style="margin:0">' + ({ new: 'Book an intake call and agree on budget, markets and timeline.', qualifying: 'Collect the documents from the checklist and request Loan Estimates.', searching: 'Analyze candidates together; use the price check before each offer.', under_contract: 'Track contingency deadlines and send the lender package.', closed: 'Hand over the Schedule E export and set a 12-month review.', inactive: 'Archive or reactivate when the client is ready.' })[cl.stage] + '</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="btn btn-line btn-sm" href="/checklist">Document checklist</a><a class="btn btn-line btn-sm" href="/deadlines">Deadlines</a></div></div></div></div>';
+        }
+      } else if (v === 'playbook') {
+        H += '<div class="box"><h2>Advisor playbook</h2><p class="hint">Talking points and the right tool for the most common client situations. More depth than the consumer guides: built for professionals advising US rental investors.</p></div>' + PLAYBOOK.map(function (pb) { return '<div class="box"><h3>' + esc(pb[0]) + '</h3><p class="hint">' + esc(pb[1]) + '</p><ul style="padding-left:18px;display:grid;gap:6px;font-size:14px">' + pb[2].map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul><a href="' + pb[3] + '" style="display:inline-block;margin-top:8px;color:#0E7A53;font-weight:700;font-size:14px">Open the matching tool →</a></div>'; }).join('') +
+          '<div class="box"><h2>Compliance essentials</h2><ul style="padding-left:18px;display:grid;gap:8px;font-size:14px">' + COMPLIANCE.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul></div>';
+      } else if (v === 'company') {
+        var b = c.biz || {};
+        H += '<div class="cols"><form class="box" id="biz"><h2>Company details</h2><p class="hint">Shown on every lender package you create for clients.</p><div class="fg">' +
+          '<label class="fl full">Company name<input name="company" maxlength="120" value="' + esc(b.company || '') + '"></label>' +
+          '<label class="fl">Role<select name="role">' + [['agent', 'Real estate agent / broker'], ['loan_officer', 'Loan officer / mortgage broker'], ['property_manager', 'Property manager'], ['advisor', 'Financial advisor'], ['other', 'Other']].map(function (r) { return '<option value="' + r[0] + '"' + (r[0] === b.role ? ' selected' : '') + '>' + r[1] + '</option>'; }).join('') + '</select></label>' +
+          '<label class="fl">License / NMLS number<input name="license_no" maxlength="60" value="' + esc(b.license_no || '') + '"></label>' +
+          '<label class="fl">Phone<input name="phone" maxlength="40" value="' + esc(b.phone || '') + '"></label><label class="fl">Email<input name="email" type="email" maxlength="254" value="' + esc(b.email || '') + '"></label>' +
+          '<label class="fl">Website<input name="website" maxlength="200" value="' + esc(b.website || '') + '"></label><label class="fl">Brand color<input name="brand_color" type="color" value="' + esc(b.brand_color || '#0C1A35') + '"></label>' +
+          '<label class="fl full">Disclaimer on documents<textarea name="disclaimer" rows="3" maxlength="600">' + esc(b.disclaimer || '') + '</textarea><small>For example your equal housing or NMLS consumer access statement.</small></label></div><button class="btn btn-primary" style="margin-top:12px">Save company details</button></form>' +
+          '<div class="box"><h2>Plan</h2><p class="hint" style="margin:0">' + plan + '. To change seats or plan, email <a href="mailto:invest@leaserun.com" style="color:#0E7A53;font-weight:600">invest@leaserun.com</a>.</p></div></div>';
+      }
+      root.innerHTML = H; bindChrome();
+      function formObj(f) { var o = {}; $$('input,select,textarea', f).forEach(function (i) { if (i.name) o[i.name] = i.value.trim() === '' ? null : i.value.trim(); }); return o; }
+      function fail(e) { toast(/B2B_LIMIT/.test(e.message) ? 'Business Basic includes 25 active client files.' : /B2B_REQUIRED/.test(e.message) ? 'Client files need a business plan.' : e.message); }
+      var nf = $('#new'); if (nf && nf.tagName === 'FORM') nf.onsubmit = function (e) { e.preventDefault(); var o = formObj(nf); if (!o.name) return; db('clients', { method: 'POST', body: JSON.stringify(o) }).then(function (r) { location.href = '/business/portal?v=client&id=' + encodeURIComponent(r[0].id); }).catch(fail); };
+      var ef = $('#cl-edit'); if (ef) {
+        ef.onsubmit = function (e) { e.preventDefault(); db('clients?id=eq.' + encodeURIComponent(qs('id')), { method: 'PATCH', body: JSON.stringify(formObj(ef)) }).then(function () { toast('Saved'); }).catch(fail); };
+        $('#cl-del').onclick = function () { if (!confirm('Delete this client file? Analyses stay in your account without a client.')) return; db('clients?id=eq.' + encodeURIComponent(qs('id')), { method: 'DELETE' }).then(function () { location.href = '/business/portal?v=clients'; }).catch(fail); };
+      }
+      var bf = $('#biz'); if (bf) bf.onsubmit = function (e) { e.preventDefault(); var o = formObj(bf); o.user_id = uid(); db('business_profiles?on_conflict=user_id', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify(o) }).then(function () { toast('Company details saved'); }).catch(fail); };
+    });
+  }
+
+  // ---------------------------------------------------------------- learn search
+  function pageLearn() {
+    var q = $('#lsearch'); if (!q) return;
+    q.addEventListener('input', function () {
+      var t = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean), any = false;
+      $$('[data-group]').forEach(function (g) {
+        var vis = 0;
+        $$('.lcard', g).forEach(function (c) { var ok = t.every(function (w) { return c.getAttribute('data-q').indexOf(w) >= 0; }); c.hidden = !ok; if (ok) vis++; });
+        g.hidden = !vis; if (vis) any = true;
+      });
+      $('#lnone').hidden = any;
+    });
+  }
+
   // ---------------------------------------------------------------- nav + boot
   $$('.nav-app').forEach(function (a) { if (signedIn()) { a.textContent = 'My dashboard'; a.href = '/app'; } });
   var PAGES = { analyzer: pageAnalyzer, start: pageStart, login: pageLogin, signup: pageSignup, forgot: pageForgot, reset: pageReset,
-    dashboard: pageDashboard, property: pageProperty, profile: pageProfile, tools: pageTools, package: pagePackage, pricing: pagePricing };
-  if (PAGES[PAGE] && (root || PAGE === 'pricing')) PAGES[PAGE]();
+    dashboard: pageDashboard, property: pageProperty, profile: pageProfile, tools: pageTools, package: pagePackage, pricing: pagePricing, learn: pageLearn, deadlines: pageDeadlines, scenarios: pageScenarios, checklist: pageChecklist, profiler: pageProfiler, b2b: pageB2B };
+  if (PAGES[PAGE]) PAGES[PAGE]();
 })();

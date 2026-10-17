@@ -5,7 +5,8 @@ Runs after build.py and extra.py, before finalize.py. Existing pages keep their 
 this script only adds new pages, nav links and one teaser section on the home page.
 """
 import pathlib, re, shutil
-import build
+import build, json, html as _html
+import learn_content as LC
 
 ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
@@ -63,6 +64,59 @@ CMP = [
     ("Portfolio, refinance, Schedule E export", "&ndash;", "&ndash;", "&ndash;", "&check;"),
 ]
 
+CALC_ITEMS = [
+    ("/analyzer", "Deal analyzer", "Cash flow, cap rate, cash-on-cash, DSCR, red flags, stress test, 10-year projection and federal tax."),
+    ("/start", "Your first rental in 3 steps", "A guided walk-through for beginners, with every term explained."),
+    ("/deadlines", "Deadline calculator", "Contingencies, Closing Disclosure, first payment and 1031 exchange dates, with a calendar file."),
+    ("/scenarios", "Sell, exchange, refinance or keep", "Capital gains, recapture and cash for each exit option."),
+    ("/checklist", "Loan document checklist", "Everything lenders ask for on an investment-property loan."),
+    ("/profiler", "Investor profiler", "Six questions to find the strategy that fits your cash and time."),
+    ("/sample-loan-package", "Sample lender package", "See the PDF you can create for each property."),
+    ("/learn", "Learn", "Plain-English answers on financing, taxes and being a landlord."),
+]
+CALC_HUB = ('<main class="app-shell"><div class="wrap"><div class="tools">'
+            + "".join(f'<a class="tool" href="{u}"><b>{t}</b><p>{d}</p><span class="pill good" style="align-self:flex-start">Open</span></a>' for u, t, d in CALC_ITEMS)
+            + '</div></div></main><div id="lr-root" hidden></div>')
+
+B2B_PLANS = [
+    ("b2b-basic", "Business Basic", "$79", "per month", "For solo agents and loan officers", False, "", [
+        "25 active client files with pipeline", "Unlimited client analyses", "Lender packages with your name, license and brand color",
+        "Advisor playbook and compliance essentials", "All calculators and Pro tools"]),
+    ("b2b-pro", "Business Pro", "$149", "per month", "Most popular", True, "Everything in Basic, plus:", [
+        "Unlimited client files", "Portfolio stress test and refinance tools for client portfolios", "Schedule E export per client for their CPA",
+        "Priority email support"]),
+    ("b2b-enterprise", "Business Enterprise", "Custom", "", "Brokerages, lenders, PM firms", False, "Everything in Pro, plus:", [
+        "Team seats and shared client pipeline", "Single sign-on", "White-label analyzer for your website", "Onboarding and API access on request"]),
+]
+B2B_CMP = [
+    ("Active client files", "25", "unlimited", "unlimited"),
+    ("Branded lender packages", "&check;", "&check;", "&check;"),
+    ("Advisor playbook", "&check;", "&check;", "&check;"),
+    ("Portfolio, refinance, Schedule E for clients", "&ndash;", "&check;", "&check;"),
+    ("Team seats, SSO, white label", "&ndash;", "&ndash;", "&check;"),
+]
+
+def business_body():
+    cards = ""
+    for pid, name, amt, per, badge, feat, basis, feats in B2B_PLANS:
+        btn = (f'<a class="btn btn-pay" href="mailto:invest@leaserun.com?subject=LeaseRun%20Business%20Enterprise">Contact sales</a>' if pid == "b2b-enterprise"
+               else f'<button class="btn btn-pay" data-plan="{pid}">Get {name}</button>')
+        cards += (f'<div class="plan{" feat" if feat else ""}"><span class="badge-t">{badge}</span><h3>{name}</h3>'
+                  f'<div class="amt">{amt} <small>{per}</small></div>' + (f'<div class="basis">{basis}</div>' if basis else "")
+                  + '<ul>' + "".join(f"<li>{f}</li>" for f in feats) + f'</ul>{btn}</div>')
+    rows = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in B2B_CMP)
+    who = [("Real estate agents", "Show investor clients the cash flow, DSCR and stress test of every listing before the showing, and hand over a clean package."),
+           ("Loan officers and brokers", "Receive complete files: sources and uses, PITIA, lender DSCR, reserves and the document checklist in one PDF."),
+           ("Property managers", "Help owners decide whether to keep, refinance, sell or 1031 &ndash; with numbers instead of opinions.")]
+    return (head_block("LeaseRun for Business", "Client files, branded lender packages and a playbook for professionals who work with US rental investors.", "For agents, lenders and property managers")
+            + '<main class="app-shell"><div class="wrap"><div class="grid-3" style="margin-bottom:26px">'
+            + "".join(f'<div class="card-light"><h3>{t}</h3><p>{d}</p></div>' for t, d in who) + '</div>'
+            + '<div class="plans" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr))">' + cards + '</div>'
+            + '<div class="box" style="margin-top:22px"><h2>Compare business plans</h2><div class="scroll-x"><table class="tbl"><thead><tr><th></th><th>Basic</th><th>Pro</th><th>Enterprise</th></tr></thead>'
+            + f'<tbody>{rows}</tbody></table></div><p class="hint" style="margin:10px 0 0">Prices in US dollars per account, billed monthly; applicable sales tax may be added. Already a customer? <a href="/business/portal" style="color:#0E7A53;font-weight:600">Open the business portal</a>.</p></div>'
+            + '<div class="box"><h2>Built for compliance</h2><p class="hint" style="margin:0">Your license or NMLS number and disclaimer appear on every document. LeaseRun pays no referral fees (RESPA Section 8), describes properties and numbers instead of people (Fair Housing Act), and never asks for Social Security or bank account numbers.</p></div>'
+            + DISCLAIMER + '</div></main><div id="lr-root" hidden></div>')
+
 
 def pricing_body():
     cards = ""
@@ -83,10 +137,46 @@ def pricing_body():
             + DISCLAIMER + '</div></main><div id="lr-root" hidden></div>')
 
 
+def build_learn():
+    (DIST / "learn").mkdir(exist_ok=True)
+    cats = dict(LC.CATS)
+    strip = lambda t: _html.unescape(re.sub(r"<[^>]+>", "", t))
+    for a in LC.A:
+        rel = [b for b in LC.A if b["cat"] == a["cat"] and b["slug"] != a["slug"]][:4]
+        tool = (f'<div class="cta-inline"><b>Try it with your numbers</b><a class="btn btn-primary btn-sm" href="{a["tool"][0]}">{a["tool"][1]} &rarr;</a></div>' if a["tool"] else "")
+        ld = json.dumps({"@context": "https://schema.org", "@type": "Article", "headline": strip(a["title"]), "description": strip(a["summary"]),
+                         "author": {"@type": "Organization", "name": "LeaseRun"}, "publisher": {"@type": "Organization", "name": "LeaseRun"},
+                         "dateModified": "2026-10-18", "mainEntityOfPage": f"https://leaserun.com/learn/{a['slug']}"})
+        body = (head_block(a["title"], a["summary"], cats[a["cat"]])
+                + '<main class="app-shell"><div class="wrap"><div class="article-grid"><article class="article">'
+                + '<nav class="crumbs"><a href="/learn">Learn</a> &rsaquo; ' + cats[a["cat"]] + '</nav>'
+                + a["body"] + tool
+                + '<p class="hint" style="margin-top:22px;font-size:13px">General information about US rules as of October 2026, not tax, legal or financial advice. Rules change and vary by state; confirm with a licensed professional.</p>'
+                + '</article><aside class="article-side">'
+                + ('<div class="box"><h3>Related</h3><ul class="rel">' + "".join(f'<li><a href="/learn/{b["slug"]}">{b["title"]}</a></li>' for b in rel) + '</ul></div>' if rel else "")
+                + '<div class="box"><h3>Run the numbers</h3><p class="hint">Analyze any US rental in five minutes.</p><a class="btn btn-primary btn-sm" href="/analyzer">Open the analyzer</a></div>'
+                + '</aside></div></div></main><div id="lr-root" hidden></div>'
+                + f'<script type="application/ld+json">{ld}</script>')
+        (DIST / "learn" / f"{a['slug']}.html").write_text(page("learn", strip(a["title"]) + " | LeaseRun Learn", strip(a["summary"]), f"/learn/{a['slug']}", body), encoding="utf-8")
+    groups = ""
+    for cid, cname in LC.CATS:
+        items = [a for a in LC.A if a["cat"] == cid]
+        groups += (f'<section class="lgroup" data-group><h2>{cname}</h2><div class="lcards">'
+                   + "".join(f'<a class="lcard" href="/learn/{a["slug"]}" data-q="{_html.escape(strip(a["title"] + " " + a["summary"]).lower())}"><b>{a["title"]}</b><span>{a["summary"]}</span></a>' for a in items)
+                   + '</div></section>')
+    body = (head_block("Real estate investing, explained", f"{len(LC.A)} clear answers on US rentals: money, financing, taxes and being a landlord.", "Learn")
+            + '<main class="app-shell"><div class="wrap"><label class="fl" style="max-width:520px;margin-bottom:22px">Search<input id="lsearch" type="search" placeholder="e.g. DSCR, 1031, closing costs" autocomplete="off"></label>'
+            + groups + '<p class="empty-state" id="lnone" hidden>No answer matches your search. Try fewer words.</p></div></main><div id="lr-root" hidden></div>')
+    (DIST / "learn.html").write_text(page("learn", "Learn: US Rental Property Investing Explained | LeaseRun",
+        "Plain-English answers on US rental investing: cash flow, closing costs, DSCR loans, depreciation, 1031 exchanges, fair housing and more.", "/learn", body), encoding="utf-8")
+    return ["/learn"] + [f"/learn/{a['slug']}" for a in LC.A]
+
+
 def main():
     for a in ASSETS:
         shutil.copy(ROOT / a, DIST / a)
     (DIST / "app").mkdir(exist_ok=True)
+    (DIST / "business").mkdir(exist_ok=True)
 
     pages = {
         "analyzer.html": page("analyzer", "Rental Property Analyzer: Cash Flow, Cap Rate, DSCR | LeaseRun",
@@ -100,6 +190,24 @@ def main():
         "sample-loan-package.html": page("package", "Sample Lender Package for an Investment Property | LeaseRun",
             "See what a lender-ready package looks like: sources and uses, PITIA, DSCR, reserves, stress test and document checklist.",
             "/sample-loan-package", shell(), sample=True),
+        "deadlines.html": page("deadlines", "1031 Exchange & Closing Deadline Calculator | LeaseRun",
+            "Calculate your 45-day and 180-day 1031 exchange deadlines and every date in your home purchase: inspection, financing, appraisal, Closing Disclosure and first payment.",
+            "/deadlines", head_block("Your deadlines, on one page", "Purchase contingencies, the Closing Disclosure and 1031 exchange dates \u2013 with a calendar file and reminders.", "Deadline calculator") + shell()),
+        "scenarios.html": page("scenarios", "Sell, 1031 Exchange, Refinance or Keep? Rental Property Calculator | LeaseRun",
+            "Compare selling a rental, a 1031 exchange, a cash-out refinance and keeping it: capital gains, depreciation recapture, NIIT and return on equity.",
+            "/scenarios", head_block("Sell, exchange, refinance or keep?", "See the cash and the tax of each option side by side before you call a listing agent.", "Exit scenarios") + shell()),
+        "checklist.html": page("checklist", "Mortgage Document Checklist for Investment Properties | LeaseRun",
+            "Every document lenders ask for on an investment property loan: income, assets, real estate owned, the subject property and LLC paperwork.",
+            "/checklist", head_block("Loan document checklist", "What lenders ask for on an investment-property loan, grouped so nothing is missing on day one.", "Checklist") + shell()),
+        "profiler.html": page("profiler", "Investor Profiler: Which Rental Strategy Fits You? | LeaseRun",
+            "Six questions to find your best-fitting US rental strategy: house hack, turnkey, buy and hold, BRRRR or DSCR scaling.",
+            "/profiler", head_block("Which strategy fits you?", "Six questions about cash, time and goals \u2013 and an honest starting point.", "Investor profiler") + shell()),
+        "calculators.html": page("calculators", "Free Real Estate Investment Calculators | LeaseRun",
+            "Free US rental property calculators: deal analyzer, first-rental walk-through, deadlines, sell-or-hold, document checklist and investor profiler.",
+            "/calculators", head_block("Free calculators for US rental investors", "No account needed. Sign up only when you want to save properties.", "Calculators") + CALC_HUB),
+        "business.html": page("pricing", "LeaseRun for Business: Tools for Agents, Loan Officers and Property Managers",
+            "Client files, branded lender packages, DSCR and stress tests, and an advisor playbook for professionals working with US rental investors.", "/business", business_body()),
+        "business/portal.html": page("b2b", "Business portal | LeaseRun", "LeaseRun business portal.", "/business/portal", shell(), index=False),
         "login.html": page("login", "Sign in | LeaseRun", "Sign in to your LeaseRun investor account.", "/login", shell(), index=False),
         "signup.html": page("signup", "Create a free account | LeaseRun", "Create your free LeaseRun investor account.", "/signup", shell(), index=False),
         "forgot.html": page("forgot", "Reset password | LeaseRun", "Reset your LeaseRun password.", "/forgot", shell(), index=False),
@@ -112,9 +220,10 @@ def main():
     }
     for name, html in pages.items():
         (DIST / name).write_text(html, encoding="utf-8")
+    learn_urls = build_learn()
 
     # Nav: add software links on every page (existing links stay).
-    links = '<a href="/start">First Rental</a><a href="/analyzer">Analyzer</a><a href="/pricing">Pricing</a><a href="/login" class="nav-app">Sign in</a>'
+    links = '<a href="/calculators">Calculators</a><a href="/learn">Learn</a><a href="/pricing">Pricing</a><a href="/login" class="nav-app">Sign in</a>'
     teaser = '''
 <section style="padding:64px 0;background:#fff;border-top:1px solid var(--line-light)"><div class="wrap">
   <div class="sec-head"><span class="eyebrow"><span class="dot"></span>New &middot; Investor software</span>
@@ -132,21 +241,24 @@ def main():
         if f.name == "admin.html":
             continue
         html = f.read_text(encoding="utf-8")
-        if 'href="/analyzer">Analyzer</a>' not in html:
+        if 'href="/calculators">Calculators</a>' not in html:
             html = html.replace('<a href="#" data-modal class="btn btn-primary btn-sm">', links + '<a href="#" data-modal class="btn btn-primary btn-sm">', 1)
         if '/lr-app.js' not in html and 'nav-app' in html:
             html = html.replace('<script src="/app.js" defer></script>', f'<script src="/app.js" defer></script>\n<script src="/lr-calc.js?v={V}" defer></script>\n<script src="/lr-app.js?v={V}" defer></script>', 1)
         html = html.replace('<a href="/about-contact#compliance">Privacy</a>', '<a href="/privacy">Privacy</a>')
         html = html.replace('<a href="/about-contact#compliance">Terms</a>', '<a href="/terms">Terms</a>')
+        if '/business">LeaseRun for Business' not in html:
+            html = html.replace('<li><a href="#" data-modal>Weekly Deal Sheet</a></li></ul></div>',
+                                '<li><a href="#" data-modal>Weekly Deal Sheet</a></li><li><a href="/calculators">Free Calculators</a></li><li><a href="/learn">Learn</a></li><li><a href="/business">LeaseRun for Business</a></li></ul></div>', 1)
         if f.name == "index.html" and f.parent == DIST and "Investor software" not in html:
             html = html.replace("\n<footer>", teaser + "\n<footer>", 1)
         f.write_text(html, encoding="utf-8")
 
     # robots + sitemap
-    (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /app\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /reset\nSitemap: https://leaserun.com/sitemap.xml\n")
+    (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /app\nDisallow: /business/portal\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /reset\nSitemap: https://leaserun.com/sitemap.xml\n")
     sm = DIST / "sitemap.xml"
     xml = sm.read_text() if sm.exists() else '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n'
-    add = "".join(f"<url><loc>https://leaserun.com{u}</loc></url>" for u in ["/start", "/analyzer", "/pricing", "/sample-loan-package"] if f"{u}<" not in xml)
+    add = "".join(f"<url><loc>https://leaserun.com{u}</loc></url>" for u in ["/calculators", "/start", "/analyzer", "/deadlines", "/scenarios", "/checklist", "/profiler", "/pricing", "/business", "/sample-loan-package"] + learn_urls if f"{u}<" not in xml)
     sm.write_text(xml.replace("</urlset>", add + "</urlset>"))
     print("software:", sorted(pages))
 

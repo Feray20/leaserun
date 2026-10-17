@@ -67,10 +67,17 @@ Added on top of the company site; existing pages are unchanged apart from extra 
 | `/sample-loan-package` | Lender package with fictional numbers |
 | `/login`, `/signup`, `/forgot`, `/reset` | Supabase Auth (email + password) |
 | `/app` | Dashboard: beginner purchase path or pro portfolio KPIs, saved properties, tools |
-| `/app/property`, `/app/profile`, `/app/tools`, `/app/loan-package` | Property workspace, investor profile, 9 tools (tiered), printable lender package |
+| `/app/property`, `/app/profile`, `/app/tools`, `/app/loan-package` | Property workspace, investor profile (incl. data export), 9 tools with charts (tiered), printable lender package |
+| `/calculators` | Hub of all free calculators |
+| `/deadlines` | Contingency, Closing Disclosure (TRID business days), first payment and 1031 45/180-day dates, .ics export |
+| `/scenarios` | Sell vs. 1031 vs. cash-out refinance vs. keep, with recapture and NIIT |
+| `/checklist`, `/profiler` | Loan document checklist; six-question strategy profiler |
+| `/learn`, `/learn/*` | Knowledge center (31 articles, `site/learn_content.py`) with search |
+| `/business` | LeaseRun for Business: Basic $79, Pro $149, Enterprise custom |
+| `/business/portal` | Business portal: pipeline, client files, client analyses, branded lender packages, advisor playbook, company profile |
 
-Files: `site/lr-calc.js` (pure US underwriting engine, tested in `tests/calc.test.js` → `node --test tests/calc.test.js`), `site/lr-app.js` (UI, talks to Supabase REST directly), `site/lr-app.css`, `site/software.py` (adds the pages during the build).
+Files: `site/lr-calc.js` (pure US underwriting engine, tested in `tests/calc.test.js` → `node --test tests/calc.test.js`; build: `python3 build.py && python3 extra.py && python3 software.py && python3 finalize.py`), `site/lr-app.js` (UI, talks to Supabase REST directly), `site/lr-app.css`, `site/software.py` (adds the pages during the build).
 
-Database: `supabase/migrations/20261017120000_investor_app.sql` – `entitlements` (read-only for users, written by billing), `financial_profiles`, `properties`; RLS owner-only; free plan limited to 2 properties by trigger.
+Database: `supabase/migrations/20261017120000_investor_app.sql` and `20261018090000_business.sql` (business_profiles, clients, properties.client_id; Basic limited to 25 active clients) – `entitlements` (read-only for users, written by billing), `financial_profiles`, `properties`; RLS owner-only; free plan limited to 2 properties by trigger.
 
 Supabase Auth settings: Site URL `https://leaserun.com`, redirect URLs `https://leaserun.com/**` and `https://leaserun.vercel.app/**`.

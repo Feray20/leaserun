@@ -10,7 +10,7 @@ import build  # reuse the shared header/footer
 ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
 EMAIL = "invest@leaserun.com"
-UPDATED = "October 17, 2026"
+UPDATED = "October 18, 2026"
 ADMIN_API = "https://pxexxguhgqfxwhtnwcrj.supabase.co/functions/v1/leads-admin"
 
 
@@ -36,6 +36,8 @@ PRIVACY = legal("Privacy Policy",
     [("Information we collect",
       P("<b>Information you provide.</b> When you subscribe to our deal sheet, request a portfolio audit or start owner onboarding, we collect what you enter, such as your name, email address, phone number, investment budget, available capital, timeline, number of properties owned and any notes you include.",
         "<b>Information collected automatically.</b> Our hosting provider records standard technical data such as IP address, browser type, pages visited and timestamps for security and performance. We do not use advertising cookies. Your browser may store a small preference so that our newsletter pop-up is not shown repeatedly.")),
+     ("Investor software accounts",
+      P("If you create a LeaseRun account, we store your email address and a securely hashed password (through our authentication provider), the investor profile you enter (for example income range, monthly debts, available cash, self-reported credit score range, filing status and tax bracket) and the properties you save. This data is used only to run your calculations and produce documents you request, such as the lender package. Database access rules allow only your signed-in account to read or change it. Please do not enter Social Security numbers, bank account numbers or tax returns. You can download your data from your profile page at any time and ask us to delete your account.")),
      ("How we use information",
       UL("Respond to your inquiry and provide the services you request",
          "Send the weekly deal sheet and related investment and property-management information you asked for",
@@ -65,6 +67,8 @@ TERMS = legal("Terms of Use",
       P("All projections are estimates based on stated assumptions and may differ materially from actual results. Sample properties illustrate our underwriting format and may not be available. Past or projected performance does not guarantee future results. Real estate investing involves risk, including loss of capital, vacancy, unexpected repairs, changes in interest rates and changes in law.")),
      ("Your responsibilities",
       P("You are responsible for your own investment decisions and for obtaining independent advice from qualified professionals, including a CPA, attorney and, for 1031 exchanges, a Qualified Intermediary. You agree to provide accurate information and not to misuse the site, interfere with its operation, or attempt to access data you are not authorized to access.")),
+     ("Software accounts and plans",
+      P("You may create one personal account and must keep your password confidential. Free accounts include a limited number of saved properties. Paid plans are described on the pricing page: one-time purchases (Lender Package, Buyer Pass) do not renew; Investor Pro renews monthly until you cancel, effective at the end of the current billing month. Prices are shown in US dollars; applicable sales tax may be added. Calculations are estimates based on your inputs and typical assumptions and are not a loan approval, appraisal, or tax, legal or investment advice. We may suspend accounts used to misuse the service or to access data of others.")),
      ("Services and agreements",
       P("Brokerage, acquisition and property-management services are provided only under separate written agreements, which control over anything on this site. Guarantees described on this site are subject to the terms, limits and eligibility requirements in those agreements.")),
      ("Fair housing",
