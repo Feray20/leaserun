@@ -2,7 +2,7 @@
 
 Website for **LeaseRun** — turnkey US rental acquisitions, full-service property management and 1031 exchange coordination for real estate investors.
 
-**Live:** https://leaserun.vercel.app
+**Live:** https://leaserun.com (also https://leaserun.vercel.app)
 
 ## Structure
 
@@ -54,3 +54,23 @@ python3 -m http.server -d dist 8000   # open http://localhost:8000
 - Replace sample deals in `site/build.py` (`LISTINGS`) with real inventory.
 - Add real license numbers and contact details once available.
 - Connect the custom domain in Vercel and set up the `invest@leaserun.com` mailbox.
+
+## Investor software (US version of ImmoAdv)
+
+Added on top of the company site; existing pages are unchanged apart from extra nav links and one teaser section on the home page.
+
+| Route | Purpose |
+|---|---|
+| `/start` | Guided first-rental walk-through in 3 steps with glossary (public) |
+| `/analyzer` | Full deal analyzer: closing costs, PITIA, cash flow, cap rate, CoC, DSCR, red flags, stress test, 10-year projection, federal tax (public) |
+| `/pricing` | Free · Lender Package $39 · Buyer Pass $49/90 days · Investor Pro $29/mo (waitlist until checkout is live) |
+| `/sample-loan-package` | Lender package with fictional numbers |
+| `/login`, `/signup`, `/forgot`, `/reset` | Supabase Auth (email + password) |
+| `/app` | Dashboard: beginner purchase path or pro portfolio KPIs, saved properties, tools |
+| `/app/property`, `/app/profile`, `/app/tools`, `/app/loan-package` | Property workspace, investor profile, 9 tools (tiered), printable lender package |
+
+Files: `site/lr-calc.js` (pure US underwriting engine, tested in `tests/calc.test.js` → `node --test tests/calc.test.js`), `site/lr-app.js` (UI, talks to Supabase REST directly), `site/lr-app.css`, `site/software.py` (adds the pages during the build).
+
+Database: `supabase/migrations/20261017120000_investor_app.sql` – `entitlements` (read-only for users, written by billing), `financial_profiles`, `properties`; RLS owner-only; free plan limited to 2 properties by trigger.
+
+Supabase Auth settings: Site URL `https://leaserun.com`, redirect URLs `https://leaserun.com/**` and `https://leaserun.vercel.app/**`.

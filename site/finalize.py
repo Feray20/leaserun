@@ -56,7 +56,7 @@ HEAD_EXTRA = ('<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n'
 
 
 def main():
-    for page in sorted(DIST.glob("*.html")):
+    for page in sorted(DIST.rglob("*.html")):
         html = page.read_text(encoding="utf-8")
         for pat, rep, rx in RULES:
             html = re.sub(pat, rep, html, count=1 if 'metrics' in pat else 0, flags=re.S) if rx else html.replace(pat, rep)

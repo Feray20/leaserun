@@ -230,3 +230,16 @@ table.cmp th{background:var(--paper);font-size:12px;text-transform:uppercase;let
 .panel{background:var(--paper-2);border:1px solid var(--line-light);border-radius:18px;padding:30px}
 .mt-s{margin-top:12px}.mt-m{margin-top:24px}.mt-l{margin-top:44px}
 .center{text-align:center}
+
+/* Nav with investor-software links */
+.nav-links{gap:20px}
+.nav-links a.nav-app{color:var(--text);border:1px solid var(--line);padding:7px 12px;border-radius:9px}
+@media (max-width:1120px) and (min-width:861px){.nav-links{gap:14px}.nav-links a{font-size:13px}}
+@media (max-width:860px){.nav-links a.nav-app{border:0;padding:12px 0}}
+@media (max-width:1240px){
+  .nav-links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:flex-start;gap:0;background:var(--ink);border-bottom:1px solid var(--line);padding:8px 20px 16px}
+  .nav-links.open{display:flex}
+  .nav-links a{padding:12px 0;width:100%;font-size:15px}
+  .nav-links a.nav-app{border:0;padding:12px 0}
+  .menu-btn{display:block}
+}
