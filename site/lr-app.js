@@ -7,6 +7,8 @@
   var SB_URL = 'https://pxexxguhgqfxwhtnwcrj.supabase.co';
   var SB_KEY = 'sb_publishable_7Ga_tZ-JbJyVbA5e8YaGUg_DvftkCHP';
   var SKEY = 'lr-session-v1', DRAFT = 'lr-draft-v1';
+  // Stripe Payment Links (filled in when checkout goes live; empty = waitlist mode).
+  var BILLING = { mode: 'off', links: {}, portal: '' };
   var C = window.LRCalc;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -490,6 +492,7 @@
   ];
   function pageDashboard() {
     requireAuth(function (c) {
+      afterPayment();
       if (c.b2b) { location.replace('/business/portal'); return; }
       var beginner = mode() === 'beginner', pf = c.profile || {};
       var profDone = !!(pf.annual_income && pf.liquid_reserves != null && pf.credit_band);
@@ -594,7 +597,7 @@
         '<label class="fl">Federal tax bracket<div class="suf"><input name="marginal_rate" type="number" min="0" max="50" value="' + esc(p.marginal_rate == null ? '' : p.marginal_rate) + '"><span>%</span></div></label>' +
         '<label class="fl">Rental units you own<input name="doors_owned" type="number" min="0" value="' + esc(p.doors_owned == null ? '' : p.doors_owned) + '"></label>' +
         '<label class="fl">View' + sel('mode', [['beginner', 'Beginner – guide me'], ['pro', 'Pro – show everything']], p.mode || mode()) + '</label>' +
-        '</div><button class="btn btn-primary" style="margin-top:16px">Save profile</button></form><div><div class="box"><h2>Your buying power</h2><div id="bp"></div></div><div class="box"><h2>Account</h2><p class="hint" style="margin:0">' + esc(u.email || '') + '<br>Plan: <b>' + PLAN_NAME[c.tier] + '</b></p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn btn-line btn-sm" href="/pricing">Plans</a><button type="button" class="btn btn-line btn-sm" id="exp">Download my data</button><a class="btn btn-line btn-sm" href="mailto:invest@leaserun.com?subject=Delete%20my%20LeaseRun%20account">Request account deletion</a></div></div></div></div>';
+        '</div><button class="btn btn-primary" style="margin-top:16px">Save profile</button></form><div><div class="box"><h2>Your buying power</h2><div id="bp"></div></div><div class="box"><h2>Account</h2><p class="hint" style="margin:0">' + esc(u.email || '') + '<br>Plan: <b>' + PLAN_NAME[c.tier] + '</b></p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><a class="btn btn-line btn-sm" href="/pricing">Plans</a>' + (BILLING.portal && c.ent.stripe_customer ? '<a class="btn btn-line btn-sm" href="' + esc(BILLING.portal) + (claims().email ? '?prefilled_email=' + encodeURIComponent(claims().email) : '') + '">Manage subscription & invoices</a>' : '') + '<button type="button" class="btn btn-line btn-sm" id="exp">Download my data</button><a class="btn btn-line btn-sm" href="mailto:invest@leaserun.com?subject=Delete%20my%20LeaseRun%20account">Request account deletion</a></div></div></div></div>';
       bindChrome();
       $('#exp').onclick = function () {
         var dump = { exported_at: new Date().toISOString(), email: claims().email, plan: c.ent.plan, investor_profile: c.profile, properties: c.props, business_profile: c.biz, clients: c.clients };
@@ -796,7 +799,7 @@
     requireAuth(function (c) {
       var p = c.props.filter(function (x) { return x.id === qs('id'); })[0];
       if (!p) { root.innerHTML = tabs('') + '<div class="box"><h2>Property not found</h2><a class="btn btn-line" href="/app">Back</a></div>'; bindChrome(); return; }
-      var paid = c.tier >= 1 || c.ent.loan_packages_left > 0;
+      var paid = c.tier >= 1 || (c.ent.unlocked_properties || []).indexOf(p.id) >= 0;
       var client = p.client_id ? c.clients.filter(function (x) { return x.id === p.client_id; })[0] : null;
       var pf = client ? { full_name: client.name } : (c.profile || {});
       renderPackage(p.data || {}, pf, { paid: paid, id: p.id.slice(0, 8).toUpperCase(), status: p.status, brand: c.b2b ? c.biz : null, client: !!client });
@@ -811,7 +814,7 @@
     var mark = o.sample ? 'SAMPLE' : (!o.paid ? 'PREVIEW' : '');
     var bar = '<div class="no-print" style="max-width:860px;margin:0 auto 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
       (o.sample ? '<span class="pill">Sample with fictional numbers</span><a class="btn btn-primary btn-sm" href="/signup">Create your own – free</a>' :
-        '<a class="btn btn-line btn-sm" href="/app/property?id=' + encodeURIComponent(qs('id')) + '">← Back to property</a>' + (o.paid ? '<button class="btn btn-pay btn-sm" onclick="window.print()">Save as PDF / Print</button><span class="hint" style="margin:0;font-size:13px">In the print dialog choose “Save as PDF”.</span>' : '<span class="pill mid">Preview – printing is part of the Loan Package, Buyer Pass and Investor Pro</span><a class="btn btn-pay btn-sm" href="/pricing">See plans</a>')) + '</div>';
+        '<a class="btn btn-line btn-sm" href="/app/property?id=' + encodeURIComponent(qs('id')) + '">← Back to property</a>' + (o.paid ? '<button class="btn btn-pay btn-sm" onclick="window.print()">Save as PDF / Print</button><span class="hint" style="margin:0;font-size:13px">In the print dialog choose “Save as PDF”.</span>' : '<span class="pill mid">Preview – printing is part of the Lender Package, Buyer Pass and Investor Pro</span>' + (BILLING.links['loan-package'] ? '<a class="btn btn-pay btn-sm" href="' + esc(checkoutUrl('loan-package', qs('id'))) + '">Unlock this package – $39</a>' : '') + '<a class="btn btn-line btn-sm" href="/pricing">See plans</a>')) + '</div>';
     var br = o.brand && o.brand.company ? o.brand : null;
     var bcol = br && /^#[0-9A-Fa-f]{6}$/.test(br.brand_color || '') ? br.brand_color : null;
     var h = bar + '<article class="report"' + (bcol ? ' style="border-top:6px solid ' + bcol + '"' : '') + '>' + (br ? '<div class="meta" style="margin-bottom:12px;font-weight:700;color:' + (bcol || 'inherit') + '">Prepared by ' + esc(br.company) + (br.license_no ? ' \u00b7 License ' + esc(br.license_no) : '') + (br.phone ? ' \u00b7 ' + esc(br.phone) : '') + (br.email ? ' \u00b7 ' + esc(br.email) : '') + '</div>' : '') + (mark ? '<div class="wm"><span>' + mark + '</span></div>' : '') +
@@ -870,11 +873,40 @@
     function bindForm() { var vf = $('#vf'); if (vf) vf.onsubmit = function (e) { e.preventDefault(); var v = $('#vl').value.trim(), i = v.indexOf('#'); if (i < 0) return; location.hash = v.slice(i + 1); location.reload(); }; }
   }
 
+
+  function checkoutUrl(plan, propertyId) {
+    var base = BILLING.links[plan]; if (!base) return '/pricing';
+    var u = new URL(base), id = uid(), em = claims().email;
+    if (id) u.searchParams.set('client_reference_id', propertyId ? id + '_' + propertyId : id);
+    if (em) u.searchParams.set('prefilled_email', em);
+    return u.toString();
+  }
+  function afterPayment() {
+    if (qs('paid') !== '1' || !signedIn()) return;
+    history.replaceState(null, '', location.pathname);
+    var start = ctx && JSON.stringify(ctx.ent), tries = 0;
+    toast('Payment received – unlocking your plan…');
+    (function poll() {
+      ctx = null;
+      loadCtx().then(function (c) {
+        if (JSON.stringify(c.ent) !== start && tries > 0) { toast('Your plan is active: ' + (B2B_NAME[c.ent.plan] || PLAN_NAME[c.tier])); setTimeout(function () { location.reload(); }, 1200); return; }
+        if (++tries < 8) setTimeout(poll, 2500); else toast('Payment received. If your plan is not active in a minute, email invest@leaserun.com.');
+      }).catch(function () {});
+    })();
+  }
   // ---------------------------------------------------------------- pricing (waitlist until checkout is live)
   function pagePricing() {
     if (qs('limit') === '1') { var g = $('#limit-note'); if (g) g.hidden = false; }
+    var want = qs('buy'); if (want && BILLING.links[want] && signedIn() && want !== 'loan-package') { location.href = checkoutUrl(want); return; }
+    if (BILLING.mode === 'test') { var n = document.createElement('div'); n.className = 'gate'; n.innerHTML = '<b>Test mode:</b> checkout uses Stripe test cards (4242 4242 4242 4242). No real money is charged.'; var pl = $('.plans'); if (pl) pl.parentNode.insertBefore(n, pl); }
     $$('[data-plan]').forEach(function (b) {
       b.addEventListener('click', function () {
+        var pl = b.getAttribute('data-plan');
+        if (BILLING.links[pl]) {
+          if (!signedIn()) { location.href = '/signup?next=' + encodeURIComponent('/pricing?buy=' + pl); return; }
+          if (pl === 'loan-package') { toast('Open a saved property and choose \u201cLender package\u201d to unlock it.'); setTimeout(function () { location.href = '/app'; }, 1400); return; }
+          location.href = checkoutUrl(pl); return;
+        }
         var plan = b.getAttribute('data-plan'), em = signedIn() ? claims().email : '';
         var f = document.createElement('form'); f.className = 'fg'; f.style.marginTop = '8px';
         f.innerHTML = '<label class="fl full">Email<input type="email" required value="' + esc(em || '') + '"></label><button class="btn btn-pay full">Notify me at launch</button><p class="hint full" style="font-size:12px;margin:0">Online checkout opens shortly. We email you once – no spam.</p>';
@@ -1065,6 +1097,7 @@
   ];
   function pageB2B() {
     requireAuth(function (c) {
+      afterPayment();
       var v = qs('v') || 'overview';
       if (!c.b2b) {
         root.innerHTML = tabs('') + '<div class="box"><h2>Business portal</h2><p class="hint">Your account does not have a LeaseRun for Business plan yet. Business plans add client files, branded lender packages, the advisor playbook and all Pro tools.</p><a class="btn btn-pay btn-sm" href="/business">See business plans</a></div>';

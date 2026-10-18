@@ -90,3 +90,11 @@ Supabase Auth settings: Site URL `https://leaserun.com`, redirect URLs `https://
 - **PWA:** `manifest.webmanifest`, `sw.js` (offline page; never caches `/app`, `/business/portal`, API calls).
 - **Images:** `python3 scripts/make_images.py` regenerates `site/icons` and the 1200×630 previews in `site/og` (committed; build needs no Pillow).
 - **Database setup in one step:** paste `supabase/SETUP_RUN_IN_SQL_EDITOR.sql` into the Supabase SQL editor and run it (safe to re-run).
+
+## Payments (Stripe)
+- Plans are sold through **Stripe Payment Links**; `site/lr-app.js` → `BILLING` holds the link URLs (empty = waitlist mode) and `mode: 'test' | 'live'`.
+- `client_reference_id` = user id (lender package: `userId_propertyId`); success URL `https://leaserun.com/app?paid=1`.
+- Webhook `site/api/stripe-webhook.js` (events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.deleted`) verifies the Stripe signature and calls `public.lr_grant` in Supabase.
+- `lr_grant` only accepts calls with the shared secret (env `LR_GRANT_SECRET`; only its SHA-256 is in `private.settings`), is idempotent per Stripe event and never lets users change their own plan.
+- Vercel env vars: `LR_GRANT_SECRET` (set), `STRIPE_WEBHOOK_SECRET`, `LR_PAYMENT_LINKS` (`{"plink_…":"pro", …}`; plans: loan_package, buyer_pass, pro, b2b_basic, b2b_pro).
+- Tests: `node --test tests/calc.test.js tests/webhook.test.mjs`
