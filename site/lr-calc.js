@@ -304,7 +304,37 @@
       costs: costs, monthlySaving: monthlySaving, breakEvenMonths: monthlySaving > 0 ? Math.ceil(costs / monthlySaving) : null };
   }
 
-  var api = { STATE_TAX: STATE_TAX, STATE_NAMES: STATE_NAMES, RENT_REG: RENT_REG, DEFAULTS: DEFAULTS,
+
+  // Parse pasted listing text (any US listing site or MLS sheet) into analyzer inputs.
+  function parseListing(text) {
+    var t = String(text || '').replace(/ /g, ' ').slice(0, 20000), o = {}, m;
+    function money(v) { return Math.round(parseFloat(String(v).replace(/[,$\s]/g, ''))); }
+    function moneyK(v, suf) { var n = parseFloat(String(v).replace(/[,$\s]/g, '')); if (/k/i.test(suf || '')) n *= 1e3; if (/m/i.test(suf || '')) n *= 1e6; return Math.round(n); }
+    m = t.match(/(?:list(?:ing)?\s*price|asking(?:\s*price)?|price|sold\s*for|for\s*sale)\s*[:\-]?\s*\$\s?([\d,.]+)\s*([kKmM])?/i) || t.match(/\$\s?(\d{2,3}(?:,\d{3}){1,2})(?!\s*\/\s*mo)(?!\s*per)/);
+    if (m) { var pr = moneyK(m[1], m[2]); if (pr >= 10000 && pr < 50000000) o.price = pr; }
+    m = t.match(/([\d,]{3,6})\s*(?:sq\.?\s*ft|sqft|square\s*feet|sf)\b/i); if (m) { var sq = money(m[1]); if (sq > 200 && sq < 50000) o.sqft = sq; }
+    m = t.match(/(?:year\s*built|built\s*in|built)\s*[:\-]?\s*(18\d{2}|19\d{2}|20\d{2})/i); if (m) o.yearBuilt = +m[1];
+    m = t.match(/(\d{1,2})\s*(?:bd|beds?|bedrooms?)\b/i); if (m) o.beds = +m[1];
+    m = t.match(/(\d{1,2}(?:\.\d)?)\s*(?:ba|baths?|bathrooms?)\b/i); if (m) o.baths = +m[1];
+    m = t.match(/HOA[^$\n]{0,30}\$\s?([\d,]+)\s*(?:\/\s*|per\s*)?(mo|month|monthly|yr|year|annual|annually|qtr|quarter)?/i);
+    if (m) { var h = money(m[1]); var per = (m[2] || 'mo').toLowerCase(); o.hoaMonthly = /y|ann/.test(per) ? Math.round(h / 12) : /q/.test(per) ? Math.round(h / 3) : h; }
+    m = t.match(/(?:annual\s*)?(?:property\s*)?tax(?:es)?(?:\s*\(\d{4}\))?[^$\n]{0,25}\$\s?([\d,]+)(\s*\/\s*(?:mo|month))?/i);
+    if (m) { var tx = money(m[1]); o.taxesAnnual = m[2] ? tx * 12 : tx; if (o.price && (o.taxesAnnual < o.price * 0.0005 || o.taxesAnnual > o.price * 0.05)) delete o.taxesAnnual; }
+    m = t.match(/(?:rent(?:al)?\s*(?:estimate|est\.?|income)?|market\s*rent|current\s*rent|gross\s*rent)[^$\n]{0,20}\$\s?([\d,]+)\s*(?:\/\s*mo|per\s*month|monthly)?/i);
+    if (m) { var rn = money(m[1]); if (rn >= 300 && rn < 100000) o.rent = rn; }
+    if (/\bfour[-\s]?plex|quadplex|\b4[-\s]?units?\b/i.test(t)) { o.type = 'fourplex'; o.units = 4; }
+    else if (/\btri[-\s]?plex|\b3[-\s]?units?\b/i.test(t)) { o.type = 'triplex'; o.units = 3; }
+    else if (/\bduplex|\b2[-\s]?units?\b/i.test(t)) { o.type = 'duplex'; o.units = 2; }
+    else if (/\bcondo|townho(?:use|me)/i.test(t)) { o.type = 'condo'; o.units = 1; }
+    else if (/single[-\s]?family/i.test(t)) { o.type = 'sfr'; o.units = 1; }
+    m = t.match(/(\d{1,6}\s+[A-Za-z0-9.'\- ]{2,40}?(?:St|Street|Ave|Avenue|Rd|Road|Dr|Drive|Ln|Lane|Ct|Court|Blvd|Way|Pl|Place|Ter|Terrace|Cir|Circle|Pkwy|Hwy)\.?)(?:,?\s*(?:#|Apt|Unit)\s*\w+)?,?\s*([A-Za-z .'\-]{2,30}),\s*([A-Z]{2})\s*(\d{5})?/);
+    if (m && STATE_TAX[m[3]]) { o.name = (m[1].trim() + ', ' + m[2].trim() + ' ' + m[3]).slice(0, 120); o.state = m[3]; }
+    else { m = t.match(/,\s*([A-Z]{2})\s+\d{5}\b/); if (m && STATE_TAX[m[1]]) o.state = m[1]; }
+    if (/flood\s*zone\s*[:\-]?\s*(A|AE|AH|AO|V|VE)\b/i.test(t) || /special\s*flood\s*hazard/i.test(t)) o.floodZone = true;
+    return o;
+  }
+
+  var api = { parseListing: parseListing, STATE_TAX: STATE_TAX, STATE_NAMES: STATE_NAMES, RENT_REG: RENT_REG, DEFAULTS: DEFAULTS,
     normalize: normalize, payment: payment, balanceAfter: balanceAfter, amortize: amortize, closingCosts: closingCosts,
     analyze: analyze, compareOffers: compareOffers, refinance: refinance, irr: irr };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -280,7 +280,8 @@
 
   function mountAnalyzer(el, data, opts) {
     var beginner = opts.beginner;
-    el.innerHTML = '<div class="cols"><div class="box">' + (opts.head || '') + editorHtml(data, beginner) + '</div><div class="sticky"><div id="lr-act"></div><div id="lr-out"></div></div></div>';
+    var imp = '<details class="adv import no-print"' + (opts.openImport ? ' open' : '') + '><summary>Paste a listing to fill in the form</summary><p class="hint" style="margin:6px 0">Copy the text of a listing page (Ctrl/Cmd+A, then copy) or an MLS sheet and paste it here. We read price, size, year built, HOA, taxes, address and rent if they appear. Nothing is sent anywhere.</p><textarea id="lr-paste" rows="5" style="width:100%;padding:10px;border-radius:10px;border:1px solid #D5DBE7;font:inherit;font-size:14px" placeholder="Paste listing text here"></textarea><button type="button" class="btn btn-line btn-sm" id="lr-parse" style="margin-top:8px">Fill in the form</button><div id="lr-parsed" class="hint" style="margin:8px 0 0"></div></details>';
+    el.innerHTML = '<div class="cols"><div class="box">' + (opts.head || '') + imp + editorHtml(data, beginner) + '</div><div class="sticky"><div id="lr-act"></div><div id="lr-out"></div></div></div>';
     var form = $('.lr-form', el), out = $('#lr-out', el), timer;
     if (opts.actions) $('#lr-act', el).innerHTML = opts.actions();
     function run() {
@@ -292,6 +293,13 @@
       out.innerHTML = resultsHtml(r, beginner);
       if (opts.onChange) opts.onChange(d, r);
     }
+    $('#lr-parse', el).onclick = function () {
+      var o = C.parseListing($('#lr-paste', el).value), keys = Object.keys(o).filter(function (k) { return k !== 'beds' && k !== 'baths'; }), n = 0;
+      keys.forEach(function (k) { var f = form.elements[k]; if (!f) return; if (f.type === 'checkbox') f.checked = !!o[k]; else f.value = o[k]; n++; });
+      var lab = { name: 'address', state: 'state', price: 'price', sqft: 'size', yearBuilt: 'year built', hoaMonthly: 'HOA', taxesAnnual: 'taxes', rent: 'rent', type: 'type', units: 'units', floodZone: 'flood zone' };
+      $('#lr-parsed', el).innerHTML = n ? 'Filled in: <b>' + keys.map(function (k) { return lab[k] || k; }).join(', ') + '</b>.' + (o.rent ? '' : ' No rent found \u2013 please enter rent from comps.') + ' Please check every value.' : 'Nothing recognized. Try copying the full listing page.';
+      run();
+    };
     form.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(run, 120); });
     form.addEventListener('change', run);
     run();
@@ -301,6 +309,10 @@
   // ---------------------------------------------------------------- page: analyzer (public)
   function pageAnalyzer() {
     var draft = store(DRAFT) || { name: 'Sample: 3-bed house, Columbus OH', state: 'OH', price: 165000, rent: 1650, yearBuilt: 1998, sqft: 1350, downPct: 25, rate: 7.0 };
+    var qp = new URLSearchParams(location.search), qk = ['price', 'rent', 'downPct', 'rate'], fromLink = false;
+    qk.forEach(function (k) { var v = parseFloat(qp.get(k)); if (isFinite(v) && v >= 0 && v < 1e8) { draft[k] = v; fromLink = true; } });
+    if (qp.get('state') && C.STATE_NAMES[qp.get('state').toUpperCase()]) { draft.state = qp.get('state').toUpperCase(); fromLink = true; }
+    if (fromLink) { draft.name = 'Property from calculator'; if (qp.get('ref')) store('lr-ref', String(qp.get('ref')).slice(0, 60)); }
     var beginner = (store('lr-mode') || 'beginner') === 'beginner';
     var top = '<div class="app-bar"><div><span class="pill">' + (beginner ? 'Beginner view' : 'Pro view') + '</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-line btn-sm" id="lr-mode">' + (beginner ? 'Switch to Pro view' : 'Switch to Beginner view') + '</button><button class="btn btn-line btn-sm" id="lr-reset">Reset</button><button class="btn btn-primary btn-sm" id="lr-save">' + (signedIn() ? 'Save to my account' : 'Save – free account') + '</button></div></div>';
     root.innerHTML = top + '<div id="lr-an"></div><p class="hint" style="margin-top:18px;font-size:13px;color:var(--muted-dark)">Estimates for education only – not investment, tax, legal or lending advice. Verify every number with your lender, insurance agent, county assessor and CPA.</p>';
@@ -815,8 +827,47 @@
       '<h2>9. Document checklist</h2><ul style="list-style:none;font-size:13px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px 16px">' + ['Photo ID', 'Two years of federal tax returns', 'W-2s / 1099s and recent pay stubs', 'Two months of bank & brokerage statements', 'Executed purchase contract', 'Rent comps or appraiser rent schedule (Form 1007)', 'Existing leases (if occupied)', 'Landlord insurance quote (DP-3)', 'LLC articles, operating agreement, EIN letter', 'Schedule of real estate owned'].map(function (x) { return '<li>☐ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
       '<p class="meta" style="margin-top:18px;font-size:11px">Figures are estimates prepared ' + (br ? 'by ' + esc(br.company) + ' from information provided by the borrower' : 'by the borrower from self-reported data') + ' and typical cost assumptions. This document is not a loan application, loan approval, appraisal or tax advice. The lender’s Loan Estimate, appraisal and underwriting determine the final terms.</p>' +
       (br && br.disclaimer ? '<p class="meta" style="font-size:11px">' + esc(br.disclaimer) + '</p>' : '') +
+      (o.sample || o.paid ? '<div id="pkg-verify" class="pkg-verify"></div>' : '') +
       '<div class="rfoot"><span>' + (br ? esc(br.company) + ' \u00b7 ' : '') + 'Created with LeaseRun \u00b7 leaserun.com</span><span>Report ' + esc(o.id) + ' · ' + today + '</span></div></article>';
     root.innerHTML = h;
+    stampPackage(r, o.id, p.name);
+  }
+
+
+  // ---------------------------------------------------------------- package fingerprint + verify
+  function sha256hex(t) {
+    if (!(window.crypto && crypto.subtle)) return Promise.resolve('');
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)).then(function (b) { return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); });
+  }
+  function pkgPayload(r, id, name) {
+    var d = new Date(), ymd = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+    return ['1', String(id).replace(/[^\w]/g, '').slice(0, 12), ymd, Math.round(r.input.price), Math.round(r.loan), Math.round(r.input.rent), Math.round(r.pitia),
+      r.dscrLender == null ? 'na' : Math.round(r.dscrLender * 100), Math.round(r.cashFlowM), String(name || '').replace(/[~#&]/g, ' ').slice(0, 40)].join('~');
+  }
+  function stampPackage(r, id, name) {
+    var slot = $('#pkg-verify'); if (!slot || !window.LRQR) return;
+    var payload = pkgPayload(r, id, name);
+    sha256hex(payload).then(function (h) {
+      if (!h) return;
+      var code = h.slice(0, 10).toUpperCase(), url = 'https://leaserun.com/verify#p=' + encodeURIComponent(payload) + '&c=' + code;
+      try { slot.innerHTML = '<div class="pkg-qr">' + window.LRQR.svg(url, 124) + '<div><b>Verification code ' + code.replace(/(.{5})/, '$1-') + '</b><br>Scan the code or open leaserun.com/verify to compare the key figures of this package with the original.</div></div>'; }
+      catch (e) { slot.textContent = 'Verification code ' + code; }
+    });
+  }
+  function pageVerify() {
+    var h = new URLSearchParams(location.hash.replace(/^#/, '')), p = h.get('p'), c = (h.get('c') || '').toUpperCase();
+    var form = '<form id="vf" class="fg" style="margin-top:6px"><label class="fl full">Paste the verification link<input id="vl" placeholder="https://leaserun.com/verify#p=..."></label><button class="btn btn-primary btn-sm full">Check</button></form>';
+    if (!p) { root.innerHTML = '<p class="hint">Scan the QR code on the last page of the package with your phone camera, or paste the link below.</p>' + form; bindForm(); return; }
+    sha256hex(p).then(function (hx) {
+      var ok = hx && hx.slice(0, 10).toUpperCase() === c, f = p.split('~');
+      if (f.length < 10 || f[0] !== '1') { root.innerHTML = '<div class="verdict bad"><div><b>Not a LeaseRun verification link</b><p>The link is incomplete or damaged.</p></div></div>' + form; bindForm(); return; }
+      var date = f[2].slice(4, 6) + '/' + f[2].slice(6, 8) + '/' + f[2].slice(0, 4);
+      root.innerHTML = '<div class="verdict ' + (ok ? 'good' : 'bad') + '"><div><b>' + (ok ? 'Code matches' : 'Code does not match') + '</b><p>' + (ok ? 'These are the figures the package showed when it was created. Compare them with the document you received; if any differ, the document was changed afterwards.' : 'The figures in this link do not match its code. Ask the sender for the original package.') + '</p></div></div>' +
+        '<table class="tbl"><tbody>' + [['Property', esc(f.slice(9).join('~'))], ['Report', esc(f[1])], ['Created', date], ['Purchase price', usd(+f[3])], ['Loan amount', usd(+f[4])], ['Monthly rent', usd(+f[5])], ['PITIA', usd(+f[6])], ['DSCR (rent ÷ PITIA)', f[7] === 'na' ? 'n/a' : (f[7] / 100).toFixed(2)], ['Monthly cash flow', usd(+f[8])], ['Code', esc(c)]].map(function (x) { return '<tr><td>' + x[0] + '</td><td>' + x[1] + '</td></tr>'; }).join('') + '</tbody></table>' +
+        '<p class="hint" style="margin-top:10px">A matching code shows the figures are consistent with what LeaseRun produced. It does not confirm the borrower’s information, the property value or any loan approval.</p>' + form;
+      bindForm();
+    });
+    function bindForm() { var vf = $('#vf'); if (vf) vf.onsubmit = function (e) { e.preventDefault(); var v = $('#vl').value.trim(), i = v.indexOf('#'); if (i < 0) return; location.hash = v.slice(i + 1); location.reload(); }; }
   }
 
   // ---------------------------------------------------------------- pricing (waitlist until checkout is live)
@@ -1088,6 +1139,7 @@
   // ---------------------------------------------------------------- nav + boot
   $$('.nav-app').forEach(function (a) { if (signedIn()) { a.textContent = 'My dashboard'; a.href = '/app'; } });
   var PAGES = { analyzer: pageAnalyzer, start: pageStart, login: pageLogin, signup: pageSignup, forgot: pageForgot, reset: pageReset,
-    dashboard: pageDashboard, property: pageProperty, profile: pageProfile, tools: pageTools, package: pagePackage, pricing: pagePricing, learn: pageLearn, deadlines: pageDeadlines, scenarios: pageScenarios, checklist: pageChecklist, profiler: pageProfiler, b2b: pageB2B };
+    dashboard: pageDashboard, property: pageProperty, profile: pageProfile, tools: pageTools, package: pagePackage, pricing: pagePricing, learn: pageLearn, deadlines: pageDeadlines, scenarios: pageScenarios, checklist: pageChecklist, profiler: pageProfiler, b2b: pageB2B, verify: pageVerify };
   if (PAGES[PAGE]) PAGES[PAGE]();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); }); }
 })();

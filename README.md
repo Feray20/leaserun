@@ -74,6 +74,7 @@ Added on top of the company site; existing pages are unchanged apart from extra 
 | `/checklist`, `/profiler` | Loan document checklist; six-question strategy profiler |
 | `/learn`, `/learn/*` | Knowledge center (31 articles, `site/learn_content.py`) with search |
 | `/business` | LeaseRun for Business: Basic $79, Pro $149, Enterprise custom |
+| `/security`, `/program`, `/partners`, `/verify` | Security page, 12-month landlord program, partner page with embeddable widget, lender-package verification |
 | `/business/portal` | Business portal: pipeline, client files, client analyses, branded lender packages, advisor playbook, company profile |
 
 Files: `site/lr-calc.js` (pure US underwriting engine, tested in `tests/calc.test.js` → `node --test tests/calc.test.js`; build: `python3 build.py && python3 extra.py && python3 software.py && python3 finalize.py`), `site/lr-app.js` (UI, talks to Supabase REST directly), `site/lr-app.css`, `site/software.py` (adds the pages during the build).
@@ -81,3 +82,11 @@ Files: `site/lr-calc.js` (pure US underwriting engine, tested in `tests/calc.tes
 Database: `supabase/migrations/20261017120000_investor_app.sql` and `20261018090000_business.sql` (business_profiles, clients, properties.client_id; Basic limited to 25 active clients) – `entitlements` (read-only for users, written by billing), `financial_profiles`, `properties`; RLS owner-only; free plan limited to 2 properties by trigger.
 
 Supabase Auth settings: Site URL `https://leaserun.com`, redirect URLs `https://leaserun.com/**` and `https://leaserun.vercel.app/**`.
+
+### More
+- **Listing import:** paste listing text in the analyzer; `LRCalc.parseListing` fills price, size, year, HOA, taxes, rent, type, address (tested).
+- **Verification:** every paid/sample lender package carries a QR code (`site/lr-qr.js`, own encoder, versions 1–10) linking to `/verify` with the key figures and a SHA-256 code.
+- **Widget:** `<div data-leaserun-widget data-color="#0C1A35" data-ref="name" data-state="TX"></div><script src="https://leaserun.com/widget.js" async></script>`
+- **PWA:** `manifest.webmanifest`, `sw.js` (offline page; never caches `/app`, `/business/portal`, API calls).
+- **Images:** `python3 scripts/make_images.py` regenerates `site/icons` and the 1200×630 previews in `site/og` (committed; build needs no Pillow).
+- **Database setup in one step:** paste `supabase/SETUP_RUN_IN_SQL_EDITOR.sql` into the Supabase SQL editor and run it (safe to re-run).

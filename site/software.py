@@ -10,7 +10,7 @@ import learn_content as LC
 
 ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
-ASSETS = ["lr-calc.js", "lr-app.js", "lr-app.css", "logo-mark.png"]
+ASSETS = ["lr-calc.js", "lr-qr.js", "lr-app.js", "lr-app.css", "logo-mark.png", "widget.js", "sw.js", "manifest.webmanifest"]
 V = "20261017"  # cache-busting for the app assets
 
 DISCLAIMER = ('<p class="hint" style="font-size:13px;color:var(--muted-dark);margin-top:22px">LeaseRun software provides estimates for '
@@ -27,12 +27,17 @@ def page(app, title, desc, path, body, index=True, sample=False):
     html = build.head(title, desc, path, False) + body + build.foot()
     attrs = f' data-app="{app}"' + (' data-sample="1"' if sample else "")
     html = html.replace("<body>", f"<body{attrs}>", 1)
-    extra = f'<link rel="stylesheet" href="/lr-app.css?v={V}">\n'
+    slug = path.strip("/").replace("learn/", "learn-") or "default"
+    og = slug if (ROOT / "og" / f"{slug}.png").exists() else "default"
+    extra = (f'<link rel="stylesheet" href="/lr-app.css?v={V}">\n'
+             f'<meta property="og:image" content="https://leaserun.com/og/{og}.png">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+             '<meta name="twitter:card" content="summary_large_image">\n<link rel="manifest" href="/manifest.webmanifest">\n')
     if not index:
         extra = '<meta name="robots" content="noindex, nofollow">\n' + extra
+    html = html.replace('<meta name="twitter:card" content="summary">\n', '', 1)
     html = html.replace("</head>", extra + "</head>", 1)
     html = html.replace('<script src="/app.js" defer></script>',
-                        f'<script src="/app.js" defer></script>\n<script src="/lr-calc.js?v={V}" defer></script>\n<script src="/lr-app.js?v={V}" defer></script>', 1)
+                        f'<script src="/app.js" defer></script>\n<script src="/lr-calc.js?v={V}" defer></script>\n<script src="/lr-qr.js?v={V}" defer></script>\n<script src="/lr-app.js?v={V}" defer></script>', 1)
     return html
 
 
@@ -73,6 +78,7 @@ CALC_ITEMS = [
     ("/profiler", "Investor profiler", "Six questions to find the strategy that fits your cash and time."),
     ("/sample-loan-package", "Sample lender package", "See the PDF you can create for each property."),
     ("/learn", "Learn", "Plain-English answers on financing, taxes and being a landlord."),
+    ("/program", "12-month landlord program", "What to do each month from closing to your first tax return."),
 ]
 CALC_HUB = ('<main class="app-shell"><div class="wrap"><div class="tools">'
             + "".join(f'<a class="tool" href="{u}"><b>{t}</b><p>{d}</p><span class="pill good" style="align-self:flex-start">Open</span></a>' for u, t, d in CALC_ITEMS)
@@ -116,6 +122,58 @@ def business_body():
             + f'<tbody>{rows}</tbody></table></div><p class="hint" style="margin:10px 0 0">Prices in US dollars per account, billed monthly; applicable sales tax may be added. Already a customer? <a href="/business/portal" style="color:#0E7A53;font-weight:600">Open the business portal</a>.</p></div>'
             + '<div class="box"><h2>Built for compliance</h2><p class="hint" style="margin:0">Your license or NMLS number and disclaimer appear on every document. LeaseRun pays no referral fees (RESPA Section 8), describes properties and numbers instead of people (Fair Housing Act), and never asks for Social Security or bank account numbers.</p></div>'
             + DISCLAIMER + '</div></main><div id="lr-root" hidden></div>')
+
+SECURITY_BODY = (
+    '<main class="app-shell"><div class="wrap"><div class="article-grid"><article class="article">'
+    '<h2>What we store</h2><ul><li>Your email and a hashed password, managed by our authentication provider (Supabase Auth). We never see your password.</li>'
+    '<li>Your investor profile, saved properties and, for business accounts, client files and company details.</li>'
+    '<li>Nothing else: no Social Security numbers, no bank or card numbers, no tax returns, no uploaded IDs.</li></ul>'
+    '<h2>Who can see it</h2><p>Every table uses row-level security in the database. A signed-in account can read and change only its own rows; the public website key cannot read any account data at all. Plan upgrades can only be written by our billing system, never by the browser.</p>'
+    '<h2>How it is protected</h2><ul><li>All traffic is encrypted with TLS; HTTP Strict Transport Security is enabled.</li>'
+    '<li>A strict Content Security Policy allows scripts only from LeaseRun itself, which blocks most cross-site scripting.</li>'
+    '<li>The site cannot be embedded in other websites (clickjacking protection), and pages that show account data are never cached.</li>'
+    '<li>Calculations run in your browser. Pasted listing text and calculator inputs are not sent to us unless you save a property.</li>'
+    '<li>Passwords need at least 10 characters; sign-in attempts are rate-limited by the authentication provider.</li></ul>'
+    '<h2>Your controls</h2><ul><li>Download all your data as a file from your investor profile.</li><li>Delete properties and client files at any time.</li>'
+    '<li>Ask us to delete your account: <a href="mailto:invest@leaserun.com?subject=Delete%20my%20LeaseRun%20account">invest@leaserun.com</a>.</li></ul>'
+    '<h2>Report a vulnerability</h2><p>Found a security issue? Email <a href="mailto:invest@leaserun.com?subject=Security%20report">invest@leaserun.com</a> with the subject &ldquo;Security report&rdquo;. Please give us reasonable time to fix it before disclosure. See also our <a href="/.well-known/security.txt">security.txt</a>.</p>'
+    '</article><aside class="article-side"><div class="box"><h3>Related</h3><ul class="rel"><li><a href="/privacy">Privacy Policy</a></li><li><a href="/terms">Terms of Use</a></li><li><a href="/learn/what-data-does-leaserun-store">What data does LeaseRun store?</a></li></ul></div></aside></div></div></main><div id="lr-root" hidden></div>')
+
+MONTHS = [
+    ("Month 1", "Closing and setup", ["Keep the Closing Disclosure, deed and title policy in one folder; they set your tax basis.", "Open a separate bank account for the property (and the LLC, if any).", "Set up landlord insurance (DP-3) and, where relevant, flood insurance; confirm the lender is listed.", "Change locks, test smoke and CO detectors, note meter readings."]),
+    ("Month 2", "Make ready and list", ["Finish make-ready work; keep receipts and separate repairs from improvements.", "Write your tenant screening criteria before you advertise.", "Set the rent from current comps; list with good photos and a property description that describes the home, not people."]),
+    ("Month 3", "Lease up", ["Screen every applicant the same way; send adverse action notices when a credit report leads to denial.", "Use a lease written for your state and the lead-paint disclosure for pre-1978 homes.", "Document the move-in condition with dated photos signed by the tenant."]),
+    ("Month 4", "Systems", ["Collect rent electronically; set the late-fee rules your state allows.", "Create a simple bookkeeping sheet by Schedule E line.", "Agree a repair process and approval limit with your manager or tenant."]),
+    ("Month 5", "Reserves", ["Move the monthly CapEx and repair budget into a reserve account.", "Check the escrow analysis from your servicer: did taxes or insurance change?"]),
+    ("Month 6", "Mid-year review", ["Compare actual cash flow with your analysis in LeaseRun; update the property.", "Re-shop insurance if the premium jumped.", "If you bought in a high-tax area, check the new assessment and the appeal deadline."]),
+    ("Month 7", "Preventive maintenance", ["Service HVAC before the heavy season; clean gutters; check the roof and water heater.", "Inspect with proper notice to the tenant, as your lease and state law require."]),
+    ("Month 8", "Tax planning", ["Ask your CPA about depreciation, the passive loss allowance and whether a cost segregation study pays off.", "Make estimated tax payments if the rental produces taxable income."]),
+    ("Month 9", "Renewal plan", ["Decide on renewal 60–90 days before the lease ends; check local rent increase rules and notice periods.", "Price the renewal from current comps; turnover usually costs more than a modest increase."]),
+    ("Month 10", "Next deal readiness", ["Update your investor profile; check reserves and DTI for a second property.", "Request fresh Loan Estimates if rates have moved."]),
+    ("Month 11", "Year-end", ["Collect W-9s from contractors you paid $600 or more; prepare 1099-NEC filings.", "Gather the Form 1098 (mortgage interest) and property tax receipts."]),
+    ("Month 12", "First tax return", ["Export the Schedule E estimate from LeaseRun and hand it to your CPA with the actual records.", "Review: did the property meet the cash-flow and DSCR targets you set? Adjust the next buy box accordingly."]),
+]
+PROGRAM_BODY = ('<main class="app-shell"><div class="wrap"><div class="journey">'
+    + "".join(f'<div class="jstep"><div><b>{m} &middot; {t}</b><ul style="padding-left:18px;margin-top:6px;display:grid;gap:5px;font-size:14px;color:var(--muted-dark)">' + "".join(f"<li>{x}</li>" for x in items) + '</ul></div></div>' for m, t, items in MONTHS)
+    + '</div><div class="box" style="margin-top:18px"><h2>Keep it on track</h2><p class="hint">Investor Pro adds the portfolio stress test, refinance tool and Schedule E export that this program refers to.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-primary btn-sm" href="/pricing">See Investor Pro</a><button class="btn btn-line btn-sm" onclick="window.print()">Print the program</button></div></div>'
+    + DISCLAIMER + '</div></main><div id="lr-root" hidden></div>')
+
+PARTNERS_BODY = ('<main class="app-shell"><div class="wrap"><div class="grid-3">'
+    + "".join(f'<div class="card-light"><h3>{t}</h3><p>{d}</p></div>' for t, d in [
+        ("Educators and communities", "Real estate courses, meetups and newsletters can link members to the free analyzer and the learning center."),
+        ("Websites of agents and lenders", "Embed the free cash-flow calculator on your website. It links visitors to the full analysis."),
+        ("Brokerages and lenders", "Team plans with shared pipelines and white-label options under LeaseRun for Business Enterprise.")])
+    + '</div><div class="box" style="margin-top:20px"><h2>Embed the calculator</h2><p class="hint">Copy these two lines into any page. Change the color, your reference name and the default state.</p>'
+      '<pre style="background:#0C1A35;color:#E8EDF7;padding:14px;border-radius:10px;overflow:auto;font-size:13px">&lt;div data-leaserun-widget data-color="#0C1A35" data-ref="your-company" data-state="TX"&gt;&lt;/div&gt;\n&lt;script src="https://leaserun.com/widget.js" async&gt;&lt;/script&gt;</pre>'
+      '<p class="hint">Live preview:</p><div data-leaserun-widget data-color="#119767" data-ref="partners-page" data-state="OH"></div></div>'
+    + '<div class="box"><h2>How we work with partners</h2><ul style="padding-left:18px;display:grid;gap:6px;font-size:14px"><li>LeaseRun does not pay fees for referrals of settlement services (RESPA Section 8). Partnerships cover education, software and co-marketing only.</li><li>The widget collects no data and sets no cookies.</li><li>Questions: <a href="mailto:invest@leaserun.com?subject=Partnership" style="color:#0E7A53;font-weight:600">invest@leaserun.com</a></li></ul></div>'
+    + '</div></main><div id="lr-root" hidden></div><script src="/widget.js" defer></script>')
+
+VERIFY_BODY = ('<main class="app-shell"><div class="wrap" style="max-width:720px"><div class="box"><h2>Check a lender package</h2>'
+    '<p class="hint">Every lender package carries a verification code and a QR code. The code is a fingerprint of the key figures in the document. If any of those figures were changed after the package was created, the fingerprint no longer matches.</p>'
+    '<div id="lr-root"></div></div>' + DISCLAIMER + '</div></main>')
+
+OFFLINE_BODY = ('<main class="app-shell"><div class="wrap" style="max-width:640px"><div class="box"><h2>You are offline</h2><p class="hint">The analyzer and the first-rental walk-through still work if you opened them before. Saved properties need a connection.</p><a class="btn btn-primary btn-sm" href="/analyzer">Open the analyzer</a></div></div></main><div id="lr-root" hidden></div>')
 
 
 def pricing_body():
@@ -175,6 +233,12 @@ def build_learn():
 def main():
     for a in ASSETS:
         shutil.copy(ROOT / a, DIST / a)
+    for d in ("og", "icons"):
+        if (DIST / d).exists():
+            shutil.rmtree(DIST / d)
+        shutil.copytree(ROOT / d, DIST / d)
+    (DIST / ".well-known").mkdir(exist_ok=True)
+    (DIST / ".well-known" / "security.txt").write_text("Contact: mailto:invest@leaserun.com\nExpires: 2027-10-18T00:00:00.000Z\nPreferred-Languages: en, de\nCanonical: https://leaserun.com/.well-known/security.txt\nPolicy: https://leaserun.com/security\n")
     (DIST / "app").mkdir(exist_ok=True)
     (DIST / "business").mkdir(exist_ok=True)
 
@@ -208,6 +272,15 @@ def main():
         "business.html": page("pricing", "LeaseRun for Business: Tools for Agents, Loan Officers and Property Managers",
             "Client files, branded lender packages, DSCR and stress tests, and an advisor playbook for professionals working with US rental investors.", "/business", business_body()),
         "business/portal.html": page("b2b", "Business portal | LeaseRun", "LeaseRun business portal.", "/business/portal", shell(), index=False),
+        "security.html": page("learn", "Security and Data Protection | LeaseRun", "How LeaseRun protects your account and data: row-level security, encryption, strict content security policy, data export and deletion.", "/security",
+            head_block("Security and data protection", "What we store, who can see it and how it is protected.", "Security") + SECURITY_BODY),
+        "program.html": page("learn", "Your First Year as a Landlord: 12-Month Program | LeaseRun", "A month-by-month plan for new US landlords: closing, lease-up, systems, reserves, maintenance, renewals and the first tax return.", "/program",
+            head_block("Your first year as a landlord", "A month-by-month program from closing day to your first Schedule E.", "12-month program") + PROGRAM_BODY),
+        "partners.html": page("learn", "Partner With LeaseRun: Embed the Rental Calculator | LeaseRun", "Embed LeaseRun's free rental cash-flow calculator on your website, and partner with us on education and software.", "/partners",
+            head_block("Partner with LeaseRun", "For educators, communities, agents, lenders and brokerages.", "Partners") + PARTNERS_BODY),
+        "verify.html": page("verify", "Verify a Lender Package | LeaseRun", "Check whether a LeaseRun lender package is unchanged.", "/verify",
+            head_block("Verify a lender package", "Confirm that the key figures in a package were not changed.", "Verification") + VERIFY_BODY, index=False),
+        "offline.html": page("learn", "Offline | LeaseRun", "You are offline.", "/offline", OFFLINE_BODY, index=False),
         "login.html": page("login", "Sign in | LeaseRun", "Sign in to your LeaseRun investor account.", "/login", shell(), index=False),
         "signup.html": page("signup", "Create a free account | LeaseRun", "Create your free LeaseRun investor account.", "/signup", shell(), index=False),
         "forgot.html": page("forgot", "Reset password | LeaseRun", "Reset your LeaseRun password.", "/forgot", shell(), index=False),
@@ -249,7 +322,7 @@ def main():
         html = html.replace('<a href="/about-contact#compliance">Terms</a>', '<a href="/terms">Terms</a>')
         if '/business">LeaseRun for Business' not in html:
             html = html.replace('<li><a href="#" data-modal>Weekly Deal Sheet</a></li></ul></div>',
-                                '<li><a href="#" data-modal>Weekly Deal Sheet</a></li><li><a href="/calculators">Free Calculators</a></li><li><a href="/learn">Learn</a></li><li><a href="/business">LeaseRun for Business</a></li></ul></div>', 1)
+                                '<li><a href="#" data-modal>Weekly Deal Sheet</a></li><li><a href="/calculators">Free Calculators</a></li><li><a href="/learn">Learn</a></li><li><a href="/business">LeaseRun for Business</a></li><li><a href="/partners">Partners</a></li><li><a href="/security">Security</a></li></ul></div>', 1)
         if f.name == "index.html" and f.parent == DIST and "Investor software" not in html:
             html = html.replace("\n<footer>", teaser + "\n<footer>", 1)
         f.write_text(html, encoding="utf-8")
@@ -258,7 +331,7 @@ def main():
     (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /app\nDisallow: /business/portal\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /reset\nSitemap: https://leaserun.com/sitemap.xml\n")
     sm = DIST / "sitemap.xml"
     xml = sm.read_text() if sm.exists() else '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n'
-    add = "".join(f"<url><loc>https://leaserun.com{u}</loc></url>" for u in ["/calculators", "/start", "/analyzer", "/deadlines", "/scenarios", "/checklist", "/profiler", "/pricing", "/business", "/sample-loan-package"] + learn_urls if f"{u}<" not in xml)
+    add = "".join(f"<url><loc>https://leaserun.com{u}</loc></url>" for u in ["/calculators", "/start", "/analyzer", "/deadlines", "/scenarios", "/checklist", "/profiler", "/pricing", "/business", "/sample-loan-package", "/security", "/program", "/partners"] + learn_urls if f"{u}<" not in xml)
     sm.write_text(xml.replace("</urlset>", add + "</urlset>"))
     print("software:", sorted(pages))
 

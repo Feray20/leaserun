@@ -85,3 +85,22 @@ test('refinance break-even', () => {
 test('IRR of a simple flow', () => {
   near(c.irr([-100, 110]), 10, 0.01);
 });
+
+test('listing parser reads a typical listing', () => {
+  const txt = `412 Maple St, Columbus, OH 43215
+For sale $189,900
+3 beds 2 baths 1,420 sqft
+Single Family Residence · Built in 1978
+HOA: $35/mo
+Annual tax amount: $3,214
+Rent estimate: $1,650/mo`;
+  const o = c.parseListing(txt);
+  assert.equal(o.price, 189900); assert.equal(o.sqft, 1420); assert.equal(o.yearBuilt, 1978);
+  assert.equal(o.hoaMonthly, 35); assert.equal(o.taxesAnnual, 3214); assert.equal(o.rent, 1650);
+  assert.equal(o.state, 'OH'); assert.equal(o.type, 'sfr'); assert.match(o.name, /412 Maple St, Columbus OH/);
+});
+
+test('listing parser handles duplex, yearly HOA and K prices', () => {
+  const o = c.parseListing('Duplex in Dayton, OH 45402. Price: $245K. Year built: 1952. HOA $600/year. 2,100 sq ft');
+  assert.equal(o.price, 245000); assert.equal(o.type, 'duplex'); assert.equal(o.units, 2); assert.equal(o.hoaMonthly, 50); assert.equal(o.state, 'OH');
+});
