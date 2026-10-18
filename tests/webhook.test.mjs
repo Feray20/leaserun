@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
-import { verifySignature, parseReference, POST } from '../site/api/stripe-webhook.js';
+import { verifySignature, parseReference, POST } from '../site/api/stripe-webhook.mjs';
 
 const secret = 'whsec_test';
 const sign = (body, t) => `t=${t},v1=${crypto.createHmac('sha256', secret).update(`${t}.${body}`).digest('hex')}`;
