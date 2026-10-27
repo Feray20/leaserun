@@ -25,8 +25,6 @@ export async function ingestReceived(rid: string, notify = true): Promise<'ok' |
   const text = m.text || htmlToText(m.html || '');
   const a = m.authentication || {};
   const failed = (v?: string) => typeof v === 'string' && /fail/i.test(v);
-  // ImmoAdv routed receipts to a tax-bookkeeping folder ("belege"); LeaseRun has no such feature, so this stays off.
-  const taxMail = false;
   const threadId = await findThread({ inReplyTo, refs, subject: m.subject || '', counterpart: from.email });
   const id = crypto.randomUUID();
 
@@ -42,9 +40,8 @@ export async function ingestReceived(rid: string, notify = true): Promise<'ok' |
       const safe = (att.filename || 'attachment').replace(/[^\p{L}\p{N}._ -]+/gu, '_').slice(0, 120) || 'attachment';
       // Malware check: never store dangerous attachments (scripts in PDFs, hidden programs).
       // Every attachment is scanned (PDF, images, Office, ZIP, text); executable file types are never stored.
-      // allowEInvoice stays false: embedded e-invoice XML (a German/EU format) is only relevant for tax bookkeeping.
       if (blockedName(safe)) { blocked.push(`${safe}: executable file type`); continue; }
-      const sc = staticScan(buf, { allowEInvoice: taxMail });
+      const sc = staticScan(buf);
       if (!sc.clean) { blocked.push(`${safe}: ${sc.threat}`); continue; }
       const path = `in/${id}/${files.length}-${safe}`;
       const up = await db.storage.from('mail').upload(path, buf, { contentType: att.content_type || 'application/octet-stream', upsert: true });
@@ -63,7 +60,7 @@ export async function ingestReceived(rid: string, notify = true): Promise<'ok' |
   const unsubbed = Boolean((await db.from('lr_settings').select('key').eq('key', `mail_unsub:${from.email}`.slice(0, 200)).maybeSingle()).data);
   const contactId = await contactFor(from.email);
   const ins = await db.from('lr_mail_messages').insert({
-    id, thread_id: threadId, direction: 'in', folder: spam ? 'spam' : taxMail ? 'belege' : unsubbed ? 'archive' : 'inbox', design: 'eingang',
+    id, thread_id: threadId, direction: 'in', folder: spam ? 'spam' : unsubbed ? 'archive' : 'inbox', design: 'eingang',
     from_email: from.email.slice(0, 320), from_name: from.name, to_emails: to, cc_emails: cc, subject: (m.subject || '(no subject)').slice(0, 500),
     html: m.html ? m.html.slice(0, 2_000_000) : null, text_body: text.slice(0, 500_000), snippet: snippetOf(text),
     message_id: messageId, in_reply_to: inReplyTo, refs, resend_id: rid, attachments: files, auth: authInfo, contact_id: contactId,
@@ -73,11 +70,11 @@ export async function ingestReceived(rid: string, notify = true): Promise<'ok' |
   if (contactId) await db.from('lr_crm_activities').insert({ contact_id: contactId, type: 'email', note: `Received: ${(m.subject || '').slice(0, 200)}`, actor: 'postfach' });
   const ownSystem = from.email.endsWith('@' + (mailboxAddress().split('@')[1] || 'leaserun.com'));
   // Decline or "please stop emailing" in reply to outreach → end the contact, send nothing more.
-  if (!spam && !ownSystem && !taxMail) await handleDecline(from.email, text, m.subject || '').catch((e) => console.error('mail_decline', (e as Error).message));
-  if (notify && !spam && !unsubbed && !ownSystem && !taxMail) await pushAdmins('mail', 'New email', 'A new message is waiting in the Inbox.', 'mail_new');
+  if (!spam && !ownSystem) await handleDecline(from.email, text, m.subject || '').catch((e) => console.error('mail_decline', (e as Error).message));
+  if (notify && !spam && !unsubbed && !ownSystem) await pushAdmins('mail', 'New email', 'A new message is waiting in the Inbox.', 'mail_new');
   // Prepare a reply draft automatically (after answering Resend, so the webhook does not wait). Nothing is ever sent
   // automatically – the owner reads and sends it herself.
-  if (!spam && !unsubbed && !ownSystem && !taxMail) {
+  if (!spam && !unsubbed && !ownSystem) {
     const job = () => import('@/lib/mail/autodraft').then((x) => x.autoDraftFor(id)).then((r) => console.log('mail_autodraft', id, r.why)).catch((e) => console.error('mail_autodraft', (e as Error).message));
     try { const { after } = await import('next/server'); after(job); } catch { void job(); }
   }

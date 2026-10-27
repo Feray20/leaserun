@@ -1,9 +1,9 @@
-// PDF-Ansicht: Ergebnis erscheint zuerst auf dem Bildschirm (alle Seiten, mit pdf.js gerendert –
-// funktioniert auch auf dem iPhone), danach Herunterladen oder Teilen.
+// PDF viewer: the result shows on screen first (all pages, rendered with pdf.js –
+// works on iPhone too), then download or share.
 const PDFJS = '/vendor/pdfjs-4.10.38/';
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Ihr Dokument', note = '', onClose } = {}) {
+export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Your document', note = '', onClose } = {}) {
   document.querySelector('.lr-pdfv')?.remove();
   const url = URL.createObjectURL(blob);
   const el = document.createElement('div');
@@ -13,13 +13,13 @@ export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Ihr Do
   el.setAttribute('aria-label', title);
   const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/pdf' })] })); } catch { return false; } })();
   el.innerHTML = `<div class="lr-pdfv-bar"><div class="lr-pdfv-t"><strong>${esc(title)}</strong><small>${esc(filename)}</small></div>
-    <button type="button" class="lr-pdfv-x" aria-label="Schließen">✕</button></div>
+    <button type="button" class="lr-pdfv-x" aria-label="Close">✕</button></div>
     ${note ? `<p class="lr-pdfv-note">${note}</p>` : ''}
-    <div class="lr-pdfv-pages" tabindex="0"><p class="lr-pdfv-load">Dokument wird angezeigt …</p></div>
-    <div class="lr-pdfv-act"><a class="btn btn-dark" href="${url}" download="${esc(filename)}">PDF herunterladen</a>${canShare ? '<button type="button" class="btn btn-outline" data-share>Teilen</button>' : ''}<button type="button" class="btn btn-ghost" data-close>Schließen</button></div>`;
+    <div class="lr-pdfv-pages" tabindex="0"><p class="lr-pdfv-load">Loading document …</p></div>
+    <div class="lr-pdfv-act"><a class="btn btn-dark" href="${url}" download="${esc(filename)}">Download PDF</a>${canShare ? '<button type="button" class="btn btn-outline" data-share>Share</button>' : ''}<button type="button" class="btn btn-ghost" data-close>Close</button></div>`;
   document.body.appendChild(el);
   document.body.classList.add('lr-pdfv-open');
-  // Zurück-Taste (Browser/Wischgeste) schließt die Ansicht, statt die Seite zu verlassen.
+  // Back button (browser/swipe) closes the viewer instead of leaving the page.
   let done = false;
   const finish = () => { if (done) return; done = true; el.remove(); document.body.classList.remove('lr-pdfv-open'); setTimeout(() => URL.revokeObjectURL(url), 60_000); onClose?.(); document.removeEventListener('keydown', key); removeEventListener('popstate', pop); };
   const pop = () => finish();
@@ -30,7 +30,7 @@ export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Ihr Do
   el.querySelector('.lr-pdfv-x').onclick = close;
   el.querySelector('[data-close]').onclick = close;
   el.querySelector('[data-share]')?.addEventListener('click', async () => {
-    try { await navigator.share({ files: [new File([blob], filename, { type: 'application/pdf' })], title }); } catch { /* abgebrochen */ }
+    try { await navigator.share({ files: [new File([blob], filename, { type: 'application/pdf' })], title }); } catch { /* canceled */ }
   });
   el.querySelector('.lr-pdfv-x').focus();
 
@@ -50,19 +50,19 @@ export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Ihr Do
       const c = document.createElement('canvas');
       c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
       c.style.width = `${Math.floor(vp.width / dpr)}px`; c.style.height = `${Math.floor(vp.height / dpr)}px`;
-      c.setAttribute('aria-label', `Seite ${i} von ${doc.numPages}`);
+      c.setAttribute('aria-label', `Page ${i} of ${doc.numPages}`);
       box.appendChild(c);
       await page.render({ canvasContext: c.getContext('2d'), viewport: vp, annotationMode: pdfjs.AnnotationMode?.ENABLE_FORMS ?? 2 }).promise;
     }
     await doc.destroy();
   } catch (e) {
     console.warn(e);
-    box.innerHTML = '<p class="lr-pdfv-load">Die Vorschau kann hier nicht angezeigt werden. Bitte über „PDF herunterladen“ öffnen.</p>';
+    box.innerHTML = '<p class="lr-pdfv-load">The preview can’t be shown here. Please open it with “Download PDF”.</p>';
   }
   return { close };
 }
 
-// Formularfelder eines PDFs auslesen (AcroForm), z. B. nach dem Wiedereinlesen eines ausgefüllten LeaseRun-Formulars.
+// Read the form fields of a PDF (AcroForm), e.g. after re-uploading a filled-in LeaseRun form.
 export async function readPdfForm(file) {
   const pdfjs = await import(PDFJS + 'pdf.mjs');
   pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.mjs';

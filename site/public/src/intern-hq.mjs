@@ -1,59 +1,61 @@
-// LeaseRun HEADQUARTERS · Command Center (Web-Admin, Bereich „System“).
-// Baut auf der bestehenden Admin-Zentrale auf (keine Parallelstruktur): Status, Kennzahlen, Hinweise, Systeme und
-// Aktivität kommen aus /api/admin/app/overview (dieselbe Quelle wie die Admin-App), Umsatz heute aus dem Finanz-Cockpit.
-// Nur echte Daten: Fehlt eine Quelle, steht „–“ mit Hinweis – nichts wird geschätzt oder erfunden.
+// LeaseRun HEADQUARTERS · Command Center (Web-Admin, "System" area).
+// Builds on the existing admin center (no parallel structure): status, metrics, alerts, systems and activity come
+// from /api/admin/app/overview (same source as the admin app), today's revenue from the Finance Cockpit.
+// Real data only: if a source is missing, "–" is shown with a note – nothing is estimated or made up.
 import { api, download, dtt, esc, eur } from './sess.mjs?v=892f3666';
 
-// Diese Hinweise zeigt „Prüfen & erledigen“ bereits mit Knopf – im Entscheidungs-Block nicht doppelt.
+// "Check & fix" already shows these alerts with a button – not duplicated in the decisions block.
 const IN_CHECK = new Set(['sys-panic', 'sys-mfa', 'sys-mail', 'sys-mailerr', 'sec-noise', 'web-errors']);
 
-// Ziele der Overview-Schnittstelle → Reiter (und Datenbereich) der Admin-Zentrale.
+// Targets of the overview API → tab (and data area) of the admin center.
 const TARGET = {
   jetzt: ['jetzt'],
   zahlungen: ['rechnungen', 'b2b'], postfach: ['postfach'], termine: ['termine'], anfragen: ['anfragen', 'b2b'],
   unternehmen: ['partner', 'b2b'], sicherheit: ['sicherheit'], system: ['system'], statistik: ['kennzahlen', 'b2c'], audit: ['protokoll'],
 };
-// Priorität nach Gefahr zuerst (Command-Center-Regel), danach Aktualität.
+// Priority by severity first (command center rule), then recency.
 const SEV = { critical: 0, warning: 1, info: 2 };
-const SEV_L = { critical: ['bad', 'Kritisch'], warning: ['warn', 'Warnung'], info: ['info', 'Info'] };
-const SYS_L = { ok: ['ok', 'OK'], warn: ['warn', 'Hinweis'], fail: ['bad', 'Störung'], off: ['off', 'Aus'] };
+const SEV_L = { critical: ['bad', 'Critical'], warning: ['warn', 'Warning'], info: ['info', 'Info'] };
+const SYS_L = { ok: ['ok', 'OK'], warn: ['warn', 'Note'], fail: ['bad', 'Outage'], off: ['off', 'Off'] };
 
 const ic = (d, s = 18) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const I_REF = '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/>';
 const I_GO = '<path d="M9 6l6 6-6 6"/>';
+// Owner's timezone; formatting en-US.
+const TZ = 'Europe/Berlin';
 const today = () => {
   const d = new Date();
-  return `${d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} · ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`;
+  return `${d.toLocaleDateString('en-US', { timeZone: TZ, weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })} · ${d.toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' })}`;
 };
 const ago = (s) => {
   if (!s) return '';
   const m = Math.round((Date.now() - new Date(s).getTime()) / 60000);
-  if (m < 1) return 'gerade eben'; if (m < 60) return `vor ${m} Min.`;
-  const h = Math.round(m / 60); if (h < 24) return `vor ${h} Std.`;
+  if (m < 1) return 'just now'; if (m < 60) return `${m} min ago`;
+  const h = Math.round(m / 60); if (h < 24) return `${h} h ago`;
   return dtt(s);
 };
 
-// Digitale Mitarbeiter (lib/admin/hq-agents.ts ist die Quelle; diese Liste ist die Startansicht, bis der Server antwortet).
-// Jeder nimmt Aufträge im Eingabefeld an. Intern wird sofort erledigt, alles nach außen nur nach Ferays Freigabe.
+// Digital staff (lib/admin/hq-agents.ts is the source; this list is the initial view until the server answers).
+// Each one takes tasks in the input field. Internal work is done right away; anything external only after the owner approves.
 let AGENTS = [
-  { id: 'postfach', name: 'Emily', last: 'Carter', role: 'E-Mail & Postfach', color: '#DB2777', vibe: 'Ruhig und gründlich. Hat jede Mail im Blick.', job: 'Holt E-Mails ab, ordnet sie nach Dringlichkeit und bereitet Antworten als Entwurf vor.' },
-  { id: 'sicherheit', name: 'Jake', last: 'Morrison', role: 'Sicherheit', color: '#7C3AED', vibe: 'Wachsam, schläft nie. Sperrt Angreifer, bevor du es merkst.', job: 'Sperrt angreifende Quellen, räumt auf und meldet, was nur du lösen kannst.' },
-  { id: 'technik', name: 'Olivia', last: 'Brooks', role: 'Technik', color: '#0D9488', vibe: 'Präzise. Prüft lieber einmal mehr.', job: 'Prüft Stripe, Zahlungs-Webhook, E-Mail-Domain, Datenbank und neue Versionen live.' },
-  { id: 'finanzen', name: 'Ryan', last: 'Mitchell', role: 'Finanzen', color: '#16A34A', vibe: 'Zahlenmensch. Nichts geht raus ohne dein Okay.', job: 'Umsatz, offene und überfällige Rechnungen; bereitet Zahlungserinnerungen vor.' },
-  { id: 'vertrieb', name: 'Madison', last: 'Hayes', role: 'Vertrieb & Partner', color: '#F59E0B', vibe: 'Schnell und freundlich. Keine Anfrage bleibt liegen.', job: 'Behält Unternehmensanfragen, Demo-Wünsche und Partnerkonten im Blick.' },
-  { id: 'neukunden', name: 'Hannah', last: 'Walsh', role: 'Neukunden', color: '#0EA5E9', vibe: 'Denkt vom ersten Besuch bis zum Kauf.', job: 'Beobachtet den Weg vom Besucher zum Kauf, findet Abbrüche und macht Vorschläge, wie mehr Besucher Kunden werden.' },
-  { id: 'bestandskunden', name: 'Liam', last: 'Foster', role: 'Bestandskunden', color: '#2563EB', vibe: 'Kümmert sich, bevor jemand geht.', job: 'Behält aktive Abos, auslaufende Zugänge, stille Konten und Erstattungen im Blick.' },
-  { id: 'akquise', name: 'Zoe', last: 'Campbell', role: 'Akquise', color: '#D97706', vibe: 'Hartnäckig und höflich. Vergisst keine Wiedervorlage.', job: 'Hält Kontakte und Wiedervorlagen im Fluss, bereitet Anschreiben als Entwurf vor.' },
-  { id: 'support', name: 'Tyler', last: 'Reed', role: 'Kundenreise & Support', color: '#2F7FC1', vibe: 'Sieht jeden Stolperstein eines Kunden – sofort.', job: 'Sieht sofort, wenn ein Kunde auf einen Fehler stößt oder an der Kasse abbricht, bestimmt die Ursache und erledigt Harmloses selbst.' },
-  { id: 'freigaben', name: 'Ava', last: 'Bennett', role: 'Freigaben', color: '#0F2C59', vibe: 'Deine rechte Hand. Sammelt alles, was dein Okay braucht.', job: 'Zeigt alles, was nach außen gehen würde – erst nach deiner Freigabe.' },
-  { id: 'creator', name: 'Chloe', last: 'Parker', role: 'Creator', color: '#E11D48', vibe: 'Kennt jede Community. Hält Bewerbungen im Fluss.', job: 'Behält Creator-Bewerbungen und Rückfragen im Blick.' },
-  { id: 'recht', name: 'Daniel', last: 'Hughes', role: 'Recht & Compliance', color: '#475569', vibe: 'Lieber einmal zu vorsichtig.', job: 'Prüft Rechtstexte, Einwilligungen, Abmeldelinks und Fristen – Risiken lieber entfernen als behalten.' },
-  { id: 'briefing', name: 'Ethan', last: 'Collins', role: 'Lagebild', color: '#0369A1', vibe: 'Verbindet die Punkte zwischen allen Abteilungen.', job: 'Wertet alle Agenten gemeinsam aus, erkennt gemeinsame Ursachen und nennt die drei wichtigsten Schritte für heute.' },
-  { id: 'optimierung', name: 'Noah', last: 'Sullivan', role: 'Optimierung', color: '#9333EA', vibe: 'Findet Verbesserungen, bevor du sie suchst.', job: 'Prüft Website und System selbstständig, erledigt Internes sofort und schlägt den Rest vor.' },
-  { id: 'marketing', name: 'Sophie', last: 'Turner', role: 'Marketing', color: '#EA580C', vibe: 'Denkt in Reichweite. Jede Idee kommt mit Zahl und Begründung.', job: 'Liest Besucher, Quellen, Kasse und Newsletter, macht Vorschläge und entwirft Texte. Veröffentlicht nichts – du gibst frei.' },
+  { id: 'postfach', name: 'Emily', last: 'Carter', role: 'Email', color: '#DB2777', vibe: 'Calm and thorough. Keeps an eye on every email.', job: 'Fetches email, sorts it by urgency and prepares replies as drafts.' },
+  { id: 'sicherheit', name: 'Jake', last: 'Morrison', role: 'Security', color: '#7C3AED', vibe: 'Watchful, never sleeps. Blocks attackers before you notice.', job: 'Blocks attacking sources, cleans up and reports what only you can solve.' },
+  { id: 'technik', name: 'Olivia', last: 'Brooks', role: 'Product & Tech', color: '#0D9488', vibe: 'Precise. Would rather check once more.', job: 'Checks Stripe, the payment webhook, email domain, database and new releases live.' },
+  { id: 'finanzen', name: 'Ryan', last: 'Mitchell', role: 'Finance', color: '#16A34A', vibe: 'Numbers person. Nothing goes out without your okay.', job: 'Revenue, open and overdue invoices; prepares payment reminders.' },
+  { id: 'vertrieb', name: 'Madison', last: 'Hayes', role: 'Sales & Partners', color: '#F59E0B', vibe: 'Fast and friendly. No request gets left behind.', job: 'Keeps track of business requests, demo requests and partner accounts.' },
+  { id: 'neukunden', name: 'Hannah', last: 'Walsh', role: 'New customers', color: '#0EA5E9', vibe: 'Thinks from the first visit to the purchase.', job: 'Watches the path from visitor to purchase, finds drop-offs and suggests how more visitors become customers.' },
+  { id: 'bestandskunden', name: 'Liam', last: 'Foster', role: 'Customer success', color: '#2563EB', vibe: 'Steps in before anyone leaves.', job: 'Keeps track of active subscriptions, expiring access, quiet accounts and refunds.' },
+  { id: 'akquise', name: 'Zoe', last: 'Campbell', role: 'Acquisition (B2B)', color: '#D97706', vibe: 'Persistent and polite. Never misses a follow-up.', job: 'Keeps contacts with lenders, brokers, property managers and agents moving and prepares win-win outreach as drafts.' },
+  { id: 'support', name: 'Tyler', last: 'Reed', role: 'Support', color: '#2F7FC1', vibe: 'Spots every customer stumble – right away.', job: 'Sees immediately when a customer hits an error or abandons checkout, finds the cause and fixes harmless issues himself.' },
+  { id: 'freigaben', name: 'Ava', last: 'Bennett', role: 'Approvals', color: '#0F2C59', vibe: 'Your right hand. Collects everything that needs your okay.', job: 'Shows everything that would go out – only after your approval.' },
+  { id: 'creator', name: 'Chloe', last: 'Parker', role: 'Creators', color: '#E11D48', vibe: 'Knows every community. Keeps applications moving.', job: 'Keeps track of creator applications and questions.' },
+  { id: 'recht', name: 'Daniel', last: 'Hughes', role: 'Legal & Compliance', color: '#475569', vibe: 'Better too careful than sorry.', job: 'Checks legal pages, consents, unsubscribe links and deadlines – would rather remove a risk than keep it.' },
+  { id: 'briefing', name: 'Ethan', last: 'Collins', role: 'Daily briefing', color: '#0369A1', vibe: 'Connects the dots between all departments.', job: 'Reviews all agents together, spots shared causes and names the three most important steps for today.' },
+  { id: 'optimierung', name: 'Noah', last: 'Sullivan', role: 'SEO & Optimization', color: '#9333EA', vibe: 'Finds improvements before you look for them.', job: 'Checks website and system on his own, fixes internal things right away and proposes the rest.' },
+  { id: 'marketing', name: 'Sophie', last: 'Turner', role: 'Marketing', color: '#EA580C', vibe: 'Thinks in reach. Every idea comes with a number and a reason.', job: 'Reads visitors, sources, checkout and newsletter, makes suggestions and drafts copy. Publishes nothing – you approve.' },
 ];
 const SHIFT_MS = 3 * 60_000;
-// Abteilungen im Orbit. In der Mitte: LeaseRun. Dazu Feray als Founder Head.
+// Departments in the orbit. In the center: LeaseRun. Plus the owner as Head of Operations.
 const I = {
   mail: '<path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/>', shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>', euro: '<path d="M17 7a6 6 0 1 0 0 10"/><path d="M5 10h8M5 14h8"/>',
@@ -63,27 +65,26 @@ const I = {
   star: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>', mega: '<path d="M3 10v4h3l6 4V6l-6 4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>', crown: '<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>',
 };
 const ORBIT = [
-  { k: 'founder', n: 'Founder Head', founder: true, icon: I.crown, c: '#0F2C59' },
-  { k: 'freigaben', n: 'Freigaben', agent: 'freigaben', icon: I.check, c: '#0F2C59' },
-  { k: 'postfach', n: 'Postfach', agent: 'postfach', icon: I.mail, c: '#DB2777' },
-  { k: 'finanzen', n: 'Finanzen', agent: 'finanzen', icon: I.euro, c: '#16A34A' },
-  { k: 'vertrieb', n: 'Vertrieb & Partner', agent: 'vertrieb', icon: I.handshake, c: '#F59E0B' },
-  { k: 'neukunden', n: 'Neukunden', agent: 'neukunden', icon: I.star, c: '#0EA5E9' },
-  { k: 'bestandskunden', n: 'Bestandskunden', agent: 'bestandskunden', icon: I.help, c: '#2563EB' },
-  { k: 'akquise', n: 'Akquise', agent: 'akquise', icon: I.mega, c: '#D97706' },
-  { k: 'creator', n: 'Creator', agent: 'creator', icon: I.star, c: '#E11D48' },
-  { k: 'support', n: 'Kunden & Support', agent: 'support', icon: I.help, c: '#2F7FC1' },
-  { k: 'technik', n: 'Technik', agent: 'technik', icon: I.cpu, c: '#0D9488' },
-  { k: 'sicherheit', n: 'Sicherheit', agent: 'sicherheit', icon: I.shield, c: '#7C3AED' },
-  { k: 'recht', n: 'Recht', agent: 'recht', icon: I.check, c: '#475569' },
+  { k: 'founder', n: 'Head of Operations', founder: true, icon: I.crown, c: '#0F2C59' },
+  { k: 'freigaben', n: 'Approvals', agent: 'freigaben', icon: I.check, c: '#0F2C59' },
+  { k: 'postfach', n: 'Email', agent: 'postfach', icon: I.mail, c: '#DB2777' },
+  { k: 'finanzen', n: 'Finance', agent: 'finanzen', icon: I.euro, c: '#16A34A' },
+  { k: 'vertrieb', n: 'Sales', agent: 'vertrieb', icon: I.handshake, c: '#F59E0B' },
+  { k: 'neukunden', n: 'New customers', agent: 'neukunden', icon: I.star, c: '#0EA5E9' },
+  { k: 'bestandskunden', n: 'Customer success', agent: 'bestandskunden', icon: I.help, c: '#2563EB' },
+  { k: 'akquise', n: 'Acquisition', agent: 'akquise', icon: I.mega, c: '#D97706' },
+  { k: 'creator', n: 'Creators', agent: 'creator', icon: I.star, c: '#E11D48' },
+  { k: 'support', n: 'Support', agent: 'support', icon: I.help, c: '#2F7FC1' },
+  { k: 'technik', n: 'Product', agent: 'technik', icon: I.cpu, c: '#0D9488' },
+  { k: 'sicherheit', n: 'Security', agent: 'sicherheit', icon: I.shield, c: '#7C3AED' },
+  { k: 'recht', n: 'Legal', agent: 'recht', icon: I.check, c: '#475569' },
   { k: 'briefing', n: 'Briefing', agent: 'briefing', icon: I.sun, c: '#0369A1' },
-  { k: 'optimierung', n: 'Optimierung', agent: 'optimierung', icon: I.gauge, c: '#9333EA' },
+  { k: 'optimierung', n: 'SEO', agent: 'optimierung', icon: I.gauge, c: '#9333EA' },
   { k: 'marketing', n: 'Marketing', agent: 'marketing', icon: I.mega, c: '#EA580C' },
 ];
-// LeaseRun-Zeichen (Pfeil-Haus aus dem Logo) für die Mitte.
+// LeaseRun mark (arrow house from the logo) for the center.
 const MARK = '<svg viewBox="-2 -2 104 88" width="34" height="30" aria-hidden="true"><defs><linearGradient id="hqMk" gradientUnits="userSpaceOnUse" x1="0" y1="84" x2="100" y2="0"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#7DD3FC"/></linearGradient></defs><g fill="url(#hqMk)"><polygon points="50,8.3 63.1,19.4 62.6,22.5 49,34 45.2,31.1 5.3,68.9 2.5,70 3.1,51.7"/><polygon points="98.8,0.7 93.4,37.3 83.6,29.8 50.8,62.3 43.7,57.9 17.2,82.6 0.2,82.6 42.2,38.4 50.3,40.1 69.6,19.5 64.6,8.1"/><polygon points="82.3,37.6 99.5,53.6 99.6,84 88.6,83.6 62.5,57"/></g></svg>';
-// Antworten der Agenten: **fett** und Zeilenumbrüche darstellen (Text ist vorher maskiert).
-// Fett (**…**), Zeilenumbrüche und https-Links (in neuem Tab) – erst escapen, dann nur sichere https-Adressen verlinken.
+// Agent replies: bold (**…**), line breaks and https links (new tab) – escape first, then link only safe https URLs.
 const rich = (t) => esc(t).replace(/\*\*([^*\n]{1,200})\*\*/g, '<b>$1</b>').replace(/https:\/\/[A-Za-z0-9.\-]+(?:\/[A-Za-z0-9\-._~%/?=&;#]*)?/g, (u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`).replace(/\n/g, '<br>');
 const initials = (a) => (a.name[0] + a.last[0]).toUpperCase();
 
@@ -92,42 +93,42 @@ export async function hq(v, { goTab, msg }) {
   const my = ++seq;
   v.innerHTML = `<section class="hq" aria-labelledby="hqT">
     <header class="hq-hero" data-level="load">
-      <div class="hq-hero-top"><small class="hq-kick">LeaseRun Headquarters · Zentralsteuerung</small><button type="button" class="hq-ref" id="hqRef">${ic(I_REF, 16)}<span>Aktualisieren</span></button></div>
-      <h2 id="hqT" class="hq-title"><span class="hq-dot" aria-hidden="true"></span><span id="hqStat">Lage wird geprüft …</span></h2>
+      <div class="hq-hero-top"><small class="hq-kick">LeaseRun Headquarters · Command Center</small><button type="button" class="hq-ref" id="hqRef">${ic(I_REF, 16)}<span>Refresh</span></button></div>
+      <h2 id="hqT" class="hq-title"><span class="hq-dot" aria-hidden="true"></span><span id="hqStat">Checking status …</span></h2>
       <p class="hq-detail" id="hqDet"></p>
       <p class="hq-bar" id="hqBar"></p>
       <p class="hq-asof"><span id="hqAsof">${esc(today())}</span> <span class="hq-aist" id="hqAi"></span></p>
       <p class="hq-since" id="hqSince" hidden></p>
-      <form class="hq-q" id="hqQ" role="search"><input name="q" autocomplete="off" maxlength="300" placeholder="Suchen oder Auftrag geben …" aria-label="Suchen oder Auftrag an LeaseRun Intelligence" aria-controls="hqOS" aria-expanded="false"><button type="submit" class="hq-btn hq-btn-p">Los</button><div class="hq-os" id="hqOS" role="listbox" hidden></div></form>
+      <form class="hq-q" id="hqQ" role="search"><input name="q" autocomplete="off" maxlength="300" placeholder="Search or give a task …" aria-label="Search or give a task to LeaseRun Intelligence" aria-controls="hqOS" aria-expanded="false"><button type="submit" class="hq-btn hq-btn-p">Go</button><div class="hq-os" id="hqOS" role="listbox" hidden></div></form>
       <div class="hq-qa" id="hqQA" aria-live="polite" hidden></div>
       <section class="hq-orbit" id="hqOrbit" aria-labelledby="hqOrbitT">
-        <h3 class="sr-only" id="hqOrbitT">Abteilungen und digitale Mitarbeiter</h3>
+        <h3 class="sr-only" id="hqOrbitT">Departments and digital staff</h3>
         <div class="hq-feed" id="hqFeed" aria-live="polite"></div>
         <div class="hq-ring" id="hqRing">
           <div class="hq-core"><div class="hq-orb" aria-hidden="true"><span></span><span></span><span class="hq-orb-logo"><img src="/logo-icon.svg" alt="" width="54" height="46"></span></div>
-            <button type="button" class="hq-pill" id="hqAll"><span class="hq-mk">${MARK}</span><b>LeaseRun</b><small>Intelligence · alle an die Arbeit</small></button></div>
-          ${ORBIT.map((d, i) => { const a = AGENTS.find((x) => x.id === d.agent); return `<button type="button" class="hq-dep${d.founder ? ' founder' : ''}" data-dep="${d.k}" style="--i:${i};--n:${ORBIT.length}">${d.founder ? '<span class="hq-dep-ic hq-face"><img src="/img/gruender-240.webp" alt="Feray Korkmaz" width="40" height="40" loading="lazy"></span>' : `<span class="hq-dep-ic" style="--c:${a?.color || d.c}">${a ? `<span class="hq-ini">${initials(a)}</span>` : ic(d.icon, 20)}</span>`}<span class="hq-dep-t"><b>${esc(d.founder ? 'Feray Korkmaz' : `${a.name} ${a.last}`)}</b><small data-dl>${d.founder ? 'Head of Operations' : `<i class="dot"></i>${esc(d.n)}`}</small></span><em class="hq-dep-b" data-db hidden></em></button>`; }).join('')}
+            <button type="button" class="hq-pill" id="hqAll"><span class="hq-mk">${MARK}</span><b>LeaseRun</b><small>Intelligence · everyone to work</small></button></div>
+          ${ORBIT.map((d, i) => { const a = AGENTS.find((x) => x.id === d.agent); return `<button type="button" class="hq-dep${d.founder ? ' founder' : ''}" data-dep="${d.k}" style="--i:${i};--n:${ORBIT.length}">${d.founder ? '<span class="hq-dep-ic hq-face"><img src="/img/gruender-240.webp" alt="Head of Operations" width="40" height="40" loading="lazy"></span>' : `<span class="hq-dep-ic" style="--c:${a?.color || d.c}">${a ? `<span class="hq-ini">${initials(a)}</span>` : ic(d.icon, 20)}</span>`}<span class="hq-dep-t"><b>${esc(d.founder ? 'Feray Korkmaz' : `${a.name} ${a.last}`)}</b><small data-dl>${d.founder ? 'Head of Operations' : `<i class="dot"></i>${esc(d.n)}`}</small></span><em class="hq-dep-b" data-db hidden></em></button>`; }).join('')}
         </div>
         <div class="hq-sheet" id="hqSheet" aria-live="polite"></div>
-        <div class="hq-orbit-foot"><span id="hqShift">Schicht startet …</span></div>
+        <div class="hq-orbit-foot"><span id="hqShift">Shift starting …</span></div>
       </section>
     </header>
-    <section class="hq-card hq-prio hq-dec" aria-labelledby="hqDecT"><div class="hq-dec-h"><h3 id="hqDecT">Jetzt wichtig <span class="hq-dec-n" id="hqDecN"></span></h3><div class="hq-sh-a"><button type="button" class="hq-btn" id="hqDecRun">Jetzt prüfen</button><button type="button" class="hq-btn hq-btn-p" id="hqDecAll" hidden>Alles erledigen</button></div></div><div id="hqDec" aria-live="polite"><div class="hq-kpi hq-sk"></div></div></section>
-    <section class="hq-card hq-met" aria-labelledby="hqMetT"><h3 id="hqMetT">Heute · Kennzahlen</h3>
+    <section class="hq-card hq-prio hq-dec" aria-labelledby="hqDecT"><div class="hq-dec-h"><h3 id="hqDecT">Now important <span class="hq-dec-n" id="hqDecN"></span></h3><div class="hq-sh-a"><button type="button" class="hq-btn" id="hqDecRun">Check now</button><button type="button" class="hq-btn hq-btn-p" id="hqDecAll" hidden>Fix all</button></div></div><div id="hqDec" aria-live="polite"><div class="hq-kpi hq-sk"></div></div></section>
+    <section class="hq-card hq-met" aria-labelledby="hqMetT"><h3 id="hqMetT">Today · Metrics</h3>
       <div class="hq-chips hq-chips-l" id="hqRev" aria-live="polite"></div>
       <div class="hq-kpis" id="hqKpi" aria-live="polite">${'<div class="hq-kpi hq-sk"></div>'.repeat(4)}</div></section>
-    <details class="hq-card hq-fold"><summary><h3>Systeme</h3><span id="hqSysSum">…</span></summary><div id="hqSys"></div></details>
-    <details class="hq-card hq-fold"><summary><h3>Verlauf</h3><span id="hqActSum"></span></summary><div id="hqAct"></div></details>
+    <details class="hq-card hq-fold"><summary><h3>Systems</h3><span id="hqSysSum">…</span></summary><div id="hqSys"></div></details>
+    <details class="hq-card hq-fold"><summary><h3>Activity</h3><span id="hqActSum"></span></summary><div id="hqAct"></div></details>
   </section>`;
   const $ = (s) => v.querySelector(s);
-  // Reihenfolge: Status → Jetzt wichtig (inkl. Freigaben, Aktiv) → Kennzahlen → Abteilungen (Handy: kompaktes Raster) → Systeme/Verlauf.
+  // Order: status → Now important (incl. approvals, active) → metrics → departments (phone: compact grid) → systems/activity.
   const phone = matchMedia('(max-width: 600px)');
-  // Auch am Desktop: Entscheidungen vor dem Abteilungs-Ring – das Wichtigste steht im ersten Bildschirm.
+  // Desktop too: decisions before the department ring – the most important things are on the first screen.
   const arrange = () => { const o = $('#hqOrbit'), m = v.querySelector('.hq-met'); if (!o || !m) return; v.classList.toggle('hq-phone', phone.matches); m.after(o); };
   arrange(); phone.addEventListener?.('change', arrange);
-  // Tippen neben das Blatt schließt es (Handy).
+  // Tapping beside the sheet closes it (phone).
   $('#hqSheet').addEventListener('click', (e) => { if (e.target === e.currentTarget && openDep) { openDep = null; paintAll(); } });
-  // Ring mit Maus (oder Stift) drehen; ein kurzer Klick öffnet weiterhin den Agenten.
+  // Rotate the ring with mouse (or pen); a short click still opens the agent.
   const ring = { dragged: false, rot: 0 };
   { const el = $('#hqRing'); let st = null;
     el.addEventListener('pointerdown', (e) => { if (innerWidth < 900 || e.button !== 0) return; const r = el.getBoundingClientRect(); st = { cx: r.left + r.width / 2, cy: r.top + r.height / 2, x: e.clientX, y: e.clientY, rot: ring.rot }; st.a = Math.atan2(e.clientY - st.cy, e.clientX - st.cx); ring.dragged = false; });
@@ -136,85 +137,85 @@ export async function hq(v, { goTab, msg }) {
     el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
     el.addEventListener('wheel', (e) => { if (innerWidth < 900 || !e.shiftKey) return; e.preventDefault(); ring.rot += e.deltaY > 0 ? 12 : -12; el.style.setProperty('--rot', `${ring.rot}deg`); }, { passive: false });
   }
-  // ---------- Schicht: alle Mitarbeiter parallel ----------
+  // ---------- Shift: all staff in parallel ----------
   let shift = {}; const busy = new Set(); let queued = false;
-  const ST = { ok: ['ok', 'Erledigt'], todo: ['warn', 'Braucht dich'], error: ['bad', 'Problem'] };
-  const agoS = (t) => { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? 'gerade eben' : m < 60 ? `vor ${m} Min.` : `vor ${Math.round(m / 60)} Std.`; };
-  const FOUNDER = 'Feray';
+  const ST = { ok: ['ok', 'Done'], todo: ['warn', 'Needs you'], error: ['bad', 'Problem'] };
+  const agoS = (t) => { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`; };
+  const FOUNDER = 'you';
   let openDep = null, feedIx = 0;
   const depState = (d) => { if (d.founder) { return AGENTS.some((a) => shift[a.id] && shift[a.id].status !== 'ok') ? 'todo' : 'ok'; } if (!d.agent) return 'plan'; if (busy.has(d.agent)) return 'busy'; return shift[d.agent]?.status || 'idle'; };
   let findings = [], alerts = [], decReady = false;
   let cmds = {}; const chat = {}; let autoAsk = null; let ai = null; let proposals = []; let umsetzungSofort = false; let uBlock = null;
-  const usd = (x) => `${(Number(x) || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $`;
+  const usd = (x) => (Number(x) || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   const paintAi = () => {
     const el = $('#hqAi'); if (!el) return;
     if (!ai) { el.textContent = ''; return; }
-    if (!ai.configured) { el.innerHTML = `· <a href="#einrichtung">Claude noch nicht angebunden</a>`; return; }
-    el.innerHTML = ai.blocked ? `· <b>${esc(ai.blocked)}</b>` : '· LeaseRun Intelligence aktiv';
+    if (!ai.configured) { el.innerHTML = `· <a href="#einrichtung">Claude not connected yet</a>`; return; }
+    el.innerHTML = ai.blocked ? `· <b>${esc(ai.blocked)}</b>` : '· LeaseRun Intelligence active';
   };
-  // Analyse des Modells (Ursache · erledigt · was du tun musst) im Blatt eines Agenten.
-  const GRUND = { analyse: 'Analyse & Lösung', tag: 'Tagesrunde · Vorschläge', auftrag: 'Antwort' };
+  // Model analysis (cause · done · what you need to do) in an agent's sheet.
+  const GRUND = { analyse: 'Analysis & solution', tag: 'Daily round · proposals', auftrag: 'Reply' };
   const aiBox = (r) => {
     if (!r?.ai) return '';
     const a = r.ai;
-    return `<details class="hq-ai"><summary><small>${esc(GRUND[a.grund] || 'Ergebnis')} · ${esc(agoS(a.at))}</small></summary><p>${rich(a.text)}</p></details>`;
+    return `<details class="hq-ai"><summary><small>${esc(GRUND[a.grund] || 'Result')} · ${esc(agoS(a.at))}</small></summary><p>${rich(a.text)}</p></details>`;
   };
-  // Lösungen (Vorschläge): nur „Erledigen“ / „Verwerfen“. Erledigen setzt der Umsetzungs-Agent um; Dokumente sind sofort angenommen.
-  const KIND = { code: 'Änderung an der Website', text: 'Text', marketing: 'Marketing', einstellung: 'Einstellung', dokument: 'Dokument', sonstiges: 'Lösung' };
+  // Solutions (proposals): only "Do it" / "Dismiss". "Do it" is carried out by the implementation agent; documents are accepted right away.
+  const KIND = { code: 'Website change', text: 'Copy', marketing: 'Marketing', einstellung: 'Setting', dokument: 'Document', sonstiges: 'Solution' };
   const propHtml = (p) => { const a = AGENTS.find((x) => x.id === p.agent); const st = p.status;
-    return `<li class="hq-p-${esc(st)}"><div><b>${esc(p.title)}</b><small>${esc(a ? `${a.name} · ${a.role}` : p.agent)} · ${esc(KIND[p.kind] || 'Lösung')} · ${esc(agoS(p.at))}</small>
-      ${st === 'erledigt' ? `<p class="hq-res">${esc(p.result || 'Erledigt.')}</p>` : st === 'auftrag' || st === 'in_arbeit' ? `<p class="hq-res run">${st === 'in_arbeit' ? 'Wird gerade umgesetzt …' : (uBlock ? (uBlock.reason === 'guthaben' ? 'Freigegeben – wartet auf Anthropic-Guthaben und läuft danach automatisch.' : 'Freigegeben – wartet, läuft danach automatisch.') : umsetzungSofort ? 'Startet gleich – wird in den nächsten Minuten umgesetzt.' : 'Wartet auf den Umsetzungs-Agenten – er startet bei der nächsten Website-Aktualisierung. Für sofortigen Start: Einrichtung → „Lösungen sofort umsetzen lassen“.')}</p>` : `<details class="hq-more"><summary>Details</summary><p>${esc(p.detail).replace(/\n/g, '<br>')}</p>${p.why ? `<p class="hq-why">${esc(p.why)}</p>` : ''}</details>${p.result ? `<p class="hq-res bad">${esc(p.result)}</p>` : ''}`}</div>
-      ${st === 'offen' ? `<div class="hq-sh-a">${p.doc ? `<button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="pdf">PDF</button><button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="word">Word</button>` : ''}<button type="button" class="hq-btn hq-btn-p" data-dec="erledigen" data-pid="${esc(p.id)}">Erledigen</button><button type="button" class="hq-btn" data-dec="verworfen" data-pid="${esc(p.id)}">Verwerfen</button></div>` : st === 'erledigt' && p.doc ? `<div class="hq-sh-a"><button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="pdf">PDF</button><button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="word">Word</button></div>` : ''}</li>`; };
+    return `<li class="hq-p-${esc(st)}"><div><b>${esc(p.title)}</b><small>${esc(a ? `${a.name} · ${a.role}` : p.agent)} · ${esc(KIND[p.kind] || 'Solution')} · ${esc(agoS(p.at))}</small>
+      ${st === 'erledigt' ? `<p class="hq-res">${esc(p.result || 'Done.')}</p>` : st === 'auftrag' || st === 'in_arbeit' ? `<p class="hq-res run">${st === 'in_arbeit' ? 'Being implemented …' : (uBlock ? (uBlock.reason === 'guthaben' ? 'Approved – waiting for Anthropic credit, then runs automatically.' : 'Approved – waiting, then runs automatically.') : umsetzungSofort ? 'Starting soon – will be implemented in the next few minutes.' : 'Waiting for the implementation agent – it starts with the next website update. To start right away: Setup → "Implement solutions immediately".')}</p>` : `<details class="hq-more"><summary>Details</summary><p>${esc(p.detail).replace(/\n/g, '<br>')}</p>${p.why ? `<p class="hq-why">${esc(p.why)}</p>` : ''}</details>${p.result ? `<p class="hq-res bad">${esc(p.result)}</p>` : ''}`}</div>
+      ${st === 'offen' ? `<div class="hq-sh-a">${p.doc ? `<button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="pdf">PDF</button><button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="word">Word</button>` : ''}<button type="button" class="hq-btn hq-btn-p" data-dec="erledigen" data-pid="${esc(p.id)}">Do it</button><button type="button" class="hq-btn" data-dec="verworfen" data-pid="${esc(p.id)}">Dismiss</button></div>` : st === 'erledigt' && p.doc ? `<div class="hq-sh-a"><button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="pdf">PDF</button><button type="button" class="hq-btn" data-doc="${esc(p.id)}" data-f="word">Word</button></div>` : ''}</li>`; };
   const bindProps = (box) => {
     box.querySelectorAll('[data-dec]').forEach((b) => b.onclick = async () => {
-      // „Erledigen“ wirkt sofort mit einem Tippen (Wunsch Feray). Früher war ein zweites Tippen nötig – das ging verloren,
-      // wenn die Ansicht sich zwischendurch neu aufbaute (z. B. nach einer Analyse), und es sah aus, als passiere nichts.
-      b.disabled = true; b.textContent = b.dataset.dec === 'erledigen' ? 'Wird übergeben …' : '…';
+      // "Do it" works with a single tap (owner's wish). A second tap used to be needed – it got lost when the view
+      // re-rendered in between (e.g. after an analysis), and it looked like nothing happened.
+      b.disabled = true; b.textContent = b.dataset.dec === 'erledigen' ? 'Handing over …' : '…';
       const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'proposal', proposalId: b.dataset.pid, decision: b.dataset.dec }) });
-      if (!r.ok) { b.disabled = false; msg(r.data?.error || 'Nicht möglich.', true); return; }
-      proposals = r.data.proposals || []; msg(r.data.status === 'auftrag' ? (r.data.started ? 'Umsetzung gestartet – das Ergebnis erscheint hier und als Mitteilung.' : 'Freigegeben. Der Umsetzungs-Agent startet bei der nächsten Website-Aktualisierung (für sofort: Einrichtung).') : r.data.status === 'erledigt' ? 'Angenommen.' : 'Verworfen.'); paintAll();
+      if (!r.ok) { b.disabled = false; msg(r.data?.error || 'Not possible.', true); return; }
+      proposals = r.data.proposals || []; msg(r.data.status === 'auftrag' ? (r.data.started ? 'Implementation started – the result appears here and as a notification.' : 'Approved. The implementation agent starts with the next website update (for right away: Setup).') : r.data.status === 'erledigt' ? 'Accepted.' : 'Dismissed.'); paintAll();
     });
-    box.querySelectorAll('[data-doc]').forEach((b) => b.onclick = async () => { b.disabled = true; try { await download(`/api/admin/hq/doc?id=${encodeURIComponent(b.dataset.doc)}&f=${b.dataset.f}`, {}, `dokument.${b.dataset.f === 'word' ? 'docx' : 'pdf'}`); } catch (e) { msg(e.message || 'Download nicht möglich.', true); } b.disabled = false; });
+    box.querySelectorAll('[data-doc]').forEach((b) => b.onclick = async () => { b.disabled = true; try { await download(`/api/admin/hq/doc?id=${encodeURIComponent(b.dataset.doc)}&f=${b.dataset.f}`, {}, `document.${b.dataset.f === 'word' ? 'docx' : 'pdf'}`); } catch (e) { msg(e.message || 'Download not possible.', true); } b.disabled = false; });
   };
-  // Ava · Freigaben: Entwürfe als Pakete (Herkunft + Erstellungstag) prüfen. Auswahl im Postfach öffnen oder ins „Archiv“
-  // verschieben (nichts wird gelöscht). Kein Sammel-Senden – gesendet wird nur einzeln im Postfach.
+  // Ava · Approvals: review drafts as packages (source + day created). Open the selection in the Inbox or move it to
+  // "Archive" (nothing is deleted). No bulk sending – emails are only sent one by one from the Inbox.
   let pk = null, pkBusy = false; const pkSel = new Set(), pkOpen = new Set();
   const loadPk = async () => {
     if (pkBusy) return; pkBusy = true;
     const r = await api('/api/admin/hq?entwuerfe=1'); pkBusy = false;
-    pk = r.ok ? r.data : { error: r.data?.error || 'Entwürfe gerade nicht abrufbar.' };
+    pk = r.ok ? r.data : { error: r.data?.error || 'Drafts not available right now.' };
     paintPk($('#hqSheet [data-pk]'));
   };
-  const deDay = (t) => { const [y, m, d] = String(t).split('-'); return `${d}.${m}.${y}`; };
+  const deDay = (t) => { const [y, m, d] = String(t).split('-'); return `${m}/${d}/${y}`; };
   const paintPk = (el) => {
     if (!el) return;
-    if (!pk) { el.innerHTML = '<p class="hq-sh-l">Entwürfe werden geladen …</p>'; loadPk(); return; }
+    if (!pk) { el.innerHTML = '<p class="hq-sh-l">Loading drafts …</p>'; loadPk(); return; }
     if (pk.error) { el.innerHTML = `<p class="hq-sh-l">${esc(pk.error)}</p>`; return; }
     const ids = new Set(pk.pakete.flatMap((g) => g.entwuerfe.map((e) => e.id)));
     for (const id of [...pkSel]) if (!ids.has(id)) pkSel.delete(id);
     const n = pkSel.size;
-    el.innerHTML = `<h4 class="hq-h4">Entwürfe als Pakete (${pk.anzahl})</h4>
-      ${pk.anzahl ? `<div class="hq-sh-a"><button type="button" class="hq-btn hq-btn-p" data-pk-open ${n ? '' : 'disabled'}>Ausgewählte im Postfach öffnen${n ? ` (${n})` : ''}</button><button type="button" class="hq-btn" data-pk-arch ${n ? '' : 'disabled'}>Ausgewählte archivieren${n ? ` (${n})` : ''}</button><button type="button" class="hq-btn" data-pk-re>Neu laden</button></div>
-      <p class="hq-pk-n">Gesendet wird nur einzeln im Postfach. Werbung ohne Rechtsgrundlage (keine Einwilligung, Widerspruch, Abmeldelink fehlt) ist gesperrt und kann nicht gesendet werden. Archivieren verschiebt in den Ordner „Archiv“ – nichts wird gelöscht, alles ist zurückholbar.</p>
+    el.innerHTML = `<h4 class="hq-h4">Drafts as packages (${pk.anzahl})</h4>
+      ${pk.anzahl ? `<div class="hq-sh-a"><button type="button" class="hq-btn hq-btn-p" data-pk-open ${n ? '' : 'disabled'}>Open selected in Inbox${n ? ` (${n})` : ''}</button><button type="button" class="hq-btn" data-pk-arch ${n ? '' : 'disabled'}>Archive selected${n ? ` (${n})` : ''}</button><button type="button" class="hq-btn" data-pk-re>Reload</button></div>
+      <p class="hq-pk-n">Emails are only sent one by one from the Inbox. Marketing without a legal basis (no opt-in, opted out, missing unsubscribe link or postal address) is blocked and can't be sent. Archiving moves to the "Archive" folder – nothing is deleted, everything can be restored.</p>
       ${pk.pakete.map((g, gi) => { const k = `${g.herkunft}|${g.tag}`, dup = g.entwuerfe.filter((e) => e.doppel).length, all = g.entwuerfe.every((e) => pkSel.has(e.id));
-        return `<details class="hq-pk-g" data-pkg="${esc(k)}"${pkOpen.has(k) ? ' open' : ''}><summary><b>${esc(g.herkunft)}, ${deDay(g.tag)}, ${g.entwuerfe.length} Stück</b>${dup ? `<small>${dup} Doppel</small>` : ''}</summary>
-          <label class="hq-chk hq-pk-all"><input type="checkbox" data-pg="${gi}"${all ? ' checked' : ''}> Ganzes Paket auswählen</label>
-          <ul class="hq-pk-l">${g.entwuerfe.map((e) => `<li><label><input type="checkbox" data-pe="${esc(e.id)}"${pkSel.has(e.id) ? ' checked' : ''}><span><b>${esc(e.an)}</b><small>${esc(e.betreff || '(ohne Betreff)')}${e.doppel ? ' · <em>Doppel</em>' : ''}</small><small class="hq-pk-r"><span class="st${e.art === 'Werbung' ? ' warn' : ''}">${esc(e.art || 'Werbung')}</span> <span class="st ${e.sendbar ? 'ok' : 'bad'}">Rechtsgrundlage: ${esc(e.grundlage || 'fehlt')}</span>${!e.sendbar && e.grund ? ` · ${esc(e.grund)}` : ''}</small>${e.vorschau ? `<small class="hq-pk-v">${esc(e.vorschau)}</small>` : ''}</span></label></li>`).join('')}</ul></details>`; }).join('')}` : '<p class="hq-sh-l">✓ Keine Entwürfe im Postfach.</p>'}`;
+        return `<details class="hq-pk-g" data-pkg="${esc(k)}"${pkOpen.has(k) ? ' open' : ''}><summary><b>${esc(g.herkunft)}, ${deDay(g.tag)}, ${g.entwuerfe.length} items</b>${dup ? `<small>${dup} duplicates</small>` : ''}</summary>
+          <label class="hq-chk hq-pk-all"><input type="checkbox" data-pg="${gi}"${all ? ' checked' : ''}> Select whole package</label>
+          <ul class="hq-pk-l">${g.entwuerfe.map((e) => `<li><label><input type="checkbox" data-pe="${esc(e.id)}"${pkSel.has(e.id) ? ' checked' : ''}><span><b>${esc(e.an)}</b><small>${esc(e.betreff || '(no subject)')}${e.doppel ? ' · <em>Duplicate</em>' : ''}</small><small class="hq-pk-r"><span class="st${e.art === 'Werbung' ? ' warn' : ''}">${esc(e.art === 'Werbung' || !e.art ? 'Marketing' : e.art)}</span> <span class="st ${e.sendbar ? 'ok' : 'bad'}">Legal basis: ${esc(e.grundlage || 'missing')}</span>${!e.sendbar && e.grund ? ` · ${esc(e.grund)}` : ''}</small>${e.vorschau ? `<small class="hq-pk-v">${esc(e.vorschau)}</small>` : ''}</span></label></li>`).join('')}</ul></details>`; }).join('')}` : '<p class="hq-sh-l">✓ No drafts in the Inbox.</p>'}`;
     el.querySelectorAll('[data-pkg]').forEach((d) => d.ontoggle = () => { d.open ? pkOpen.add(d.dataset.pkg) : pkOpen.delete(d.dataset.pkg); });
     el.querySelectorAll('[data-pe]').forEach((x) => x.onchange = () => { x.checked ? pkSel.add(x.dataset.pe) : pkSel.delete(x.dataset.pe); paintPk(el); });
     el.querySelectorAll('[data-pg]').forEach((x) => x.onchange = () => { for (const e of pk.pakete[Number(x.dataset.pg)].entwuerfe) x.checked ? pkSel.add(e.id) : pkSel.delete(e.id); paintPk(el); });
     const re = el.querySelector('[data-pk-re]'); if (re) re.onclick = () => { pk = null; paintPk(el); };
     const op = el.querySelector('[data-pk-open]');
-    // Übergabe an das Postfach: Ordner „Entwürfe“, Auswahl vorgemerkt, erster Entwurf geöffnet.
-    if (op) op.onclick = () => { try { sessionStorage.setItem('lr-pf-pick', JSON.stringify([...pkSel].slice(0, 200))); } catch { /* nur Komfort */ } goTab('postfach'); };
+    // Hand-off to the Inbox: "Drafts" folder, selection remembered, first draft opened.
+    if (op) op.onclick = () => { try { sessionStorage.setItem('lr-pf-pick', JSON.stringify([...pkSel].slice(0, 200))); } catch { /* convenience only */ } goTab('postfach'); };
     const ar = el.querySelector('[data-pk-arch]');
     if (ar) ar.onclick = async () => {
       const list = [...pkSel].slice(0, 200);
-      if (!list.length || !confirm(`${list.length} ${list.length === 1 ? 'Entwurf' : 'Entwürfe'} in den Ordner „Archiv“ verschieben? Nichts wird gesendet oder gelöscht.`)) return;
-      ar.disabled = true; ar.textContent = 'Wird archiviert …';
+      if (!list.length || !confirm(`Move ${list.length} ${list.length === 1 ? 'draft' : 'drafts'} to the "Archive" folder? Nothing is sent or deleted.`)) return;
+      ar.disabled = true; ar.textContent = 'Archiving …';
       const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'entwuerfe_archivieren', ids: list }) });
-      if (!r.ok) { msg(r.data?.error || 'Archivieren nicht möglich.', true); paintPk(el); return; }
-      pk = r.data; pkSel.clear(); msg(`${r.data.archiviert} ${r.data.archiviert === 1 ? 'Entwurf' : 'Entwürfe'} ins Archiv verschoben (im Postfach unter „Archiv“ zurückholbar).`);
+      if (!r.ok) { msg(r.data?.error || 'Archiving not possible.', true); paintPk(el); return; }
+      pk = r.data; pkSel.clear(); msg(`${r.data.archiviert} ${r.data.archiviert === 1 ? 'draft' : 'drafts'} moved to Archive (restorable in the Inbox under "Archive").`);
       paintPk(el); work(['freigaben'], true);
     };
   };

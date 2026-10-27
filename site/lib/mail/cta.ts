@@ -29,12 +29,13 @@ export function ctaFromLabel(label: string): { art: CtaArt; w?: string } | null 
   return null;
 }
 
-// Topic preselected on /book for meetings booked from an outreach email.
-export const BOOK_TOPIC = 'Press & Partnership';
+// Topic preselected on /book (?topic=) for meetings booked from an outreach email. /book topics: Business partnership,
+// Product demo, Support, Press, Other.
+export const BOOK_TOPIC = 'Press';
 
 export function ctaUrl(art: CtaArt, w?: string, token?: string | null): string {
   const t = token && /^[A-Za-z0-9_-]{16,64}$/.test(token) ? token : '';
-  if (art === 'termin') return `${SITE}/book?thema=${encodeURIComponent(BOOK_TOPIC)}${t ? `&t=${t}` : ''}`;
+  if (art === 'termin') return `${SITE}/book?topic=${encodeURIComponent(BOOK_TOPIC)}${t ? `&t=${t}` : ''}`;
   return `${SITE}/request?art=${art}${w ? `&w=${w}` : ''}${t ? `&t=${t}` : ''}`;
 }
 

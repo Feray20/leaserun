@@ -29,10 +29,9 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 // Web-Admin → Inbox: Inbox, Sent, Drafts, Starred, Archive, Spam, Trash – read, reply, compose.
-// Folder keys are stored in the DB. 'belege' (receipts for tax bookkeeping) existed only in ImmoAdv; it stays a valid key so
-// nothing breaks, but LeaseRun never files mail there and the UI does not show it.
+// Folder keys are stored in the DB. ImmoAdv's receipts folder for tax bookkeeping ('belege', lr_tax_docs) does not exist in LeaseRun.
 const j = (b: unknown, s = 200) => NextResponse.json(b, { status: s, headers: { 'Cache-Control': 'no-store' } });
-const FOLDERS = ['inbox', 'belege', 'sent', 'drafts', 'archive', 'spam', 'trash'] as const;
+const FOLDERS = ['inbox', 'sent', 'drafts', 'archive', 'spam', 'trash'] as const;
 const LIST_COLS = 'id, thread_id, direction, folder, status, design, from_email, from_name, to_emails, subject, snippet, starred, read_at, created_at, sent_at, received_at, attachments, error, contact_id, auth, research_flag';
 const MAX_INLINE = 3 * 1024 * 1024;
 
