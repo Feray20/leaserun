@@ -1,0 +1,306 @@
+{
+ "stand": "Oktober 2026",
+ "hinweis": "Alle Preise sind Endpreise inkl. 19 % USt. Kreditmappe und Käufer-Pass sind Einmalkäufe ohne Abo – der Pass endet automatisch nach 90 Tagen. Investor Pro ist monatlich kündbar zum Ende des Abrechnungsmonats.",
+ "kostenlos": {
+  "name": "Kostenlos",
+  "features": [
+   "Rechner als Vorschau mit Beispielwerten, Grundlagen der Wissenszentrale",
+   "Konto mit 2 Objekten, Exposé-Scan und Stresstest",
+   "Software-Tools: Kaufnebenkosten, Kaufpreis-Check, Sondertilgung",
+   "Kreditmappe als vollständiger Entwurf mit Wasserzeichen – Freischaltung mit einem Klick"
+  ]
+ },
+ "privat": {
+  "name": "Privat",
+  "zielgruppe": "Wählen Sie nach Ihrer Situation: ein Objekt finanzieren, in Ruhe suchen oder dauerhaft investieren. Kreditmappe und Käufer-Pass sind Einmalkäufe ohne Abo.",
+  "plans": [
+   {
+    "id": "credit-map",
+    "name": "BankReady Kreditmappe",
+    "badge": "Einzelkauf · kein Abo",
+    "highlight": true,
+    "cents": 3900,
+    "intervall": "einmalig je Objekt",
+    "mode": "payment",
+    "features": [
+     "Bankfertige Kreditmappe für ein Objekt als PDF",
+     "Finanzierung, Haushaltsrechnung, Stresstest und Prüfpunkte",
+     "Unterlagenindex und Echtheitsprüfung per QR-Code",
+     "Kein Abo · Geld zurück, wenn Ihre Bank das Format ablehnt"
+    ],
+    "fuer": "Für Eigennutzer mit konkretem Objekt: einmal sauber vorbereitet zur Bank."
+   },
+   {
+    "id": "buyer-pass",
+    "name": "Käufer-Pass (3 Monate)",
+    "badge": "Für die Suchphase",
+    "cents": 4900,
+    "intervall": "einmalig für 90 Tage",
+    "mode": "payment",
+    "features": [
+     "Alle Rechner mit eigenen Zahlen und die komplette Wissenszentrale",
+     "90 Tage unbegrenzt Objekte, Exposé-Analysen und Vergleich",
+     "Kauf-Tools: Bankangebote vergleichen, Bankgespräch, Angebotsschreiben",
+     "Druck und PDF für alle Kauf-Tools und Analysen",
+     "1 Kreditmappe inklusive (Wert 39 €)",
+     "Endet automatisch – kein Abo, keine Kündigung"
+    ],
+    "basis": "Alles aus Kostenlos, plus:",
+    "fuer": "Für die Suchphase: mehrere Objekte prüfen und vergleichen – 90 Tage, kein Abo."
+   },
+   {
+    "id": "pro-monthly",
+    "name": "Investor Pro",
+    "badge": "Für Vermieter",
+    "cents": 2900,
+    "intervall": "pro Monat",
+    "mode": "subscription",
+    "features": [
+     "Alle Rechner mit eigenen Zahlen und die komplette Wissenszentrale",
+     "Unbegrenzt Objekte und Kreditmappen",
+     "Portfolio-Kennzahlen mit Zinsschock-Test",
+     "Anschluss & Forward, Betriebskostenabrechnung",
+     "Fristenwächter mit E-Mail-Erinnerung",
+     "CSV-Export für die Anlage V · monatlich kündbar"
+    ],
+    "basis": "Alles aus Käufer-Pass, plus:",
+    "fuer": "Für aktive Investoren mit Bestand und mehreren Objekten · monatlich kündbar."
+   }
+  ],
+  "vergleich": {
+   "spalten": [
+    "Kostenlos",
+    "Kreditmappe",
+    "Käufer-Pass",
+    "Investor Pro"
+   ],
+   "zeilen": [
+    [
+     "Objekte im Konto",
+     "2",
+     "2",
+     "unbegrenzt",
+     "unbegrenzt"
+    ],
+    [
+     "Kreditmappe (PDF)",
+     "Vorschau",
+     "1 Objekt",
+     "1 inklusive",
+     "unbegrenzt"
+    ],
+    [
+     "Kaufnebenkosten, Kaufpreis-Check, Sondertilgung",
+     "✓",
+     "✓",
+     "✓",
+     "✓"
+    ],
+    [
+     "Bankangebote, Bankgespräch, Angebotsschreiben",
+     "–",
+     "–",
+     "✓",
+     "✓"
+    ],
+    [
+     "Druck und PDF der Tools",
+     "–",
+     "–",
+     "✓",
+     "✓"
+    ],
+    [
+     "Portfolio, Anschluss & Forward, Betriebskosten",
+     "–",
+     "–",
+     "–",
+     "✓"
+    ],
+    [
+     "Fristenwächter, CSV-Export Anlage V",
+     "–",
+     "–",
+     "–",
+     "✓"
+    ],
+    [
+     "Laufzeit",
+     "dauerhaft",
+     "einmalig",
+     "90 Tage",
+     "monatlich kündbar"
+    ]
+   ]
+  },
+  "demo": "Erst testen, dann entscheiden: Kostenlos erstellen Sie Ihre komplette Kreditmappe als Entwurf mit Wasserzeichen. Gefällt sie Ihnen, schalten Sie sie mit einem Klick frei – Ihre Eingaben bleiben erhalten.",
+  "addons": [
+   {
+    "id": "leitfaden",
+    "name": "Notar-Checkliste & Banken-Verhandlungsleitfaden",
+    "cents": 900,
+    "zu": [
+     "credit-map",
+     "buyer-pass"
+    ],
+    "beschreibung": "Checkliste für Bankgespräch, Notartermin und die Zeit danach – als druckbare Seite in Ihrem Konto."
+   }
+  ]
+ },
+ "b2b": {
+  "name": "Für Unternehmen",
+  "hinweis": "Nur für Unternehmer im Sinne des § 14 BGB. Alle Preise netto zzgl. 19 % USt. Monatsabos monatlich kündbar, Jahresabos zum Ende der Laufzeit. Kein Widerrufsrecht für Unternehmer.",
+  "plans": [
+   {
+    "id": "b2b-basic-monthly",
+    "tier": "BASIC",
+    "name": "Makler & Vermittler Basic",
+    "netto_cents": 5900,
+    "intervall": "pro Monat",
+    "interval": "month",
+    "seats": 1,
+    "dossiers": 20,
+    "features": [
+     "1 Berater-Zugang",
+     "Unbegrenzt: Schnell-Checks (Fall-Analysen), Kunden-Einladungen und Anfragen",
+     "20 Kreditmappen und 3 Kunden-Präsentationen (PDF) pro Monat",
+     "Software-Tools: Haushaltsrechnung, Unterlagen-Anforderung, Provision, GEG-Inserat, Ertragswert",
+     "Pipeline mit CSV-Export, Website-Widget, Exposé-QR-Codes",
+     "Beratungskompass mit Präsentationsmodus"
+    ]
+   },
+   {
+    "id": "b2b-basic-yearly",
+    "tier": "BASIC",
+    "name": "Makler & Vermittler Basic (Jahr)",
+    "netto_cents": 59000,
+    "intervall": "pro Jahr",
+    "interval": "year",
+    "seats": 1,
+    "dossiers": 20,
+    "features": [
+     "Alle Leistungen von Basic",
+     "2 Monate geschenkt – entspricht ca. 49 € netto pro Monat"
+    ]
+   },
+   {
+    "id": "b2b-pro-monthly",
+    "tier": "PRO",
+    "name": "Kanzlei & Baufi Pro",
+    "netto_cents": 13900,
+    "intervall": "pro Monat",
+    "interval": "month",
+    "seats": 3,
+    "dossiers": null,
+    "features": [
+     "Bis zu 3 Berater-Zugänge",
+     "Kreditmappen ohne Limit, Gesamtdossier mit Unterlagen",
+     "Präsentationen unbegrenzt – mit Ihrem Logo, Ihren Farben und Ihrer Schrift",
+     "Zusätzliche Tools: Beratungsprotokoll (§ 511 BGB), Angebotsvergleich, Vorfälligkeit & Anschluss",
+     "Bestandskunden-Radar: Zinsbindungsenden Ihrer Kunden (mit Einwilligung)",
+     "Eigene Partnerseite mit Terminlink",
+     "REST-API v1 für Ihr CRM: Fälle anlegen und lesen, Vorprüfung, Schnell-Check und Unterlagenprüfung · 60 Anfragen pro Minute (Frühzugang auf Anfrage)"
+    ],
+    "basis": "Alles aus Basic, plus:"
+   },
+   {
+    "id": "b2b-pro-yearly",
+    "tier": "PRO",
+    "name": "Kanzlei & Baufi Pro (Jahr)",
+    "netto_cents": 139000,
+    "intervall": "pro Jahr",
+    "interval": "year",
+    "seats": 3,
+    "dossiers": null,
+    "features": [
+     "Alle Leistungen von Pro",
+     "2 Monate geschenkt – entspricht ca. 116 € netto pro Monat"
+    ]
+   }
+  ],
+  "enterprise": {
+   "tier": "ENTERPRISE",
+   "name": "Bank & Filiale Enterprise",
+   "preis": "ab 349 € netto pro Monat",
+   "seats": 10,
+   "features": [
+    "Ab 10 Berater-Zugängen, erweiterbar",
+    "Kreditmappen und Präsentationen unbegrenzt",
+    "White-Label: Unterlagen vollständig im Erscheinungsbild Ihres Hauses, ohne LeaseRun",
+    "Volle REST-API v1 mit API-Webhooks, White-Label-Berichten sowie Mandanten- und Berater-Routing · Anfragelimit nach Vertrag (Frühzugang auf Anfrage)",
+    "Teamverwaltung mit Berater-Zuordnung",
+    "Kauf auf Rechnung, Angebot nach Filialgröße"
+   ],
+   "basis": "Alles aus Pro, plus:"
+  },
+  "vergleich": {
+   "spalten": [
+    "Basic",
+    "Pro",
+    "Enterprise"
+   ],
+   "zeilen": [
+    [
+     "Berater-Zugänge",
+     "1",
+     "bis 3",
+     "ab 10"
+    ],
+    [
+     "Schnell-Checks, Einladungen, Anfragen",
+     "unbegrenzt",
+     "unbegrenzt",
+     "unbegrenzt"
+    ],
+    [
+     "Kreditmappen (PDF) pro Monat",
+     "20",
+     "unbegrenzt",
+     "unbegrenzt"
+    ],
+    [
+     "Kunden-Präsentationen (PDF)",
+     "3 pro Monat",
+     "unbegrenzt, mit Logo",
+     "unbegrenzt, White-Label"
+    ],
+    [
+     "Haushaltsrechnung, Unterlagen, Provision, GEG, Ertragswert",
+     "✓",
+     "✓",
+     "✓"
+    ],
+    [
+     "Beratungsprotokoll, Angebotsvergleich, Vorfälligkeit",
+     "–",
+     "✓",
+     "✓"
+    ],
+    [
+     "Bestandskunden-Radar, Partnerseite",
+     "–",
+     "✓",
+     "✓"
+    ],
+    [
+     "REST-API v1 (Fälle, Vorprüfung, Unterlagen)",
+     "– (CSV-Export)",
+     "60 Anfragen/Min.",
+     "voll, Limit nach Vertrag"
+    ],
+    [
+     "API-Webhooks, White-Label-Berichte, Routing",
+     "–",
+     "–",
+     "✓"
+    ],
+    [
+     "Teamverwaltung, Kauf auf Rechnung",
+     "–",
+     "–",
+     "✓"
+    ]
+   ]
+  }
+ }
+}

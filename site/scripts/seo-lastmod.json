@@ -1,0 +1,526 @@
+{
+ "/": {
+  "h": "fb7ef35467e15d3f",
+  "d": "2026-10-26"
+ },
+ "/pricing": {
+  "h": "5685cee204b0045f",
+  "d": "2026-10-26"
+ },
+ "/business": {
+  "h": "d1d744ae0a03272b",
+  "d": "2026-10-26"
+ },
+ "/cockpit": {
+  "h": "8242649bfe0788f3",
+  "d": "2026-10-26"
+ },
+ "/privacy": {
+  "h": "4d6b2b2252b89e5d",
+  "d": "2026-10-27"
+ },
+ "/legal-notice": {
+  "h": "f8fc31f9e62f9a1e",
+  "d": "2026-10-26"
+ },
+ "/contact": {
+  "h": "a0adbeb392032f68",
+  "d": "2026-10-24"
+ },
+ "/cancel": {
+  "h": "28d2ec559a888e77",
+  "d": "2026-10-24"
+ },
+ "/sample-loan-package": {
+  "h": "9330c2fe02302c2a",
+  "d": "2026-10-26"
+ },
+ "/terms": {
+  "h": "f797779d747b3ba5",
+  "d": "2026-10-26"
+ },
+ "/pro-guide": {
+  "h": "1d0004ddec11955d",
+  "d": "2026-10-26"
+ },
+ "/profiler": {
+  "h": "1d8625e2d40e3515",
+  "d": "2026-10-24"
+ },
+ "/guides": {
+  "h": "29b062e229e21ae0",
+  "d": "2026-10-26"
+ },
+ "/guides/bankfaehige-selbstauskunft": {
+  "h": "fb2778e7b407591b",
+  "d": "2026-10-26"
+ },
+ "/guides/baufinanzierung-mit-kindern": {
+  "h": "b2384d6c4a44a44d",
+  "d": "2026-10-26"
+ },
+ "/guides/baufinanzierung-selbststaendig": {
+  "h": "5ef97f0820b49a70",
+  "d": "2026-10-26"
+ },
+ "/guides/beleihungsauslauf-immobilienkredit": {
+  "h": "22663a3a38d6d33f",
+  "d": "2026-10-26"
+ },
+ "/guides/haushaltsrechnung-immobilienfinanzierung": {
+  "h": "f6bc043da09128b1",
+  "d": "2026-10-26"
+ },
+ "/guides/immobilienkredit-ohne-eigenkapital": {
+  "h": "25ab8ed2c12c8caa",
+  "d": "2026-10-26"
+ },
+ "/guides/kredit-abgelehnt-gruende-loesung": {
+  "h": "f3bde8cde43bc28c",
+  "d": "2026-10-26"
+ },
+ "/guides/kredit-mit-autokredit": {
+  "h": "3383f7238f4a3a51",
+  "d": "2026-10-26"
+ },
+ "/guides/monatliche-rate-400000-euro-kredit": {
+  "h": "369fdc863feead2f",
+  "d": "2026-10-26"
+ },
+ "/guides/tilgung-immobilienkredit": {
+  "h": "36d135427f16e296",
+  "d": "2026-10-26"
+ },
+ "/guides/wie-hoch-darf-kreditrate-sein": {
+  "h": "5190781da66eab14",
+  "d": "2026-10-26"
+ },
+ "/guides/wie-viel-eigenkapital-fuer-immobilienkredit": {
+  "h": "c93eb959a993a0e7",
+  "d": "2026-10-26"
+ },
+ "/guides/wieviel-gehalt-fuer-200000-euro-kredit": {
+  "h": "06452714e4fea4d2",
+  "d": "2026-10-26"
+ },
+ "/guides/wieviel-gehalt-fuer-300000-euro-kredit": {
+  "h": "b70fa9fcf283beba",
+  "d": "2026-10-26"
+ },
+ "/guides/wieviel-gehalt-fuer-400000-euro-kredit": {
+  "h": "08f8b9b1442a559b",
+  "d": "2026-10-26"
+ },
+ "/guides/wieviel-gehalt-fuer-500000-euro-kredit": {
+  "h": "e0ac353ebf99e19f",
+  "d": "2026-10-26"
+ },
+ "/guides/wieviel-gehalt-fuer-600000-euro-kredit": {
+  "h": "2cabe348b9f33f0a",
+  "d": "2026-10-26"
+ },
+ "/guides/wieviel-gehalt-fuer-800000-euro-kredit": {
+  "h": "f8cea64a35bd8243",
+  "d": "2026-10-26"
+ },
+ "/calculators": {
+  "h": "2538aed839cde6ba",
+  "d": "2026-10-26"
+ },
+ "/calculators/depreciation": {
+  "h": "918278b6c6fb670c",
+  "d": "2026-10-26"
+ },
+ "/calculators/approval-odds": {
+  "h": "4339d9683bfb82b3",
+  "d": "2026-10-26"
+ },
+ "/calculators/budget": {
+  "h": "3e876efc7872f045",
+  "d": "2026-10-26"
+ },
+ "/calculators/cash-flow": {
+  "h": "91fdf91998993548",
+  "d": "2026-10-26"
+ },
+ "/calculators/rent-vs-buy": {
+  "h": "d43fab944634563c",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs": {
+  "h": "20870da7251ba500",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/baden-wuerttemberg": {
+  "h": "1ae006ccbbe6faea",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/bayern": {
+  "h": "a93fd4ae9a6c4c0d",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/berlin": {
+  "h": "87087d1d7a45d352",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/brandenburg": {
+  "h": "58f3fd1a9046f87c",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/bremen": {
+  "h": "9c1ce9303e015208",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/hamburg": {
+  "h": "68ed6eca10adc918",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/hessen": {
+  "h": "5ec3d1609f8ca706",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/mecklenburg-vorpommern": {
+  "h": "c03011fd900ffe2c",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/niedersachsen": {
+  "h": "e94f9bed5d6c30f7",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/nordrhein-westfalen": {
+  "h": "d2ad4904bac08a2f",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/rheinland-pfalz": {
+  "h": "4da7a8ab581fc6c1",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/saarland": {
+  "h": "217b4c55811ad97a",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/sachsen": {
+  "h": "d8c2c1572c3c51eb",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/sachsen-anhalt": {
+  "h": "299ed4c8bc695af5",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/schleswig-holstein": {
+  "h": "a7727be2f4c2d33d",
+  "d": "2026-10-26"
+ },
+ "/calculators/closing-costs/thueringen": {
+  "h": "974a0796b8a82ab2",
+  "d": "2026-10-26"
+ },
+ "/calculators/rent-increase": {
+  "h": "ea5aac9758105726",
+  "d": "2026-10-26"
+ },
+ "/calculators/scorecard": {
+  "h": "a9c8f3e724a8b503",
+  "d": "2026-10-26"
+ },
+ "/calculators/amortization": {
+  "h": "b5cb817f4820d99c",
+  "d": "2026-10-26"
+ },
+ "/calculators/loan-comparison": {
+  "h": "436bd23b342b6e0b",
+  "d": "2026-10-26"
+ },
+ "/security": {
+  "h": "a9da153997ce8e69",
+  "d": "2026-10-26"
+ },
+ "/start": {
+  "h": "435774f37f93e5df",
+  "d": "2026-10-26"
+ },
+ "/scenarios": {
+  "h": "9a1a839d9c102dec",
+  "d": "2026-10-26"
+ },
+ "/about": {
+  "h": "0de7a0d2f2a9e2f2",
+  "d": "2026-10-26"
+ },
+ "/refund": {
+  "h": "78dccf2aa3f91eec",
+  "d": "2026-10-24"
+ },
+ "/learn": {
+  "h": "9a9636b260adaf1d",
+  "d": "2026-10-26"
+ },
+ "/learn/brutto-netto-und-eigenkapitalrendite-was-ist-der-unterschied": {
+  "h": "1be840ff6fa3471c",
+  "d": "2026-10-26"
+ },
+ "/learn/eigentumswohnung-was-sagen-teilungserklaerung-protokolle-und-ruecklage": {
+  "h": "2ba1b28daa29f25e",
+  "d": "2026-10-26"
+ },
+ "/learn/erwerbsstatus": {
+  "h": "626600b259d78990",
+  "d": "2026-10-26"
+ },
+ "/learn/gehoeren-die-kaufnebenkosten-zu-den-werbungskosten": {
+  "h": "adfadd68377616ab",
+  "d": "2026-10-26"
+ },
+ "/learn/glossar": {
+  "h": "b8335d14919726ed",
+  "d": "2026-10-26"
+ },
+ "/learn/hebel-leverage-warum-ein-kredit-chancen-und-risiken-vergroessert": {
+  "h": "6cf236e39e1c426f",
+  "d": "2026-10-26"
+ },
+ "/learn/in-welcher-reihenfolge-baue-ich-meine-finanzen-auf": {
+  "h": "4be85e621efbbefc",
+  "d": "2026-10-26"
+ },
+ "/learn/kann-ich-die-kosten-einer-neuen-einbaukueche-absetzen": {
+  "h": "7ece4b9a3cbe070c",
+  "d": "2026-10-26"
+ },
+ "/learn/kann-ich-groessere-reparaturen-auf-mehrere-jahre-verteilen": {
+  "h": "85665f2d3b85901c",
+  "d": "2026-10-26"
+ },
+ "/learn/kann-ich-kosten-absetzen-wenn-die-wohnung-leer-steht": {
+  "h": "5ff88cb22a28e778",
+  "d": "2026-10-26"
+ },
+ "/learn/klug-investieren-worauf-kommt-es-an": {
+  "h": "5229f7a2e2227f89",
+  "d": "2026-10-26"
+ },
+ "/learn/sind-schuldzinsen-auch-nach-dem-verkauf-noch-absetzbar": {
+  "h": "3b35d8dd00ad5879",
+  "d": "2026-10-26"
+ },
+ "/learn/vermietete-wohnung-rechnung": {
+  "h": "30da08efbaf72a7e",
+  "d": "2026-10-24"
+ },
+ "/learn/vermittelt-leaserun-kredite": {
+  "h": "5b87508714730c11",
+  "d": "2026-10-26"
+ },
+ "/learn/wann-darf-ich-wegen-mietrueckstand-kuendigen": {
+  "h": "5bb7cecdc952c6c2",
+  "d": "2026-10-26"
+ },
+ "/learn/wann-ist-ein-verkauf-steuerfrei": {
+  "h": "72af2cac4bfb955c",
+  "d": "2026-10-26"
+ },
+ "/learn/warum-investieren": {
+  "h": "c41d595e9615dff5",
+  "d": "2026-10-24"
+ },
+ "/learn/warum-unterscheidet-die-bank-nach-beruf-und-einkommensart": {
+  "h": "0127ac57b884effc",
+  "d": "2026-10-26"
+ },
+ "/learn/was-bedeuten-die-felder-sollzins-tilgung-und-zinsbindung": {
+  "h": "238be283a2e88350",
+  "d": "2026-10-26"
+ },
+ "/learn/was-bedeuten-zins-tilgung-annuitaet-und-zinsbindung": {
+  "h": "a628498362ef0bea",
+  "d": "2026-10-26"
+ },
+ "/learn/was-bedeutet-cashflow-vor-und-nach-steuern": {
+  "h": "274bcbffb4bbbbf2",
+  "d": "2026-10-26"
+ },
+ "/learn/was-gehoert-in-eine-kreditmappe": {
+  "h": "9cd006d8ed80a167",
+  "d": "2026-10-26"
+ },
+ "/learn/was-gilt-bei-vermietung-an-angehoerige": {
+  "h": "a37be48b1d95b016",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-der-beleihungswert": {
+  "h": "f033d479fcbc5b3a",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-der-unterschied-zwischen-erhaltungsaufwand-und-herstellungskosten": {
+  "h": "55bd85ef95eb3d13",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-die-15-grenze-bei-renovierungen": {
+  "h": "c89a0de175cb1562",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-die-kappungsgrenze": {
+  "h": "468d9399812b8150",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-die-kreditmappe": {
+  "h": "81c9e3ff68abac96",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-die-nettomietrendite": {
+  "h": "a2f35d1df90141f5",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-ein-anschlusszins-kipp-punkt": {
+  "h": "9719d42d86c00b0f",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-ein-mietausfallwagnis": {
+  "h": "44b0e7f8b74030b8",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-eine-haushaltsrechnung-und-was-gehoert-hinein": {
+  "h": "3fecc121847a75e1",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-geld-und-wie-entsteht-es": {
+  "h": "1a7db9da950b860d",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-inflation-und-warum-betrifft-sie-mich": {
+  "h": "33d764be5a24f7db",
+  "d": "2026-10-26"
+ },
+ "/learn/was-ist-mein-grenzsteuersatz-und-wo-finde-ich-ihn": {
+  "h": "f9f049c92b3fe80e",
+  "d": "2026-10-26"
+ },
+ "/learn/was-kann-ich-bei-der-vermietung-nicht-absetzen": {
+  "h": "7fe0aa60c3747c0c",
+  "d": "2026-10-26"
+ },
+ "/learn/was-kostet-leaserun": {
+  "h": "b5e02b653170887b",
+  "d": "2026-10-26"
+ },
+ "/learn/was-macht-der-banken-ready-score": {
+  "h": "d61053e07766e5e5",
+  "d": "2026-10-26"
+ },
+ "/learn/was-passiert-wenn-die-zinsbindung-endet": {
+  "h": "2db6ddb097f85ec0",
+  "d": "2026-10-26"
+ },
+ "/learn/was-sind-beleihungswert-marktwert-und-miteigentumsanteil": {
+  "h": "2986be1b2935f1a9",
+  "d": "2026-10-26"
+ },
+ "/learn/was-sind-nicht-umlagefaehige-kosten-und-instandhaltung-pro-monat": {
+  "h": "a387710b8d82b65e",
+  "d": "2026-10-26"
+ },
+ "/learn/was-trage-ich-bei-nettoeinkommen-und-eigenkapital-ein": {
+  "h": "876bd0ab588774a0",
+  "d": "2026-10-26"
+ },
+ "/learn/was-tun-wenn-der-mieter-nicht-puenktlich-zahlt": {
+  "h": "e58add7b504eafd5",
+  "d": "2026-10-26"
+ },
+ "/learn/welche-daten-speichert-leaserun": {
+  "h": "cbb5874ce389862a",
+  "d": "2026-10-26"
+ },
+ "/learn/welche-nebenkosten-kommen-zum-kaufpreis-dazu": {
+  "h": "d76ca4f008086622",
+  "d": "2026-10-26"
+ },
+ "/learn/welche-unterlagen-fehlen-typischerweise": {
+  "h": "bb0ecb0d6e8aef2b",
+  "d": "2026-10-26"
+ },
+ "/learn/welche-werbungskosten-kann-ich-bei-einer-vermieteten-wohnung-absetzen": {
+  "h": "da8c2c4892573087",
+  "d": "2026-10-26"
+ },
+ "/learn/welcher-teil-des-hausgelds-ist-absetzbar": {
+  "h": "912234c2f3d24da3",
+  "d": "2026-10-26"
+ },
+ "/learn/welches-datum-trage-ich-bei-kaufvertrag-und-darlehensauszahlung-ein": {
+  "h": "894227a8c5aca51c",
+  "d": "2026-10-26"
+ },
+ "/learn/wer-kann-meine-daten-sehen": {
+  "h": "253f1406cf5e0944",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-bewerte-ich-ein-portfolio": {
+  "h": "a9ed721aaa8d0d2e",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-entsteht-vermoegen-sparquote-rendite-und-zinseszins": {
+  "h": "565c47a6b128bfcf",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-ermittle-ich-den-gebaeudeanteil-am-kaufpreis": {
+  "h": "9eebada3cc0ac0fb",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-funktioniert-das-gerichtliche-mahnverfahren": {
+  "h": "517ac980d088483c",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-funktioniert-die-afa": {
+  "h": "eda8ff93e54d2264",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-funktioniert-die-mietpreisbremse": {
+  "h": "2ebabad88d2c5f58",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-funktioniert-eine-staffelmiete": {
+  "h": "5cfdd58fa271215b",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-hoch-darf-die-monatliche-belastung-sein": {
+  "h": "b08a5ea5ad58bb15",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-kann-ich-mehrere-objekte-vergleichen": {
+  "h": "487b5e586f65ff4b",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-loesche-ich-meine-daten": {
+  "h": "c5cf951594732066",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-pruefe-ich-eine-eigentumswohnung": {
+  "h": "73816eb34beade73",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-setze-ich-fahrten-zu-meiner-vermieteten-wohnung-ab": {
+  "h": "39be57135e24ea91",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-sichere-ich-mich-gegen-mietausfall-ab": {
+  "h": "c42ea45ae888a978",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-trage-ich-meine-vermietung-in-die-anlage-v-ein": {
+  "h": "decefe00ebd12cd0",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-verdient-eine-vermietete-immobilie-geld": {
+  "h": "48d042d49a13332a",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-viel-eigenkapital-brauche-ich": {
+  "h": "5294b3876e2ec1c5",
+  "d": "2026-10-26"
+ },
+ "/learn/wie-viel-immobilie-kann-ich-mir-leisten": {
+  "h": "2bfe2f8eb7269a14",
+  "d": "2026-10-26"
+ }
+}

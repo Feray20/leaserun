@@ -1,0 +1,44 @@
+{
+  "name": "leaserun",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/legacy-pages.mjs && node scripts/build-ratgeber.mjs && node scripts/bundle-css.mjs && node scripts/build-seo.mjs && node scripts/version-assets.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "postbuild": "node scripts/indexnow.mjs",
+    "start": "next start",
+    "lint": "next lint",
+    "export:faq": "node scripts/export-faq.mjs",
+    "test": "node --experimental-strip-types --no-warnings --import ./tests/register.mjs --test 'tests/**/*.test.ts'",
+    "seo": "node scripts/build-ratgeber.mjs && node scripts/build-seo.mjs",
+    "ratgeber": "node scripts/build-ratgeber.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "@tailwindcss/postcss": "^4.1.14",
+    "next": "^15.5.27",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.1.14",
+    "zod": "^3.25.76",
+    "stripe": "^22.6.0",
+    "@react-pdf/renderer": "^4.3.0",
+    "qrcode": "^1.5.4",
+    "pdf-lib": "^1.17.1",
+    "fflate": "^0.8.2",
+    "tesseract.js": "^7.0.0",
+    "unpdf": "^0.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.3",
+    "@types/qrcode": "^1.5.5"
+  },
+  "overrides": {
+    "postcss": "8.5.30"
+  }
+}

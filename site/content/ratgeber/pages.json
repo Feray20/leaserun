@@ -1,0 +1,568 @@
+[
+ {
+  "path": "/guides",
+  "file": "ratgeber/index.html",
+  "title": "Ratgeber Immobilienfinanzierung: Gehalt, Rate, Eigenkapital | LeaseRun",
+  "desc": "Gehalt für 400.000 € Kredit, tragbare Rate, Eigenkapital, Haushaltsrechnung der Bank: Antworten mit Modellrechnung, Quellen und Datenstand.",
+  "crumbs": [
+   "Ratgeber"
+  ],
+  "indexable": true
+ },
+ {
+  "path": "/calculators/approval-odds",
+  "file": "rechner/bank-chancen-checker/index.html",
+  "title": "Bank-Chancen-Checker: Ist meine Finanzierung tragfähig? | LeaseRun",
+  "desc": "Haushaltsnetto, Darlehen und laufende Kosten eintragen: Rate, Überschuss und tragfähiges Darlehen im Modell – mit Ampel, Annahmen und Quellen.",
+  "crumbs": [
+   "Rechner",
+   "Bank-Chancen-Checker"
+  ],
+  "indexable": true,
+  "tool": true
+ },
+ {
+  "path": "/guides/wieviel-gehalt-fuer-200000-euro-kredit",
+  "file": "ratgeber/wieviel-gehalt-fuer-200000-euro-kredit/index.html",
+  "title": "Wie viel Gehalt für 200.000 € Kredit? Netto je Haushalt",
+  "desc": "Für 200.000 € Kredit liegt die Rate im Modell bei rund 1.030 € im Monat. Welches Haushaltsnetto Single, Paar und Familie brauchen – mit Rechner.",
+  "crumbs": [
+   "Ratgeber",
+   "Gehalt für 200.000 € Kredit"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Gehalt brauche ich für einen Kredit über 200.000 €?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Reichen 2.500 € netto für 200.000 € Kredit?",
+    "a": "Für einen Single liegt das im Modell etwa auf Höhe des Werts für eine tragfähige Ausgangslage (2.540 €) – also ohne nennenswerten Spielraum. Mit niedrigeren eigenen Lebenshaltungskosten, einem geringeren Hausgeld oder mehr Tilgungsspielraum kann die Rechnung anders aussehen. Tragen Sie Ihre echten Zahlen in den Checker ein."
+   },
+   {
+    "q": "Wie hoch ist die Rate für 200.000 € Kredit?",
+    "a": "Bei 4,2 % Sollzins und 2 % anfänglicher Tilgung sind es rund 1.033 € im Monat, bei einem Prozentpunkt weniger Zins rund 867 €. Die Rate bleibt über die Zinsbindung gleich; danach gilt ein neuer Zins."
+   },
+   {
+    "q": "Zählt das Hausgeld in der Haushaltsrechnung?",
+    "a": "Ja. Banken berücksichtigen laufende Kosten der Immobilie. Bei einer Wohnung ist das Hausgeld der naheliegende Anhaltspunkt. Wie genau es angesetzt wird, entscheidet jedes Institut selbst."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wieviel-gehalt-fuer-300000-euro-kredit",
+  "file": "ratgeber/wieviel-gehalt-fuer-300000-euro-kredit/index.html",
+  "title": "Wie viel Gehalt für 300.000 € Kredit? Rate und Netto",
+  "desc": "Für 300.000 € Kredit liegt die Rate im Modell bei rund 1.550 €. Benötigtes Haushaltsnetto für Single, Paar und Familie – und was Teilzeit ändert.",
+  "crumbs": [
+   "Ratgeber",
+   "Gehalt für 300.000 € Kredit"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Gehalt brauche ich für einen Kredit über 300.000 €?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Reichen 4.000 € netto als Paar für 300.000 €?",
+    "a": "Im Modell ja, solange keine weiteren Raten bestehen und die laufenden Objektkosten im Rahmen bleiben: Für ein Paar ohne Kinder liegt der Wert bei etwa 3.500 €. Mit Kind steigt er auf rund 3.890 €."
+   },
+   {
+    "q": "Wird das Gehalt beider Partner angerechnet?",
+    "a": "Wenn beide Darlehensnehmer sind, rechnen Banken in der Regel beide Einkommen an. Einkommen aus Probezeit, Befristung oder schwankenden Bestandteilen wie Boni werden oft nur eingeschränkt berücksichtigt."
+   },
+   {
+    "q": "Wie lange dauert es, 300.000 € abzuzahlen?",
+    "a": "Mit 2 % anfänglicher Tilgung und gleichbleibendem Zins von 4,2 % rund 27 Jahre. Eine höhere Tilgung verkürzt die Laufzeit deutlich, erhöht aber die Rate."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wieviel-gehalt-fuer-400000-euro-kredit",
+  "file": "ratgeber/wieviel-gehalt-fuer-400000-euro-kredit/index.html",
+  "title": "Wie viel Gehalt für 400.000 € Kredit? Netto mit Rechner",
+  "desc": "400.000 € Kredit: Rate im Modell rund 2.070 € im Monat. Wie viel Netto Paare und Familien brauchen und welche Stellschrauben es gibt – mit Rechner.",
+  "crumbs": [
+   "Ratgeber",
+   "Gehalt für 400.000 € Kredit"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Gehalt brauche ich für 400.000 € Kredit?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Reichen 5.000 € netto für 400.000 € Kredit?",
+    "a": "Für eine Familie mit einem Kind liegt das im Modell über dem Wert von 4.470 € und ergibt eine tragfähige Ausgangslage, sofern keine weiteren Raten bestehen. Mit zwei Kindern wird es mit rund 4.860 € enger."
+   },
+   {
+    "q": "Wie hoch ist die Rate für 400.000 €?",
+    "a": "Rund 2.067 € im Monat bei 4,2 % Sollzins und 2 % Tilgung. Wie sich Zins und Tilgung auswirken, zeigt der Ratgeber zur monatlichen Rate für 400.000 €."
+   },
+   {
+    "q": "Kann ich 400.000 € als Single finanzieren?",
+    "a": "Im Modell braucht ein Single dafür rund 3.690 € netto. Das ist möglich, setzt aber ein hohes und sicheres Einkommen voraus. Banken achten bei Singles besonders auf Reserve und Beschäftigung."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wieviel-gehalt-fuer-500000-euro-kredit",
+  "file": "ratgeber/wieviel-gehalt-fuer-500000-euro-kredit/index.html",
+  "title": "Wie viel Gehalt für 500.000 € Kredit? Netto und Rate",
+  "desc": "500.000 € Kredit: Rate im Modell rund 2.580 € im Monat. Nötiges Haushaltsnetto, Rolle des Eigenkapitals und Beleihungsauslaufs – mit Checker.",
+  "crumbs": [
+   "Ratgeber",
+   "Gehalt für 500.000 € Kredit"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Gehalt brauche ich für 500.000 € Kredit?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Welches Einkommen braucht man für 500.000 € Kredit?",
+    "a": "Im Modell rund 4.650 € Haushaltsnetto für ein Paar ohne Kinder und 4.260 € für einen Single – bei 4,2 % Sollzins, 2 % Tilgung und ohne weitere Raten."
+   },
+   {
+    "q": "Wie hoch ist die monatliche Rate bei 500.000 €?",
+    "a": "Rund 2.583 € bei 4,2 % Sollzins und 2 % Tilgung; bei einem Prozentpunkt weniger etwa 2.167 €."
+   },
+   {
+    "q": "Bekommt man 500.000 € ohne Eigenkapital?",
+    "a": "Eine Finanzierung ohne Eigenkapital ist bei so hohen Beträgen nur bei sehr gutem, sicherem Einkommen denkbar und in der Regel teurer. Mehr dazu im Ratgeber zum Immobilienkredit ohne Eigenkapital."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wieviel-gehalt-fuer-600000-euro-kredit",
+  "file": "ratgeber/wieviel-gehalt-fuer-600000-euro-kredit/index.html",
+  "title": "Wie viel Gehalt für 600.000 € Kredit? Netto und Risiko",
+  "desc": "600.000 € Kredit: Rate im Modell rund 3.100 € im Monat. Welches Netto nötig ist und wie stark ein höherer Anschlusszins die Rechnung verändert.",
+  "crumbs": [
+   "Ratgeber",
+   "Gehalt für 600.000 € Kredit"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Gehalt brauche ich für 600.000 € Kredit?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wie viel muss man verdienen für 600.000 € Kredit?",
+    "a": "Im Modell rund 5.230 € Haushaltsnetto als Paar ohne Kinder; mit zwei Kindern etwa 6.000 €. Weitere Raten oder hohe laufende Kosten erhöhen den Bedarf."
+   },
+   {
+    "q": "Was kostet ein Prozentpunkt mehr Zins bei 600.000 €?",
+    "a": "Zu Beginn rund 500 € Rate im Monat. Nach zehn Jahren, bezogen auf die dann niedrigere Restschuld, noch etwa 375 €."
+   },
+   {
+    "q": "Lohnt sich eine lange Zinsbindung bei 600.000 €?",
+    "a": "Sie kostet meist einen Zinsaufschlag, macht die Rate aber länger planbar. Ob sich das rechnet, hängt vom Aufschlag und Ihrer Erwartung an künftige Zinsen ab – eine Garantie gibt es in keine Richtung."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wieviel-gehalt-fuer-800000-euro-kredit",
+  "file": "ratgeber/wieviel-gehalt-fuer-800000-euro-kredit/index.html",
+  "title": "Wie viel Gehalt für 800.000 € Kredit? Netto im Modell",
+  "desc": "800.000 € Kredit: Rate im Modell rund 4.130 € im Monat. Nötiges Haushaltsnetto, Restschuld nach zehn Jahren und was Banken bei hohen Darlehen prüfen.",
+  "crumbs": [
+   "Ratgeber",
+   "Gehalt für 800.000 € Kredit"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Gehalt brauche ich für 800.000 € Kredit?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wie viel Netto braucht man für 800.000 € Kredit?",
+    "a": "Im Modell rund 6.380 € als Paar ohne Kinder und rund 5.990 € als Single, bei 4,2 % Sollzins und 2 % Tilgung."
+   },
+   {
+    "q": "Wie hoch ist die Rate für 800.000 € Kredit?",
+    "a": "Etwa 4.133 € im Monat bei 4,2 % Sollzins und 2 % Tilgung, bei einem Prozentpunkt weniger etwa 3.467 €."
+   },
+   {
+    "q": "Wie viel Restschuld bleibt nach zehn Jahren?",
+    "a": "Bei 2 % anfänglicher Tilgung und gleichbleibendem Zins im Modell rund 600.000 €. Mit höherer Tilgung oder Sondertilgungen sinkt sie entsprechend."
+   }
+  ]
+ },
+ {
+  "path": "/guides/monatliche-rate-400000-euro-kredit",
+  "file": "ratgeber/monatliche-rate-400000-euro-kredit/index.html",
+  "title": "Monatliche Rate für 400.000 € Kredit: Tabelle und Rechner",
+  "desc": "Rate für 400.000 € Kredit je Sollzins und Tilgung, dazu Restschuld nach zehn Jahren und Laufzeit. Mit Rechner und Erklärung der Annuität.",
+  "crumbs": [
+   "Ratgeber",
+   "Monatliche Rate für 400.000 €"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Welche monatliche Rate hat ein Kredit über 400.000 €?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wie hoch ist die Rate bei 400.000 € und 3 % Zins?",
+    "a": "Mit 2 % Tilgung rund 1.667 € im Monat. Mit 3 % Tilgung entsprechend 333 € mehr."
+   },
+   {
+    "q": "Wie viele Jahre zahlt man 400.000 € ab?",
+    "a": "Bei 4,2 % Sollzins und 2 % anfänglicher Tilgung etwa 27 Jahre, wenn der Zins über die gesamte Laufzeit gleich bliebe. Mit 3 % Tilgung sind es rund 21 Jahre."
+   },
+   {
+    "q": "Ändert sich die Rate während der Zinsbindung?",
+    "a": "Nein, beim Annuitätendarlehen bleibt sie gleich. Ausnahme: Sie haben einen Tilgungssatzwechsel vereinbart und nutzen ihn, oder Sie leisten Sondertilgungen und vereinbaren danach eine neue Rate."
+   }
+  ]
+ },
+ {
+  "path": "/guides/haushaltsrechnung-immobilienfinanzierung",
+  "file": "ratgeber/haushaltsrechnung-immobilienfinanzierung/index.html",
+  "title": "Haushaltsrechnung für die Baufinanzierung: so rechnet die Bank",
+  "desc": "Was in die Haushaltsrechnung gehört, wie Banken Lebenshaltung pauschal ansetzen und wie Sie Ihre eigene Rechnung bankfertig vorbereiten – mit Checker.",
+  "crumbs": [
+   "Ratgeber",
+   "Haushaltsrechnung der Bank"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Haushaltsrechnung für die Immobilienfinanzierung: Aufbau und Pauschalen",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Welche Pauschale setzen Banken für Lebenshaltung an?",
+    "a": "Das legt jedes Institut selbst fest; eine einheitliche Pauschale gibt es nicht. Üblich ist eine Staffelung nach Personen im Haushalt. LeaseRun rechnet mit einem offengelegten Modell, das Sie durch eigene Zahlen ersetzen können."
+   },
+   {
+    "q": "Zählt die bisherige Miete in der Haushaltsrechnung?",
+    "a": "Bei selbst genutztem Eigentum nicht, weil sie mit dem Einzug entfällt. Stattdessen kommen die laufenden Kosten der eigenen Immobilie hinzu."
+   },
+   {
+    "q": "Wird Kindergeld als Einkommen angerechnet?",
+    "a": "Viele Banken berücksichtigen Kindergeld als Einnahme. Gleichzeitig steigen mit jedem Kind die angesetzten Lebenshaltungskosten."
+   },
+   {
+    "q": "Wie hoch sollte der Überschuss sein?",
+    "a": "Eine feste Grenze gibt es nicht. Das LeaseRun-Modell verlangt für „tragfähig“ mindestens 10 % des Haushaltsnettos als Puffer."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wie-hoch-darf-kreditrate-sein",
+  "file": "ratgeber/wie-hoch-darf-kreditrate-sein/index.html",
+  "title": "Wie hoch darf die Kreditrate sein? Faustregel und Rechnung",
+  "desc": "Ein Drittel bis 40 % vom Netto? Warum Faustregeln nur ein Anfang sind, wie die Haushaltsrechnung die tragbare Rate bestimmt und welcher Puffer sinnvoll ist.",
+  "crumbs": [
+   "Ratgeber",
+   "Wie hoch darf die Kreditrate sein?"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie hoch darf die Kreditrate für eine Immobilie sein?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wie viel Prozent vom Netto darf die Rate sein?",
+    "a": "Als grobe Orientierung gilt etwa ein Drittel bis 40 %. Entscheidend ist aber die Haushaltsrechnung mit Ihren tatsächlichen Ausgaben und einem Puffer."
+   },
+   {
+    "q": "Zählt das Kindergeld zum Netto?",
+    "a": "In vielen Haushaltsrechnungen ja. Dafür werden für jedes Kind auch höhere Lebenshaltungskosten angesetzt."
+   },
+   {
+    "q": "Was passiert, wenn die Rate zu hoch ist?",
+    "a": "Im Modell sinkt der Überschuss unter den Puffer oder wird negativ. Banken bieten dann oft ein geringeres Darlehen an oder verlangen mehr Eigenkapital."
+   }
+  ]
+ },
+ {
+  "path": "/guides/tilgung-immobilienkredit",
+  "file": "ratgeber/tilgung-immobilienkredit/index.html",
+  "title": "Tilgung beim Immobilienkredit: Wie hoch sollte sie sein?",
+  "desc": "Wie die anfängliche Tilgung Laufzeit, Zinskosten und Restschuld bestimmt – mit Tabelle für 400.000 €, Sondertilgung und Tilgungssatzwechsel erklärt.",
+  "crumbs": [
+   "Ratgeber",
+   "Tilgung richtig wählen"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Tilgung beim Immobilienkredit: 1, 2 oder 3 Prozent?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Ist 1 % Tilgung zu wenig?",
+    "a": "Bei heutigen Zinsen führt 1 % zu sehr langen Laufzeiten und hoher Restschuld. Viele Banken verlangen eine höhere Mindesttilgung; die Höhe legt jedes Institut selbst fest."
+   },
+   {
+    "q": "Kann ich die Tilgung später ändern?",
+    "a": "Nur, wenn ein Tilgungssatzwechsel im Vertrag vereinbart ist. Ohne Vereinbarung bleibt die Tilgung bis zum Ende der Zinsbindung gleich."
+   },
+   {
+    "q": "Was bringt eine Sondertilgung?",
+    "a": "Sie senkt die Restschuld sofort und damit alle künftigen Zinsen. Bei gleichbleibender Rate verkürzt sich die Laufzeit."
+   }
+  ]
+ },
+ {
+  "path": "/guides/wie-viel-eigenkapital-fuer-immobilienkredit",
+  "file": "ratgeber/wie-viel-eigenkapital-fuer-immobilienkredit/index.html",
+  "title": "Wie viel Eigenkapital für den Immobilienkredit? Mit Tabelle",
+  "desc": "Mindestens die Kaufnebenkosten, besser mehr: Eigenkapital je Bundesland für 400.000 € Kaufpreis, was als Eigenkapital zählt und wie es den Zins beeinflusst.",
+  "crumbs": [
+   "Ratgeber",
+   "Wie viel Eigenkapital brauche ich?"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Wie viel Eigenkapital brauche ich für einen Immobilienkredit?",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wie viel Eigenkapital ist Pflicht?",
+    "a": "Eine gesetzliche Mindestquote gibt es nicht. Üblich ist, dass das Eigenkapital mindestens die Kaufnebenkosten deckt; manche Banken finanzieren bei sehr gutem Einkommen auch darüber hinaus."
+   },
+   {
+    "q": "Wie hoch sind die Kaufnebenkosten?",
+    "a": "Je nach Bundesland und Makler etwa 5,5 bis 12 % des Kaufpreises. Grunderwerbsteuer zwischen 3,5 und 6,5 %, Notar und Grundbuch zusammen etwa 2 %, Makler je nach Vereinbarung."
+   },
+   {
+    "q": "Bekomme ich mit mehr Eigenkapital einen besseren Zins?",
+    "a": "Oft ja, weil das Risiko der Bank sinkt. Wie stark der Effekt ist, hängt von der Zinsstaffel des jeweiligen Instituts ab."
+   }
+  ]
+ },
+ {
+  "path": "/guides/immobilienkredit-ohne-eigenkapital",
+  "file": "ratgeber/immobilienkredit-ohne-eigenkapital/index.html",
+  "title": "Kredit ohne Eigenkapital: 100- und 110-%-Finanzierung",
+  "desc": "Was 100- und 110-%-Finanzierung bedeuten, was sie im Vergleich kosten und welche Voraussetzungen Banken typischerweise sehen wollen – mit Rechenbeispiel.",
+  "crumbs": [
+   "Ratgeber",
+   "Kredit ohne Eigenkapital (100 % / 110 %)"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Immobilienkredit ohne Eigenkapital: 100- und 110-Prozent-Finanzierung",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Was ist der Unterschied zwischen 100- und 110-%-Finanzierung?",
+    "a": "Bei 100 % finanziert die Bank den Kaufpreis, die Nebenkosten zahlen Sie aus eigenen Mitteln. Bei 110 % werden auch die Nebenkosten finanziert; Eigenkapital ist dann nicht nötig."
+   },
+   {
+    "q": "Ist eine Finanzierung ohne Eigenkapital teurer?",
+    "a": "In der Regel ja. Banken verlangen für Darlehen über dem Beleihungswert meist einen Zinsaufschlag; die Höhe ist institutsspezifisch."
+   },
+   {
+    "q": "Für wen kann eine 110-%-Finanzierung sinnvoll sein?",
+    "a": "Am ehesten für Haushalte mit hohem, sicherem Einkommen, die schnell tilgen können und bewusst auf das Ansparen verzichten. Für knappe Haushalte erhöht sie das Risiko deutlich."
+   }
+  ]
+ },
+ {
+  "path": "/guides/beleihungsauslauf-immobilienkredit",
+  "file": "ratgeber/beleihungsauslauf-immobilienkredit/index.html",
+  "title": "Beleihungsauslauf: Bedeutung, Rechnung, Einfluss auf den Zins",
+  "desc": "Beleihungsauslauf = Darlehen ÷ Beleihungswert. Wie Banken den Beleihungswert ermitteln, was die 60-%-Grenze bedeutet und wie Sie den Auslauf senken.",
+  "crumbs": [
+   "Ratgeber",
+   "Beleihungsauslauf erklärt"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Beleihungsauslauf: Was er bedeutet und warum er den Zins beeinflusst",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Was ist ein guter Beleihungsauslauf?",
+    "a": "Ein Auslauf bis 60 % des Beleihungswerts gilt als sehr sicher und wird oft am günstigsten verzinst. Darüber steigen die Zinsen bei vielen Banken stufenweise; die Grenzen legt jedes Institut selbst fest."
+   },
+   {
+    "q": "Ist der Beleihungswert gleich dem Kaufpreis?",
+    "a": "Nein, meist liegt er darunter. Die Bank bewertet vorsichtig, damit der Wert auch in schwächeren Marktphasen trägt."
+   },
+   {
+    "q": "Was ist der Unterschied zwischen Beleihungsauslauf und Beleihungsgrenze?",
+    "a": "Der Auslauf beschreibt Ihre konkrete Finanzierung. Die Beleihungsgrenze ist ein fester Anteil des Beleihungswerts, bis zu dem eine Bank Darlehen als erstrangig besichert einordnet, zum Beispiel 60 % bei Pfandbriefbanken."
+   }
+  ]
+ },
+ {
+  "path": "/guides/kredit-abgelehnt-gruende-loesung",
+  "file": "ratgeber/kredit-abgelehnt-gruende-loesung/index.html",
+  "title": "Immobilienkredit abgelehnt: Gründe und nächste Schritte",
+  "desc": "Haushaltsrechnung, Eigenkapital, Bonität, Beleihungswert, Unterlagen: typische Prüffaktoren hinter einer Absage – und wie Sie sie gezielt angehen.",
+  "crumbs": [
+   "Ratgeber",
+   "Kredit abgelehnt – was jetzt?"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Immobilienkredit abgelehnt: Woran es oft liegt und was Sie tun können",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Muss die Bank eine Ablehnung begründen?",
+    "a": "Eine allgemeine Pflicht, die Gründe im Einzelnen zu nennen, gibt es nicht. Nachfragen lohnt sich trotzdem."
+   },
+   {
+    "q": "Wie erfahre ich, was die SCHUFA über mich gespeichert hat?",
+    "a": "Über das Auskunftsrecht nach Art. 15 DSGVO. Die Auskunft ist kostenlos und muss die gespeicherten Daten vollständig enthalten."
+   },
+   {
+    "q": "Wie lange sollte ich nach einer Absage warten?",
+    "a": "Das hängt vom Grund ab. Lag es an fehlenden Unterlagen, können Sie sofort neu anfragen. Lag es an der Haushaltsrechnung oder am Eigenkapital, sollten Sie zuerst die Zahlen verändern."
+   }
+  ]
+ },
+ {
+  "path": "/guides/bankfaehige-selbstauskunft",
+  "file": "ratgeber/bankfaehige-selbstauskunft/index.html",
+  "title": "Selbstauskunft für die Baufinanzierung: bankfähig ausfüllen",
+  "desc": "Persönliche Daten, Einkommen, Ausgaben, Vermögen, Verbindlichkeiten: Aufbau einer Selbstauskunft für die Baufinanzierung und typische Fehler, die Zeit kosten.",
+  "crumbs": [
+   "Ratgeber",
+   "Bankfähige Selbstauskunft"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Bankfähige Selbstauskunft: Was hineingehört und worauf Banken achten",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Ist die Selbstauskunft verpflichtend?",
+    "a": "Banken verlangen sie in der Regel als Teil des Kreditantrags, weil sie die Kreditwürdigkeit prüfen müssen (§ 505b BGB). Die Form unterscheidet sich von Bank zu Bank."
+   },
+   {
+    "q": "Muss ich alle Kredite angeben?",
+    "a": "Ja. Auch kleine Ratenkredite, Leasing und Kreditkarten mit Teilzahlung gehören hinein. Sie tauchen ohnehin in Kontoauszügen oder der Bonitätsauskunft auf."
+   },
+   {
+    "q": "Wie aktuell müssen die Angaben sein?",
+    "a": "So aktuell wie möglich. Ändert sich etwas Wesentliches – etwa der Arbeitsplatz –, sollten Sie die Bank vor der Unterschrift informieren."
+   }
+  ]
+ },
+ {
+  "path": "/guides/kredit-mit-autokredit",
+  "file": "ratgeber/kredit-mit-autokredit/index.html",
+  "title": "Baufinanzierung mit laufendem Autokredit oder Leasing",
+  "desc": "Laufende Auto- und Leasingraten mindern die Haushaltsrechnung voll. Wie viel Darlehen eine Rate von 300 € im Modell kostet und wann sich Ablösen lohnt.",
+  "crumbs": [
+   "Ratgeber",
+   "Baufinanzierung mit Autokredit oder Leasing"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Baufinanzierung mit Autokredit oder Leasingrate: Was das bedeutet",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wird eine Leasingrate wie ein Kredit gewertet?",
+    "a": "In der Haushaltsrechnung ja: Sie ist eine feste monatliche Verpflichtung und wird abgezogen."
+   },
+   {
+    "q": "Lohnt es sich, den Autokredit vorher abzulösen?",
+    "a": "Oft, wenn die Restschuld klein und die Rate hoch ist. Prüfen Sie aber, ob danach noch genug Eigenkapital und Reserve übrig sind."
+   },
+   {
+    "q": "Muss ich einen 0-%-Ratenkauf angeben?",
+    "a": "Ja. Auch ohne Zinsen ist es eine monatliche Verpflichtung, die in der Haushaltsrechnung berücksichtigt wird."
+   }
+  ]
+ },
+ {
+  "path": "/guides/baufinanzierung-mit-kindern",
+  "file": "ratgeber/baufinanzierung-mit-kindern/index.html",
+  "title": "Baufinanzierung mit Kindern: Kindergeld, Elternzeit, Rate",
+  "desc": "Wie Kinder die Haushaltsrechnung verändern, welche Rolle Kindergeld und Elterngeld spielen und wie Sie Elternzeit und Teilzeit in die Finanzierung einplanen.",
+  "crumbs": [
+   "Ratgeber",
+   "Baufinanzierung mit Kindern"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Baufinanzierung mit Kindern: Worauf Familien achten sollten",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Zählt Kindergeld bei der Baufinanzierung?",
+    "a": "Viele Banken rechnen es als Einnahme an. Gleichzeitig setzen sie je Kind höhere Lebenshaltungskosten an."
+   },
+   {
+    "q": "Wird Elterngeld als Einkommen anerkannt?",
+    "a": "Weil es zeitlich befristet ist, häufig nicht oder nur eingeschränkt. Banken interessiert vor allem das Einkommen nach der Elternzeit."
+   },
+   {
+    "q": "Sollte ich vor oder nach der Geburt kaufen?",
+    "a": "Das ist eine persönliche Entscheidung. Rechnerisch wichtig ist, dass die Rate auch in Elternzeit und Teilzeit tragbar bleibt."
+   }
+  ]
+ },
+ {
+  "path": "/guides/baufinanzierung-selbststaendig",
+  "file": "ratgeber/baufinanzierung-selbststaendig/index.html",
+  "title": "Baufinanzierung als Selbstständige: Einkommen und Unterlagen",
+  "desc": "Wie Banken das Einkommen von Selbstständigen ermitteln, welche Unterlagen typischerweise nötig sind und wie Sie die Haushaltsrechnung realistisch aufstellen.",
+  "crumbs": [
+   "Ratgeber",
+   "Baufinanzierung als Selbstständige"
+  ],
+  "indexable": true,
+  "article": {
+   "headline": "Baufinanzierung als Selbstständige oder Freiberufler",
+   "datePublished": "2026-10-26",
+   "dateModified": "2026-10-26"
+  },
+  "faqs": [
+   {
+    "q": "Wie lange muss ich selbstständig sein?",
+    "a": "Häufig werden zwei bis drei Jahre erwartet, damit Jahresabschlüsse vorliegen. Feste Vorgaben gibt es nicht; jedes Institut entscheidet selbst."
+   },
+   {
+    "q": "Welches Einkommen zählt bei Selbstständigen?",
+    "a": "In der Regel der durchschnittliche Gewinn mehrerer Jahre nach Steuern, Kranken- und Pflegeversicherung und Altersvorsorge."
+   },
+   {
+    "q": "Reicht eine aktuelle BWA ohne Steuerbescheid?",
+    "a": "Meist nicht allein. Die BWA zeigt die aktuelle Entwicklung, Banken wollen zusätzlich abgeschlossene Jahre sehen."
+   }
+  ]
+ }
+]

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /app/
+Disallow: /auth/
+Disallow: /data-room
+Disallow: /review
+Disallow: /verify/
+Disallow: /p/
+Disallow: /partners
+Disallow: /business-portal
+
+Sitemap: https://leaserun.com/sitemap.xml

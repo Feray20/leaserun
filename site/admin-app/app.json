@@ -1,0 +1,80 @@
+{
+  "expo": {
+    "name": "LeaseRun Admin",
+    "slug": "leaserun-admin",
+    "owner": "leaserun",
+    "scheme": "leaserun-admin",
+    "version": "1.2.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "primaryColor": "#0F2C59",
+    "description": "LeaseRun Admin – Control Center für Administratoren von leaserun.com.",
+    "ios": {
+      "bundleIdentifier": "de.leaserun.admin",
+      "buildNumber": "6",
+      "supportsTablet": true,
+      "requireFullScreen": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSFaceIDUsageDescription": "Face ID schützt den Zugang zu LeaseRun Admin und bestätigt sensible Aktionen.",
+        "NSPhotoLibraryAddUsageDescription": "Damit Sie Bilder aus E-Mails direkt in Ihre Fotos sichern können.",
+        "NSPhotoLibraryUsageDescription": "Damit Sie Bilder aus E-Mails direkt in Ihre Fotos sichern können."
+      }
+    },
+    "android": {
+      "package": "de.leaserun.admin",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#0F2C59"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Face ID schützt den Zugang zu LeaseRun Admin und bestätigt sensible Aktionen."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Damit Sie Bilder aus E-Mails direkt in Ihre Fotos sichern können.",
+          "savePhotosPermission": "Damit Sie Bilder aus E-Mails direkt in Ihre Fotos sichern können.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ],
+      "expo-web-browser",
+      "expo-sharing",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "26d9a005-7159-43c6-977f-6dd87ecb773b"
+      },
+      "api": "https://leaserun.com"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+/* /request – Antwortseite für Knöpfe in Akquise-Mails. Baut auf termin.css auf (tm-card, tm-form, tm-step …). */
+.af-opts{border:0;margin:4px 0 18px;padding:0;display:grid;gap:8px}
+.af-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.af-opt{display:flex!important;align-items:flex-start;gap:10px;margin:0!important;padding:12px 14px;border:1.5px solid #E2E8F0;border-radius:12px;cursor:pointer;font-weight:600;color:#1E293B;transition:border-color .15s,background-color .15s}
+.af-opt input{margin:3px 0 0;width:18px;height:18px;accent-color:#0F2C59;flex:none}
+.af-opt:has(input:checked){border-color:#0284C7;background:#F0F9FF}
+.af-opt:focus-within{box-shadow:0 0 0 3px rgba(2,132,199,.15)}
+.af-step2{margin-top:6px}
+.af-side{display:grid;gap:14px}
+.af-link{display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:#1E293B;transition:transform .15s,box-shadow .15s}
+.af-link:hover{transform:translateY(-1px);box-shadow:0 14px 34px -18px rgba(15,44,89,.35)}
+.af-link strong{display:block;color:#0F2C59;font-size:16px;margin-bottom:2px}
+.af-link .af-d{display:block;color:#475569;font-size:14px;line-height:1.45;font-weight:400;text-transform:none;letter-spacing:0}
+.af-ic{display:inline-grid;place-items:center;flex:none;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#0284C7,#0F2C59);color:#fff}
+.af-no{margin:2px 4px 0;font-size:13px;color:#64748B}
+.af-no a{color:#475569}
+@media (max-width:860px){.af-side{margin-top:4px}}
+@media (prefers-reduced-motion:reduce){.af-link,.af-opt{transition:none}.af-link:hover{transform:none}}

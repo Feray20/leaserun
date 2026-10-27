@@ -1,0 +1,72 @@
+# LeaseRun
+
+> LeaseRun (leaserun.com) ist eine unabhängige deutsche Online-Plattform für Immobilien- und Finanzierungsanalysen. Private Käufer, Kapitalanleger, Vermittler und Banken rechnen dort Kaufkraft, Kaufnebenkosten, Rendite, Cashflow und Stresstest durch und erstellen eine bankfertige Kreditmappe als PDF. LeaseRun nimmt keine Provisionen, vermittelt keine Kredite oder Immobilien und bietet keine Anlage-, Steuer- oder Rechtsberatung.
+
+Wichtige Fakten:
+
+- Betreiberin: Feray Korkmaz, Einzelunternehmen, Reinheim (Hessen), Deutschland. Kontakt: support@leaserun.com
+- Tätigkeitsgebiet: ganz Deutschland, rein digital.
+- Sprache: Deutsch. Preise in Euro, Stand Oktober 2026.
+- Privat: Kostenlos (Rechner, 2 Objekte); BankReady Kreditmappe 39 € einmalig je Objekt; Käufer-Pass 49 € für 90 Tage; Investor Pro 29 € pro Monat, monatlich kündbar. Endpreise inkl. 19 % USt.
+- Unternehmen (nur § 14 BGB): Basic 59 €, Pro 139 €, Enterprise ab 349 € netto pro Monat.
+- Rechtliche Einordnung: technisches Analyse- und Vorbereitungswerkzeug. Keine Kreditvermittlung (§ 34i GewO), keine Steuerberatung (StBerG), keine Rechtsdienstleistung (RDG). Ergebnisse sind Orientierungswerte auf Basis der Nutzerangaben, keine Finanzierungszusage.
+
+## Produkt
+
+- [Startseite und Schnellrechner](https://leaserun.com/): Rendite, Cashflow, Rate und Stresstest für ein Objekt
+- [Angebote und Preise](https://leaserun.com/pricing): alle Tarife für Privatkunden mit Leistungsvergleich
+- [Für Unternehmen](https://leaserun.com/business): Portal für Makler, Finanzierungsvermittler, Kanzleien und Banken
+- [Mustermappe](https://leaserun.com/sample-loan-package): Beispiel einer Kreditmappe
+- [Meine erste Immobilie](https://leaserun.com/start): Einstieg für Erstkäufer
+- [Sicherheit](https://leaserun.com/security): Hosting in der EU, Verschlüsselung, Zugriffskontrolle
+
+## Rechner
+
+- [Alle Rechner](https://leaserun.com/calculators)
+- [Kaufnebenkosten je Bundesland](https://leaserun.com/calculators/closing-costs): Grunderwerbsteuer, Notar, Grundbuch, Makler
+- [Budget und Kaufkraft](https://leaserun.com/calculators/budget)
+- [Cashflow nach Steuern](https://leaserun.com/calculators/cash-flow)
+- [Tilgungsplan](https://leaserun.com/calculators/amortization)
+- [Bank-Chancen-Checker](https://leaserun.com/calculators/approval-odds): Haushaltsrechnung im Modell – Rate, Überschuss, tragfähiges Darlehen
+- [Kaufen oder mieten](https://leaserun.com/calculators/rent-vs-buy)
+- [AfA-Plan](https://leaserun.com/calculators/depreciation)
+- [Angebotsvergleich](https://leaserun.com/calculators/loan-comparison)
+
+## Wissen
+
+- [Wissenszentrale](https://leaserun.com/learn): Artikel zu Finanzierung, Eigenkapital, Rendite, Steuern und Vermietung
+- [Glossar](https://leaserun.com/learn/glossar)
+- [Wie viel Immobilie kann ich mir leisten?](https://leaserun.com/learn/wie-viel-immobilie-kann-ich-mir-leisten)
+- [Was gehört in eine Kreditmappe?](https://leaserun.com/learn/was-gehoert-in-eine-kreditmappe)
+- [Vermittelt LeaseRun Kredite?](https://leaserun.com/learn/vermittelt-leaserun-kredite)
+- [Was kostet LeaseRun?](https://leaserun.com/learn/was-kostet-leaserun)
+
+## Rechtliches
+
+- [Impressum](https://leaserun.com/legal-notice)
+- [Datenschutz](https://leaserun.com/privacy)
+- [Nutzungsbedingungen](https://leaserun.com/terms)
+
+## Ratgeber Immobilienfinanzierung
+
+<!--ratgeber:start-->
+- [Übersicht](https://leaserun.com/guides)
+- [Gehalt für 200.000 € Kredit](https://leaserun.com/guides/wieviel-gehalt-fuer-200000-euro-kredit): Netto je Haushalt, Rate und typische Fallstricke bei der Wohnung
+- [Gehalt für 300.000 € Kredit](https://leaserun.com/guides/wieviel-gehalt-fuer-300000-euro-kredit): Doppelverdiener, Teilzeit und das nötige Haushaltsnetto
+- [Gehalt für 400.000 € Kredit](https://leaserun.com/guides/wieviel-gehalt-fuer-400000-euro-kredit): Familie, Haus und das Netto, das im Modell trägt
+- [Gehalt für 500.000 € Kredit](https://leaserun.com/guides/wieviel-gehalt-fuer-500000-euro-kredit): Großstadtpreise, Beleihungsauslauf und nötiges Netto
+- [Gehalt für 600.000 € Kredit](https://leaserun.com/guides/wieviel-gehalt-fuer-600000-euro-kredit): Zinsänderungsrisiko in Euro und das nötige Netto
+- [Gehalt für 800.000 € Kredit](https://leaserun.com/guides/wieviel-gehalt-fuer-800000-euro-kredit): Sehr hohe Darlehen: Netto, Restschuld und Bankprüfung
+- [Monatliche Rate für 400.000 €](https://leaserun.com/guides/monatliche-rate-400000-euro-kredit): Rate je Zins und Tilgung, Restschuld und Laufzeit
+- [Haushaltsrechnung der Bank](https://leaserun.com/guides/haushaltsrechnung-immobilienfinanzierung): Aufbau, Pauschalen und wie Sie sie selbst erstellen
+- [Wie hoch darf die Kreditrate sein?](https://leaserun.com/guides/wie-hoch-darf-kreditrate-sein): Faustregeln, Haushaltsrechnung und Puffer für später
+- [Tilgung richtig wählen](https://leaserun.com/guides/tilgung-immobilienkredit): 1, 2 oder 3 %: Laufzeit, Zinskosten und Restschuld
+- [Wie viel Eigenkapital brauche ich?](https://leaserun.com/guides/wie-viel-eigenkapital-fuer-immobilienkredit): Kaufnebenkosten, Faustregeln und was als Eigenkapital zählt
+- [Kredit ohne Eigenkapital (100 % / 110 %)](https://leaserun.com/guides/immobilienkredit-ohne-eigenkapital): Voll- und Überfinanzierung: Kosten, Risiken, Voraussetzungen
+- [Beleihungsauslauf erklärt](https://leaserun.com/guides/beleihungsauslauf-immobilienkredit): Beleihungswert, 60-%-Grenze und Zinsstaffel
+- [Kredit abgelehnt – was jetzt?](https://leaserun.com/guides/kredit-abgelehnt-gruende-loesung): Typische Prüffaktoren und die nächsten Schritte
+- [Bankfähige Selbstauskunft](https://leaserun.com/guides/bankfaehige-selbstauskunft): Was hineingehört und wie sie zu den Belegen passt
+- [Baufinanzierung mit Autokredit oder Leasing](https://leaserun.com/guides/kredit-mit-autokredit): Wie laufende Raten das mögliche Darlehen senken
+- [Baufinanzierung mit Kindern](https://leaserun.com/guides/baufinanzierung-mit-kindern): Kindergeld, Elternzeit und Lebenshaltung im Modell
+- [Baufinanzierung als Selbstständige](https://leaserun.com/guides/baufinanzierung-selbststaendig): Nachhaltiges Einkommen, Unterlagen und Haushaltsrechnung
+<!--ratgeber:end-->

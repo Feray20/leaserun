@@ -1,0 +1,369 @@
+{
+ "generated_for": "2026-10-26",
+ "thresholds": {
+  "minWords": 380,
+  "maxSimilarity": 0.45,
+  "minFaqs": 3,
+  "minSources": 2,
+  "minSections": 3,
+  "titleMin": 25,
+  "titleMax": 62,
+  "descMin": 80,
+  "descMax": 160
+ },
+ "pages": {
+  "wieviel-gehalt-fuer-200000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 97,
+    "financial_accuracy_score": 100,
+    "user_value_score": 74,
+    "words": 593,
+    "max_similarity": 0.028,
+    "most_similar": "wieviel-gehalt-fuer-400000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wieviel-gehalt-fuer-300000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 98,
+    "financial_accuracy_score": 100,
+    "user_value_score": 65,
+    "words": 476,
+    "max_similarity": 0.023,
+    "most_similar": "wieviel-gehalt-fuer-800000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wieviel-gehalt-fuer-400000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 100,
+    "uniqueness_score": 95,
+    "financial_accuracy_score": 100,
+    "user_value_score": 68,
+    "words": 511,
+    "max_similarity": 0.046,
+    "most_similar": "monatliche-rate-400000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wieviel-gehalt-fuer-500000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 96,
+    "financial_accuracy_score": 100,
+    "user_value_score": 63,
+    "words": 459,
+    "max_similarity": 0.042,
+    "most_similar": "wieviel-gehalt-fuer-800000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wieviel-gehalt-fuer-600000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 97,
+    "financial_accuracy_score": 100,
+    "user_value_score": 60,
+    "words": 425,
+    "max_similarity": 0.027,
+    "most_similar": "wieviel-gehalt-fuer-800000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wieviel-gehalt-fuer-800000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 96,
+    "financial_accuracy_score": 100,
+    "user_value_score": 62,
+    "words": 440,
+    "max_similarity": 0.042,
+    "most_similar": "wieviel-gehalt-fuer-500000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "monatliche-rate-400000-euro-kredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 95,
+    "financial_accuracy_score": 100,
+    "user_value_score": 60,
+    "words": 424,
+    "max_similarity": 0.046,
+    "most_similar": "wieviel-gehalt-fuer-400000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "haushaltsrechnung-immobilienfinanzierung": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 71,
+    "words": 546,
+    "max_similarity": 0.009,
+    "most_similar": "beleihungsauslauf-immobilienkredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wie-hoch-darf-kreditrate-sein": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 61,
+    "words": 428,
+    "max_similarity": 0.012,
+    "most_similar": "wieviel-gehalt-fuer-500000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "tilgung-immobilienkredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 98,
+    "financial_accuracy_score": 100,
+    "user_value_score": 65,
+    "words": 477,
+    "max_similarity": 0.015,
+    "most_similar": "monatliche-rate-400000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "wie-viel-eigenkapital-fuer-immobilienkredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 100,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 63,
+    "words": 451,
+    "max_similarity": 0.008,
+    "most_similar": "wieviel-gehalt-fuer-500000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "immobilienkredit-ohne-eigenkapital": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 62,
+    "words": 439,
+    "max_similarity": 0.009,
+    "most_similar": "tilgung-immobilienkredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "beleihungsauslauf-immobilienkredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 59,
+    "words": 410,
+    "max_similarity": 0.009,
+    "most_similar": "haushaltsrechnung-immobilienfinanzierung"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "kredit-abgelehnt-gruende-loesung": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 75,
+    "uniqueness_score": 100,
+    "financial_accuracy_score": 100,
+    "user_value_score": 66,
+    "words": 488,
+    "max_similarity": 0.003,
+    "most_similar": "bankfaehige-selbstauskunft"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "bankfaehige-selbstauskunft": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 50,
+    "uniqueness_score": 100,
+    "financial_accuracy_score": 100,
+    "user_value_score": 33,
+    "words": 399,
+    "max_similarity": 0.003,
+    "most_similar": "kredit-abgelehnt-gruende-loesung"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "kredit-mit-autokredit": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 50,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 61,
+    "words": 432,
+    "max_similarity": 0.013,
+    "most_similar": "wieviel-gehalt-fuer-800000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "baufinanzierung-mit-kindern": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 100,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 63,
+    "words": 455,
+    "max_similarity": 0.01,
+    "most_similar": "wieviel-gehalt-fuer-400000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  },
+  "baufinanzierung-selbststaendig": {
+   "pass": true,
+   "indexable": true,
+   "scores": {
+    "quality_score": 100,
+    "source_score": 50,
+    "uniqueness_score": 99,
+    "financial_accuracy_score": 100,
+    "user_value_score": 58,
+    "words": 400,
+    "max_similarity": 0.005,
+    "most_similar": "wieviel-gehalt-fuer-600000-euro-kredit"
+   },
+   "failures": [],
+   "prohibited": [],
+   "status": "published"
+  }
+ },
+ "consolidated": [
+  {
+   "slug": "haushaltsrechnung-bank-pauschalen",
+   "into": "/guides/haushaltsrechnung-immobilienfinanzierung",
+   "reason": "Pauschalen sind Abschnitt der Hauptseite zur Haushaltsrechnung (gleiche Suchintention)."
+  },
+  {
+   "slug": "eigenkapital-anteil-kaufnebenkosten",
+   "into": "/guides/wie-viel-eigenkapital-fuer-immobilienkredit",
+   "reason": "Eigenkapitalanteil und Kaufnebenkosten werden auf der Eigenkapital-Seite mit Länder-Tabelle behandelt."
+  },
+  {
+   "slug": "100-prozent-finanzierung-immobilie",
+   "into": "/guides/immobilienkredit-ohne-eigenkapital",
+   "reason": "100- und 110-%-Finanzierung als Vergleich auf einer Seite."
+  },
+  {
+   "slug": "110-prozent-finanzierung-immobilie",
+   "into": "/guides/immobilienkredit-ohne-eigenkapital",
+   "reason": "110-%-Finanzierung entspricht dem Kredit ohne Eigenkapital."
+  },
+  {
+   "slug": "kredit-mit-leasingrate",
+   "into": "/guides/kredit-mit-autokredit",
+   "reason": "Leasing und Autokredit wirken identisch in der Haushaltsrechnung."
+  },
+  {
+   "slug": "restschuld-immobilienkredit-berechnen",
+   "into": "/calculators/amortization",
+   "reason": "Bestehender Tilgungsplan-Rechner beantwortet die Suchintention vollständig."
+  },
+  {
+   "slug": "immobilienfinanzierung-unterlagen-bank",
+   "into": "/checklist",
+   "reason": "Bestehende Unterlagen-Checkliste (21 Unterlagen, nach Erwerbsstatus filterbar)."
+  },
+  {
+   "slug": "baufinanzierung-probezeit",
+   "into": "/learn/erwerbsstatus",
+   "reason": "Bestehende Seite „Finanzierung nach Erwerbsstatus“ behandelt Probezeit."
+  },
+  {
+   "slug": "baufinanzierung-befristeter-arbeitsvertrag",
+   "into": "/learn/erwerbsstatus",
+   "reason": "Bestehende Seite „Finanzierung nach Erwerbsstatus“ behandelt Befristung."
+  }
+ ]
+}

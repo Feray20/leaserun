@@ -1,0 +1,326 @@
+{
+  "version": "2026-10-26",
+  "disclaimer": "Reines technisches Analyse-, Informations- und Vorbereitungsinstrument. Keine Kreditvermittlung oder Darlehensberatung (§ 34i GewO, KWG), keine Steuerberatung (StBerG), keine Rechtsdienstleistung (RDG).",
+  "hinweis": "Öffentlich nur Frage und Vorschau. Die Antworten (Kernaussage, nächster Schritt, Rechenweg, Rechtsgrundlage) gibt es im LeaseRun-Zugang.",
+  "entries": [
+    {
+      "id": 1,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Wie viel Immobilie kann ich mir leisten?"
+    },
+    {
+      "id": 2,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Wie viel Eigenkapital brauche ich?"
+    },
+    {
+      "id": 3,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Welche Nebenkosten kommen zum Kaufpreis dazu?"
+    },
+    {
+      "id": 4,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Was bedeuten Zins, Tilgung, Annuität und Zinsbindung?"
+    },
+    {
+      "id": 5,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Warum unterscheidet die Bank nach Beruf und Einkommensart?"
+    },
+    {
+      "id": 6,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Was ist eine Haushaltsrechnung und was gehört hinein?"
+    },
+    {
+      "id": 7,
+      "category": "Orientierung & Leistbarkeit",
+      "question": "Wie hoch darf die monatliche Belastung sein?"
+    },
+    {
+      "id": 8,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Was ist der Beleihungswert?"
+    },
+    {
+      "id": 9,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Eigentumswohnung: Was sagen Teilungserklärung, Protokolle und Rücklage?",
+      "seoTitle": "Teilungserklärung, Protokolle & Rücklage prüfen"
+    },
+    {
+      "id": 10,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Wie prüfe ich eine Eigentumswohnung?"
+    },
+    {
+      "id": 11,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Wie kann ich mehrere Objekte vergleichen?"
+    },
+    {
+      "id": 12,
+      "category": "Objektauswahl & Kaufentscheidung",
+      "question": "Welche Unterlagen fehlen typischerweise?"
+    },
+    {
+      "id": 13,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Brutto-, Netto- und Eigenkapitalrendite: Was ist der Unterschied?"
+    },
+    {
+      "id": 14,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist die Nettomietrendite?"
+    },
+    {
+      "id": 15,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was bedeutet Cashflow vor und nach Steuern?"
+    },
+    {
+      "id": 16,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie funktioniert die AfA?"
+    },
+    {
+      "id": 17,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist die 15-%-Grenze bei Renovierungen?"
+    },
+    {
+      "id": 18,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wann ist ein Verkauf steuerfrei?"
+    },
+    {
+      "id": 19,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie funktioniert die Mietpreisbremse?"
+    },
+    {
+      "id": 20,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist die Kappungsgrenze?"
+    },
+    {
+      "id": 21,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie funktioniert eine Staffelmiete?"
+    },
+    {
+      "id": 22,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Was ist ein Mietausfallwagnis?"
+    },
+    {
+      "id": 23,
+      "category": "Kapitalanlage & Vermögensaufbau",
+      "question": "Wie bewerte ich ein Portfolio?"
+    },
+    {
+      "id": 24,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was passiert, wenn die Zinsbindung endet?"
+    },
+    {
+      "id": 25,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was ist ein Anschlusszins-Kipp-Punkt?"
+    },
+    {
+      "id": 26,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was ist die Kreditmappe?"
+    },
+    {
+      "id": 27,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was gehört in eine Kreditmappe?"
+    },
+    {
+      "id": 28,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Was macht der Banken-Ready-Score?"
+    },
+    {
+      "id": 29,
+      "category": "Finanzierung & Bankenpraxis",
+      "question": "Vermittelt LeaseRun Kredite?"
+    },
+    {
+      "id": 30,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Welche Daten speichert LeaseRun?"
+    },
+    {
+      "id": 31,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Wer kann meine Daten sehen?"
+    },
+    {
+      "id": 32,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Was kostet LeaseRun?"
+    },
+    {
+      "id": 33,
+      "category": "Produkt, Sicherheit & Datenschutz",
+      "question": "Wie lösche ich meine Daten?"
+    },
+    {
+      "id": 34,
+      "category": "Vermieten & Absicherung",
+      "question": "Was tun, wenn der Mieter nicht pünktlich zahlt?"
+    },
+    {
+      "id": 35,
+      "category": "Vermieten & Absicherung",
+      "question": "Wie funktioniert das gerichtliche Mahnverfahren?"
+    },
+    {
+      "id": 36,
+      "category": "Vermieten & Absicherung",
+      "question": "Wann darf ich wegen Mietrückstand kündigen?"
+    },
+    {
+      "id": 37,
+      "category": "Vermieten & Absicherung",
+      "question": "Wie sichere ich mich gegen Mietausfall ab?"
+    },
+    {
+      "id": 38,
+      "category": "Geld & Vermögen",
+      "question": "Was ist Geld – und wie entsteht es?"
+    },
+    {
+      "id": 39,
+      "category": "Geld & Vermögen",
+      "question": "Was ist Inflation – und warum betrifft sie mich?"
+    },
+    {
+      "id": 40,
+      "category": "Geld & Vermögen",
+      "question": "Wie entsteht Vermögen? Sparquote, Rendite und Zinseszins"
+    },
+    {
+      "id": 41,
+      "category": "Geld & Vermögen",
+      "question": "In welcher Reihenfolge baue ich meine Finanzen auf?"
+    },
+    {
+      "id": 42,
+      "category": "Geld & Vermögen",
+      "question": "Wie verdient eine vermietete Immobilie Geld?"
+    },
+    {
+      "id": 43,
+      "category": "Geld & Vermögen",
+      "question": "Hebel (Leverage): Warum ein Kredit Chancen und Risiken vergrößert"
+    },
+    {
+      "id": 44,
+      "category": "Geld & Vermögen",
+      "question": "Klug investieren: Worauf kommt es an?"
+    },
+    {
+      "id": 45,
+      "category": "Steuern & Werbungskosten",
+      "question": "Welche Werbungskosten kann ich bei einer vermieteten Wohnung absetzen?",
+      "seoTitle": "Werbungskosten bei vermieteter Wohnung absetzen"
+    },
+    {
+      "id": 46,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was kann ich bei der Vermietung nicht absetzen?"
+    },
+    {
+      "id": 47,
+      "category": "Steuern & Werbungskosten",
+      "question": "Gehören die Kaufnebenkosten zu den Werbungskosten?"
+    },
+    {
+      "id": 48,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was ist der Unterschied zwischen Erhaltungsaufwand und Herstellungskosten?",
+      "seoTitle": "Erhaltungsaufwand vs. Herstellungskosten"
+    },
+    {
+      "id": 49,
+      "category": "Steuern & Werbungskosten",
+      "question": "Kann ich größere Reparaturen auf mehrere Jahre verteilen?"
+    },
+    {
+      "id": 50,
+      "category": "Steuern & Werbungskosten",
+      "question": "Wie setze ich Fahrten zu meiner vermieteten Wohnung ab?"
+    },
+    {
+      "id": 51,
+      "category": "Steuern & Werbungskosten",
+      "question": "Welcher Teil des Hausgelds ist absetzbar?"
+    },
+    {
+      "id": 52,
+      "category": "Steuern & Werbungskosten",
+      "question": "Kann ich Kosten absetzen, wenn die Wohnung leer steht?"
+    },
+    {
+      "id": 53,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was gilt bei Vermietung an Angehörige?"
+    },
+    {
+      "id": 54,
+      "category": "Steuern & Werbungskosten",
+      "question": "Wie ermittle ich den Gebäudeanteil am Kaufpreis?"
+    },
+    {
+      "id": 55,
+      "category": "Steuern & Werbungskosten",
+      "question": "Was ist mein Grenzsteuersatz und wo finde ich ihn?"
+    },
+    {
+      "id": 56,
+      "category": "Steuern & Werbungskosten",
+      "question": "Wie trage ich meine Vermietung in die Anlage V ein?"
+    },
+    {
+      "id": 57,
+      "category": "Steuern & Werbungskosten",
+      "question": "Kann ich die Kosten einer neuen Einbauküche absetzen?"
+    },
+    {
+      "id": 58,
+      "category": "Steuern & Werbungskosten",
+      "question": "Sind Schuldzinsen auch nach dem Verkauf noch absetzbar?"
+    },
+    {
+      "id": 59,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was trage ich bei Nettoeinkommen und Eigenkapital ein?"
+    },
+    {
+      "id": 60,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was bedeuten die Felder Sollzins, Tilgung und Zinsbindung?"
+    },
+    {
+      "id": 61,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was sind nicht umlagefähige Kosten und Instandhaltung pro Monat?"
+    },
+    {
+      "id": 62,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Welches Datum trage ich bei Kaufvertrag und Darlehensauszahlung ein?",
+      "seoTitle": "Datum bei Kaufvertrag & Darlehensauszahlung"
+    },
+    {
+      "id": 63,
+      "category": "Eingaben im Konto erklärt",
+      "question": "Was sind Beleihungswert, Marktwert und Miteigentumsanteil?"
+    }
+  ]
+}

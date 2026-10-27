@@ -1,0 +1,22 @@
+{
+  "name": "LeaseRun – Technische Immobilienanalyse",
+  "short_name": "LeaseRun",
+  "description": "Kennzahlen, Unterlagen und Kreditmappe für das Bankgespräch. Keine Finanzierungsberatung.",
+  "lang": "de",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0F2C59",
+  "icons": [
+    { "src": "/icon-192.png?v=4", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png?v=4", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-192-maskable.png?v=4", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512-maskable.png?v=4", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Cockpit", "url": "/cockpit" },
+    { "name": "Konto", "url": "/app/dashboard" },
+    { "name": "Checkliste", "url": "/checklist" }
+  ]
+}
