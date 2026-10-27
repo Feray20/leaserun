@@ -2,15 +2,15 @@ import { createHash, randomBytes } from 'node:crypto';
 import PRICES from '@/public/data/preise.json';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-// B2B-Konten (Makler, Vermittler, Banken): Tarif-Grenzen, Kontozugriff und Hilfsfunktionen.
+// Business accounts (agents, mortgage brokers, lenders): plan limits, account access and helpers.
 
 export type Tier = 'BASIC' | 'PRO' | 'ENTERPRISE';
 export type InstitutionType = 'BANK' | 'BROKER' | 'REALTOR' | 'ADVISOR' | 'OTHER';
 
-// Geschäftsfunktionen (Kreditmappen-Kontingent, Partnerseite/Widget, Anfragen, Tarifbuchung) erst nach geprüftem
-// Gewerbenachweis (Freischaltung durch LeaseRun im Admin-Bereich).
+// Business features (lender package allowance, partner page/widget, leads, plan purchase) unlock only after the
+// business verification documents have been reviewed (approval by LeaseRun in the Web-Admin).
 export const isVerified = (a: { verified_at?: string | null } | null | undefined): boolean => Boolean(a?.verified_at);
-export const VERIFY_MSG = 'Ihr Unternehmenskonto ist noch nicht freigeschaltet. Bitte laden Sie im Portal unter „Verifizierung“ Ihren Gewerbenachweis hoch – nach der Prüfung schalten wir alle Funktionen frei.';
+export const VERIFY_MSG = 'Your business account is not verified yet. Please upload your business verification (license or registration) in the portal under "Verification" – once we have reviewed it, all features are unlocked.';
 
 export type B2BAccount = {
   id: string;
@@ -74,22 +74,23 @@ export type B2BAccount = {
   created_at: string;
 };
 
-// fall = Fall-Analysen (Schnell-Check eines Unterlagen-Pakets), praes = Kunden-Präsentationen je Kalendermonat (null = unbegrenzt).
-// Fair Use: Schnell-Checks und Anfragen sind in jedem Tarif unbegrenzt; begrenzt sind nur fertige PDF-Exporte (Kreditmappen, Präsentationen).
-// whitelabel = Unterlagen komplett im eigenen Erscheinungsbild (ohne LeaseRun); radar = Bestandskunden-Radar.
-export const TIER_LIMITS: Record<Tier, { seats: number; dossiersPerMonth: number | null; cobranding: boolean; merger: boolean; landing: boolean; fall: number | null; praes: number | null; whitelabel: boolean; radar: boolean }> = {
-  BASIC: { seats: 1, dossiersPerMonth: 20, cobranding: false, merger: false, landing: false, fall: null, praes: 3, whitelabel: false, radar: false },
-  PRO: { seats: 3, dossiersPerMonth: null, cobranding: true, merger: true, landing: true, fall: null, praes: null, whitelabel: false, radar: true },
-  ENTERPRISE: { seats: 10, dossiersPerMonth: null, cobranding: true, merger: true, landing: true, fall: null, praes: null, whitelabel: true, radar: true },
+// fall = client analyses (quick check of a document package), praes = client presentations per calendar month (null = unlimited).
+// clients = maximum number of active (connected or invited) clients; null = unlimited.
+// Fair use: quick checks and leads are unlimited on every plan; only finished PDF exports (lender packages, presentations) are capped.
+// whitelabel = documents fully in the partner's own branding (no LeaseRun); radar = client radar (rate/ARM reset dates).
+export const TIER_LIMITS: Record<Tier, { seats: number; clients: number | null; dossiersPerMonth: number | null; cobranding: boolean; merger: boolean; landing: boolean; fall: number | null; praes: number | null; whitelabel: boolean; radar: boolean }> = {
+  BASIC: { seats: 1, clients: 25, dossiersPerMonth: 20, cobranding: false, merger: false, landing: false, fall: null, praes: 3, whitelabel: false, radar: false },
+  PRO: { seats: 3, clients: null, dossiersPerMonth: null, cobranding: true, merger: true, landing: true, fall: null, praes: null, whitelabel: false, radar: true },
+  ENTERPRISE: { seats: 10, clients: null, dossiersPerMonth: null, cobranding: true, merger: true, landing: true, fall: null, praes: null, whitelabel: true, radar: true },
 };
-// Module, die LeaseRun im Web-Admin je Unternehmenskonto zusätzlich freischalten ("on") oder sperren ("off") kann.
-// Ohne Eintrag gilt der gebuchte Tarif. Nur der Web-Admin ändert diese Werte (Spalte lr_b2b_accounts.modules).
+// Modules LeaseRun can additionally enable ("on") or disable ("off") per business account in the Web-Admin.
+// Without an entry the purchased plan applies. Only the Web-Admin changes these values (column lr_b2b_accounts.modules).
 export const MODULES = {
-  schnellrechner: 'Schnellrechner & Fall-Analysen',
-  kreditmappe: 'BankReady Kreditmappe',
-  stresstest: 'Stresstest-Generator',
-  whitelabel: 'White-Label-Export',
-  crm: 'CRM & Mandantenverwaltung',
+  schnellrechner: 'Quick calculator & client analyses',
+  kreditmappe: 'Lender Package',
+  stresstest: 'Stress test generator',
+  whitelabel: 'White-label export',
+  crm: 'CRM & client management',
 } as const;
 export type ModuleKey = keyof typeof MODULES;
 export const MODULE_KEYS = Object.keys(MODULES) as ModuleKey[];
@@ -102,16 +103,19 @@ export function moduleOverrides(a: { modules?: unknown } | null | undefined): Mo
 }
 export const moduleState = (a: { modules?: unknown } | null | undefined, k: ModuleKey): 'on' | 'off' | null => moduleOverrides(a)[k] ?? null;
 
-// Ohne gebuchten Tarif (nach Freischaltung): zum Ausprobieren je Monat.
+// Without a purchased plan (after verification): trial allowance per month.
 export const TRIAL_LIMITS = { fall: 2, praes: 1 };
 
-export const AVV_VERSION = '2026-10';
+export const AVV_VERSION = '2026-10-US';
+
+// Time zone for monthly allowances and business billing periods.
+export const BILLING_TZ = 'America/New_York';
 
 type B2BPlanJson = { id: string; tier: Tier; name: string; netto_cents: number; intervall: string; interval: 'month' | 'year' };
 export const B2B_PLANS: B2BPlanJson[] = (PRICES as unknown as { b2b: { plans: B2BPlanJson[] } }).b2b.plans;
 export const isB2BPlan = (v: unknown): v is string => typeof v === 'string' && B2B_PLANS.some((p) => p.id === v);
 
-// Wirksamer Tarif: nur bei aktivem, nicht gesperrtem Konto und nicht abgelaufener Laufzeit.
+// Effective plan: only for an active, unlocked account whose term has not expired.
 export function effectiveTier(a: Pick<B2BAccount, 'status' | 'plan_tier' | 'plan_until'> | null): Tier | null {
   if (!a || a.status !== 'active' || !a.plan_tier) return null;
   if (a.plan_until && new Date(a.plan_until).getTime() < Date.now()) return null;
@@ -134,15 +138,15 @@ export async function membershipFor(userId: string): Promise<{ account: B2BAccou
   return { account: a as B2BAccount, role: m.role as 'owner' | 'advisor' };
 }
 
-// Objekte, für die das Konto im laufenden Kalendermonat (UTC) Kreditmappen erstellt hat.
-// Erneutes Erstellen für dasselbe Objekt (Korrekturen) zählt nicht doppelt.
+// Properties for which the account created lender packages in the current calendar month (US Eastern time).
+// Re-creating a package for the same property (corrections) does not count twice.
 export async function dossierObjectsThisMonth(accountId: string): Promise<Set<string>> {
   const now = new Date();
-  // Monatsbeginn in deutscher Zeit (1. des Monats, 00:00 MEZ/MESZ).
-  const ym = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit' }).format(now);
+  // Start of the month in US Eastern time (1st of the month, 00:00 EST/EDT).
+  const ym = new Intl.DateTimeFormat('en-CA', { timeZone: BILLING_TZ, year: 'numeric', month: '2-digit' }).format(now);
   const noon = new Date(`${ym}-01T12:00:00Z`);
-  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Berlin', hour: '2-digit', hour12: false }).format(noon));
-  const start = new Date(`${ym}-01T00:00:00+0${h - 12}:00`).toISOString();
+  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: BILLING_TZ, hour: '2-digit', hour12: false }).format(noon));
+  const start = new Date(new Date(`${ym}-01T00:00:00Z`).getTime() - (h - 12) * 3600_000).toISOString();
   const { data } = await supabaseAdmin()
     .from('lr_kreditmappe_versions')
     .select('owner_id, object_ref')
@@ -155,15 +159,15 @@ export const dossiersThisMonth = async (accountId: string) => (await dossierObje
 
 export type DossierAllowance = { allowed: boolean; accountId: string | null; reason?: string; used?: number; limit?: number | null };
 
-// Prüft, ob ein B2B-Mitglied eine Kreditmappe erstellen darf. Null = kein B2B-Tarif, es gelten die Privat-Regeln.
+// Checks whether a business member may create a lender package. Null = no business plan, consumer rules apply.
 export async function b2bDossierAllowance(userId: string, objectRef?: string): Promise<DossierAllowance | null> {
   const m = await membershipFor(userId);
   if (!m) return null;
   const a = m.account;
-  if (a.status === 'locked') return { allowed: false, accountId: a.id, reason: 'Das Unternehmenskonto ist gesperrt.' };
+  if (a.status === 'locked') return { allowed: false, accountId: a.id, reason: 'This business account is locked.' };
   if (!isVerified(a)) return { allowed: false, accountId: a.id, reason: VERIFY_MSG };
   const km = moduleState(a, 'kreditmappe');
-  if (km === 'off') return { allowed: false, accountId: a.id, reason: 'Die Kreditmappe ist für Ihr Unternehmenskonto nicht freigeschaltet. Bitte wenden Sie sich an support@leaserun.com.' };
+  if (km === 'off') return { allowed: false, accountId: a.id, reason: 'The Lender Package is not enabled for your business account. Please contact support@leaserun.com.' };
   if (km === 'on') return { allowed: true, accountId: a.id, limit: null };
   const tier = effectiveTier(a);
   if (!tier) return null;
@@ -172,7 +176,7 @@ export async function b2bDossierAllowance(userId: string, objectRef?: string): P
   const used = await dossierObjectsThisMonth(a.id);
   const total = limit + (a.dossier_bonus || 0);
   if (objectRef && used.has(`${userId}:${objectRef}`)) return { allowed: true, accountId: a.id, used: used.size, limit: total };
-  if (used.size >= total) return { allowed: false, accountId: a.id, used: used.size, limit: total, reason: `Monatskontingent erreicht (${used.size} von ${total} Kreditmappen).` };
+  if (used.size >= total) return { allowed: false, accountId: a.id, used: used.size, limit: total, reason: `Monthly allowance reached (${used.size} of ${total} lender packages).` };
   return { allowed: true, accountId: a.id, used: used.size, limit: total };
 }
 
@@ -183,17 +187,17 @@ export const hashToken = (t: string) => createHash('sha256').update(`leaserun-in
 export function slugify(s: string): string {
   return s
     .toLowerCase()
-    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 40);
 }
 
 export const INSTITUTION_LABEL: Record<InstitutionType, string> = {
-  BANK: 'Kreditinstitut', BROKER: 'Finanzierungsvermittler', REALTOR: 'Immobilienmakler', ADVISOR: 'Finanz- & Vermögensberater', OTHER: 'Sonstiges Unternehmen',
+  BANK: 'Lender, bank or credit union', BROKER: 'Mortgage broker / loan officer', REALTOR: 'Real estate agent / brokerage', ADVISOR: 'CPA / financial advisor', OTHER: 'Property manager / other firm',
 };
 
-// Öffentliche Sicht eines Partners (keine Steuer- oder Registerdaten).
+// Public view of a partner (no tax or license data).
 export function publicPartner(a: B2BAccount) {
   const tier = effectiveTier(a);
   const brand = canCobrand(a);
@@ -212,9 +216,9 @@ export function publicPartner(a: B2BAccount) {
   };
 }
 
-// Protokoll: Personen-Kennungen (E-Mail) werden vor dem Speichern pseudonymisiert (siehe lib/security/pseudo.ts).
+// Audit log: personal identifiers (email) are pseudonymized before storage (see lib/security/pseudo.ts).
 export async function adminAudit(actor: string, action: string, target: string | null, meta: Record<string, unknown> = {}) {
   const { pseudo, scrubMeta } = await import('@/lib/security/pseudo');
-  const [a, t, m] = await Promise.all([pseudo(actor).catch(() => 'ps:unbekannt'), target && target.includes('@') ? pseudo(target).catch(() => 'ps:unbekannt') : Promise.resolve(target), scrubMeta(meta).catch(() => ({}))]);
+  const [a, t, m] = await Promise.all([pseudo(actor).catch(() => 'ps:unknown'), target && target.includes('@') ? pseudo(target).catch(() => 'ps:unknown') : Promise.resolve(target), scrubMeta(meta).catch(() => ({}))]);
   await supabaseAdmin().from('lr_admin_audit').insert({ actor_email: a, action, target: t, meta: m });
 }
