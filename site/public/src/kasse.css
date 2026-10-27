@@ -1,4 +1,4 @@
-/* Basis (Schriften, Marke, Knöpfe) – nur, was die Kasse braucht; ersetzt die 107-KB-Seiten-CSS */
+/* Base (fonts, brand, buttons) – only what checkout needs; replaces the 107 KB page CSS */
 :root { --ink: #0F172A; --muted: #64748B; --line: #E2E8F0; --soft: #F8FAFC; --brand: #1E293B; --brand2: #334155; --accent: #E2E8F0; --white: #fff; --shadow: 0 18px 60px rgba(15,23,42,.09); }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -98,7 +98,7 @@ h1, h2, h3, .route-hero h1, .hero h1 { hyphens: none; word-break: normal; overfl
 .bx-flow.off li:is(:nth-child(4), :nth-child(5), :nth-child(7))::before, .lp-flow.off li:nth-child(3)::before { content: "✕"; background: rgb(220, 38, 38); color: rgb(255, 255, 255); }
 @media (max-width: 800px){a.brand { padding: 8px 0px; }}
 
-/* leaserun.com/kasse – eingebettete Bezahlung im LeaseRun-Stil */
+/* leaserun.com/checkout – embedded payment in the LeaseRun style */
 .ks-body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#EEF4FB 0,#F8FAFC 320px);color:#1E293B}
 .ks-in{width:100%;max-width:1080px;margin:0 auto;padding:0 20px;box-sizing:border-box}
 .ks-head{background:rgba(255,255,255,.94);border-bottom:1px solid #E2E8F0;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
@@ -130,7 +130,7 @@ h1, h2, h3, .route-hero h1, .hero h1 { hyphens: none; word-break: normal; overfl
 .ks-foot nav{display:flex;flex-wrap:wrap;gap:14px}.ks-foot a{color:#64748B}
 @media (max-width:480px){.ks-in{padding:0 14px}.ks-card{padding:18px;border-radius:16px}.ks-pay{padding:4px}.ks-secure{font-size:13px;padding:5px 10px}}
 
-/* LeaseRun-Fade: Markenverlauf oben, Karten liegen darüber (alle Geräte). */
+/* LeaseRun fade: brand gradient on top, cards sit above it (all devices). */
 .ks-body{background:linear-gradient(135deg,#0F2C59 0%,#1D4E89 48%,#2F7FC1 100%) top/100% 340px no-repeat,#EEF4FB}
 .ks-head{background:transparent;border-bottom:1px solid rgba(255,255,255,.14);position:static;backdrop-filter:none;-webkit-backdrop-filter:none}
 .ks-head .brand,.ks-head .brand span{color:#fff}
@@ -153,7 +153,7 @@ h1, h2, h3, .route-hero h1, .hero h1 { hyphens: none; word-break: normal; overfl
 @supports not ((-webkit-background-clip:text) or (background-clip:text)){.ks-total strong{color:#0F2C59}}
 @media (max-width:900px){
   .ks-body{background-size:100% 300px}
-  /* Handy: kompakte Übersicht, Zahlformular rasch sichtbar */
+  /* Phone: compact summary, payment form visible quickly */
   .ks-sum .ks-trust{display:none}
   .ks-sum h1{font-size:20px;margin-bottom:10px}
 }

@@ -1,4 +1,4 @@
-/* Kaufdialog (buy.mjs) – wird von buy.mjs selbst geladen, damit er auf jeder Seite gleich aussieht. Quelle: institutional.css */
+/* Purchase dialog (buy.mjs) – loaded by buy.mjs itself so it looks the same on every page. Source: institutional.css */
 .buy-dlg{border:0;padding:0;border-radius:18px;width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 30px 80px rgba(15,44,89,.35);color:var(--lr-navy,#0F2C59)}
 .buy-dlg::backdrop{background:rgba(15,23,42,.55);backdrop-filter:blur(3px)}
 .buy-in{padding:22px 22px 18px;display:grid;gap:12px}
@@ -57,9 +57,9 @@ html:has(dialog.wa-dlg[open]),html:has(dialog.buy-dlg[open]){overflow:hidden}
 .buy-dlg{color:#1E293B;font-family:inherit}.buy-dlg h2{color:#0F2C59}.buy-dlg label{text-transform:none;letter-spacing:normal}
 .buy-dlg small,.buy-dlg span,.buy-dlg strong{text-transform:none;letter-spacing:normal}
 .buy-in{grid-template-columns:minmax(0,1fr)}.buy-in>*{min-width:0}.buy-go{white-space:normal;text-align:center;line-height:1.25;padding-left:16px;padding-right:16px}.buy-legal,.buy-note,.buy-secure{overflow-wrap:anywhere}
-/* Fokus auf die Bezahlung: kompakt, Bezahlknopf bleibt beim Scrollen sichtbar. */
+/* Focus on payment: compact layout. */
 .buy-in{gap:10px}
-/* Bezahlknopf nicht mehr „klebend“: Auf niedrigen Bildschirmen (Laptop, Windows-Zoom) verdeckte er das Zustimmungs-Kästchen. */
+/* Pay button no longer sticky: on short screens (laptop, Windows zoom) it covered the consent checkbox. */
 .buy-in .buy-go{position:static;box-shadow:0 10px 24px -10px rgba(0,0,0,.45)}
 .buy-feat{padding:10px 12px;gap:4px}
 .buy-why{border:1px solid #E2E8F0;border-radius:12px;padding:8px 12px;font-size:13.5px}
@@ -67,6 +67,7 @@ html:has(dialog.wa-dlg[open]),html:has(dialog.buy-dlg[open]){overflow:hidden}
 .buy-why .buy-anchor,.buy-why .buy-gaps{margin:6px 0 4px}
 .buy-consent{font-size:13px}
 .buy-legal{font-size:12px;text-align:center}
+.buy-renew{margin:0;font-size:13px;line-height:1.5;color:#334155;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:10px;padding:8px 12px}.buy-renew a{color:#0369A1;text-decoration:underline}.buy-consent a{color:#0369A1;text-decoration:underline}
 .buy-rvok{font-size:12px!important;color:#64748B!important;justify-content:center}
 .buy-rvok input{width:16px!important;height:16px!important}
 .buy-secure{margin-top:-2px}

@@ -1,33 +1,33 @@
-// Web-Admin → Verbesserungsvorschläge: Eingang je Bereich (B2C oder B2B), Bewertung mit Sternen, Status, Antwort.
+// Web-Admin → Improvement suggestions: inbox per area (B2C or B2B), star rating, status, answer.
 import { api, dtt, esc } from './sess.mjs?v=892f3666';
 
-const TOPICS = { bedienung: 'Bedienung & Navigation', rechner: 'Rechner & Kennzahlen', kreditmappe: 'Kreditmappe & Dokumente', inhalte: 'Inhalte & Erklärungen', neue_funktion: 'Neue Funktion', fehler: 'Fehler gefunden', sonstiges: 'Sonstiges' };
-const STATUS = { neu: 'Neu', in_pruefung: 'In Prüfung', geplant: 'Geplant', umgesetzt: 'Umgesetzt', abgelehnt: 'Nicht geplant' };
-const stars = (n, name = '') => `<span class="fb-stars"${name ? ` role="radiogroup" aria-label="${name}"` : ''}>${[1, 2, 3, 4, 5].map((k) => name ? `<button type="button" data-star="${k}" aria-label="${k} von 5" aria-checked="${k === n}" role="radio" class="${k <= (n || 0) ? 'on' : ''}">★</button>` : `<i class="${k <= n ? 'on' : ''}">★</i>`).join('')}</span>`;
+const TOPICS = { bedienung: 'Ease of use & navigation', rechner: 'Calculators & metrics', kreditmappe: 'Lender Package & documents', inhalte: 'Content & explanations', neue_funktion: 'New feature', fehler: 'Found a bug', sonstiges: 'Other' };
+const STATUS = { neu: 'New', in_pruefung: 'Under review', geplant: 'Planned', umgesetzt: 'Done', abgelehnt: 'Not planned' };
+const stars = (n, name = '') => `<span class="fb-stars"${name ? ` role="radiogroup" aria-label="${name}"` : ''}>${[1, 2, 3, 4, 5].map((k) => name ? `<button type="button" data-star="${k}" aria-label="${k} of 5" aria-checked="${k === n}" role="radio" class="${k <= (n || 0) ? 'on' : ''}">★</button>` : `<i class="${k <= n ? 'on' : ''}">★</i>`).join('')}</span>`;
 
 export async function vorschlaege(v, seg) {
   const r = await api('/api/admin/feedback');
-  if (!r.ok) { v.innerHTML = `<div class="wa-state err" role="alert"><strong>Die Vorschläge konnten nicht geladen werden.</strong><span>${esc(r.data?.error || '')}</span><button type="button" class="btn btn-outline" data-retry>Erneut versuchen</button></div>`; v.querySelector('[data-retry]').onclick = () => vorschlaege(v, seg); return; }
+  if (!r.ok) { v.innerHTML = `<div class="wa-state err" role="alert"><strong>Suggestions could not be loaded.</strong><span>${esc(r.data?.error || '')}</span><button type="button" class="btn btn-outline" data-retry>Try again</button></div>`; v.querySelector('[data-retry]').onclick = () => vorschlaege(v, seg); return; }
   const items = r.data.items || [];
   let filter = 'offen', sort = 'neu';
   const SORTS = { neu: (a, b) => String(b.created_at).localeCompare(String(a.created_at)), wichtig: (a, b) => (b.importance || 0) - (a.importance || 0), bewertung: (a, b) => (b.admin_rating || 0) - (a.admin_rating || 0), aktualisiert: (a, b) => String(b.updated_at).localeCompare(String(a.updated_at)) };
   const paint = () => {
     const list = items.filter((x) => filter === 'alle' ? true : filter === 'offen' ? ['neu', 'in_pruefung'].includes(x.status) : x.status === filter).sort(SORTS[sort]);
     const cnt = (f) => items.filter((x) => f === 'alle' ? true : f === 'offen' ? ['neu', 'in_pruefung'].includes(x.status) : x.status === f).length;
-    v.innerHTML = `<section class="pt-card"><h2>Verbesserungsvorschläge · ${seg === 'b2b' ? 'Unternehmen' : 'Privatkunden'}</h2>
-      <p class="form-note">Vorschläge aus dem ${seg === 'b2b' ? 'Unternehmensportal' : 'Privatbereich'}. Die Wichtigkeit gibt der Kunde an; Ihre Bewertung und Notiz sind nur hier sichtbar. Eine Antwort sieht der Kunde bei seinen Vorschlägen.</p>
-      <div class="pc-chips" role="group" aria-label="Filter">${[['offen', 'Offen'], ['geplant', 'Geplant'], ['umgesetzt', 'Umgesetzt'], ['abgelehnt', 'Nicht geplant'], ['alle', 'Alle']].map(([k, l]) => `<button type="button" data-fbf="${k}" aria-pressed="${k === filter}">${l} <b>${cnt(k)}</b></button>`).join('')}</div>
-      <label class="us-sort fb-sort">Sortieren<select data-fbsort>${[['neu', 'Neueste zuerst'], ['wichtig', 'Wichtigkeit für den Kunden'], ['bewertung', 'Ihre Bewertung'], ['aktualisiert', 'Zuletzt bearbeitet']].map(([k, l]) => `<option value="${k}"${k === sort ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
+    v.innerHTML = `<section class="pt-card"><h2>Improvement suggestions · ${seg === 'b2b' ? 'Business' : 'Consumers'}</h2>
+      <p class="form-note">Suggestions from ${seg === 'b2b' ? 'the Business Portal' : 'consumer accounts'}. The customer sets the importance; your rating and note are only visible here. The customer sees your answer next to their suggestion.</p>
+      <div class="pc-chips" role="group" aria-label="Filter">${[['offen', 'Open'], ['geplant', 'Planned'], ['umgesetzt', 'Done'], ['abgelehnt', 'Not planned'], ['alle', 'All']].map(([k, l]) => `<button type="button" data-fbf="${k}" aria-pressed="${k === filter}">${l} <b>${cnt(k)}</b></button>`).join('')}</div>
+      <label class="us-sort fb-sort">Sort<select data-fbsort>${[['neu', 'Newest first'], ['wichtig', 'Importance to customer'], ['bewertung', 'Your rating'], ['aktualisiert', 'Recently edited']].map(([k, l]) => `<option value="${k}"${k === sort ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
       ${list.length ? `<div class="fb-list">${list.map((x) => `<article class="fb-card" data-id="${x.id}">
-        <header><div><strong>${esc(TOPICS[x.topic] || x.topic)}</strong><small>Eingegangen ${dtt(x.created_at)}${x.updated_at && x.updated_at !== x.created_at ? ` · bearbeitet ${dtt(x.updated_at)}` : ''} · ${esc(x.company ? `${x.company} · ` : '')}${esc(x.email || 'Konto')}${x.page ? ` · ${esc(x.page)}` : ''}</small></div><span class="st ${x.status === 'umgesetzt' ? 'ok' : x.status === 'abgelehnt' ? 'bad' : x.status === 'neu' ? 'warn' : ''}">${STATUS[x.status]}</span></header>
+        <header><div><strong>${esc(TOPICS[x.topic] || x.topic)}</strong><small>Received ${dtt(x.created_at)}${x.updated_at && x.updated_at !== x.created_at ? ` · edited ${dtt(x.updated_at)}` : ''} · ${esc(x.company ? `${x.company} · ` : '')}${esc(x.email || 'Account')}${x.page ? ` · ${esc(x.page)}` : ''}</small></div><span class="st ${x.status === 'umgesetzt' ? 'ok' : x.status === 'abgelehnt' ? 'bad' : x.status === 'neu' ? 'warn' : ''}">${STATUS[x.status]}</span></header>
         <p class="fb-text">${esc(x.text)}</p>
-        <div class="fb-meta"><span>Wichtigkeit für den Kunden ${stars(x.importance)}</span></div>
-        <div class="fb-admin"><label>Ihre Bewertung ${stars(x.admin_rating, 'Ihre Bewertung')}</label>
+        <div class="fb-meta"><span>Importance to customer ${stars(x.importance)}</span></div>
+        <div class="fb-admin"><label>Your rating ${stars(x.admin_rating, 'Your rating')}</label>
           <label>Status<select data-fbs>${Object.entries(STATUS).map(([k, l]) => `<option value="${k}"${k === x.status ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
-          <label class="fb-wide">Interne Notiz<textarea data-fbn rows="2" maxlength="2000" placeholder="z. B. Aufwand, Idee zur Umsetzung">${esc(x.admin_note || '')}</textarea></label>
-          <label class="fb-wide">Antwort an den Kunden (optional)<textarea data-fba rows="2" maxlength="2000" placeholder="Wird beim Kunden unter seinen Vorschlägen angezeigt">${esc(x.answer || '')}</textarea></label>
-          <button class="btn btn-dark" type="button" data-fbsave>Speichern</button><span class="form-note" data-fbmsg role="status"></span></div>
-      </article>`).join('')}</div>` : '<div class="pt-empty"><strong>Keine Vorschläge in dieser Auswahl.</strong></div>'}</section>`;
+          <label class="fb-wide">Internal note<textarea data-fbn rows="2" maxlength="2000" placeholder="e.g. effort, implementation idea">${esc(x.admin_note || '')}</textarea></label>
+          <label class="fb-wide">Answer to the customer (optional)<textarea data-fba rows="2" maxlength="2000" placeholder="Shown to the customer under their suggestions">${esc(x.answer || '')}</textarea></label>
+          <button class="btn btn-dark" type="button" data-fbsave>Save</button><span class="form-note" data-fbmsg role="status"></span></div>
+      </article>`).join('')}</div>` : '<div class="pt-empty"><strong>No suggestions in this view.</strong></div>'}</section>`;
     v.querySelectorAll('[data-fbf]').forEach((b) => b.onclick = () => { filter = b.dataset.fbf; paint(); });
     v.querySelector('[data-fbsort]')?.addEventListener('change', (e) => { sort = e.target.value; paint(); });
     v.querySelectorAll('.fb-card').forEach((card) => {
@@ -41,33 +41,33 @@ export async function vorschlaege(v, seg) {
         const body = { id: it.id, status: card.querySelector('[data-fbs]').value, adminRating: it.admin_rating ?? null, adminNote: card.querySelector('[data-fbn]').value, answer: card.querySelector('[data-fba]').value };
         const x = await api('/api/admin/feedback', { method: 'PATCH', body: JSON.stringify(body) });
         e.target.disabled = false;
-        if (x.ok) { Object.assign(it, { status: body.status, admin_note: body.adminNote, answer: body.answer }); m.textContent = 'Gespeichert.'; setTimeout(paint, 600); } else m.textContent = x.data?.error || 'Fehler';
+        if (x.ok) { Object.assign(it, { status: body.status, admin_note: body.adminNote, answer: body.answer }); m.textContent = 'Saved.'; setTimeout(paint, 600); } else m.textContent = x.data?.error || 'Error';
       };
     });
   };
   paint();
 }
 
-// System → Google-Bewertungen: Bewertungslink und Place-ID eintragen (Durchschnitt und Anzahl kommen live von Google).
+// System → Google reviews: enter the review link and Place ID (average and count come live from Google).
 export async function reviewsAdmin(v) {
   const r = await api('/api/admin/reviews');
   if (!r.ok) return;
   const d = r.data;
   const box = document.createElement('section');
   box.className = 'pt-card'; box.id = 'rvAdmin';
-  box.innerHTML = `<h2>Google-Bewertungen</h2>
-    <ol class="wa-steps"><li>Google-Unternehmensprofil anlegen: <a href="https://business.google.com" target="_blank" rel="noopener">business.google.com</a> (Dienstleistungsunternehmen ohne Ladengeschäft, Adresse ausblenden möglich).</li>
-      <li>Im Profil „Nach Rezensionen fragen“ wählen und den Link (https://g.page/r/…) hier eintragen – dann erscheint im Konto und im Unternehmensportal „Bei Google bewerten“.</li>
-      <li>Optional für Sterne auf der Website: Place-ID eintragen (<a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Place-ID-Finder</a>) und in Vercel GOOGLE_PLACES_API_KEY setzen.</li></ol>
-    <form id="rvF" class="wa-grid2"><label>Bewertungslink<input name="reviewUrl" type="url" value="${esc(d.reviewUrl || '')}" placeholder="https://g.page/r/…"></label><label>Place-ID (optional)<input name="placeId" value="${esc(d.placeId || '')}" placeholder="ChIJ…"></label>
-      <div><button class="btn btn-dark" type="submit">Speichern</button> <span class="form-note" id="rvMsg" role="status"></span></div></form>
-    <p class="form-note">Stand: ${d.rating ? `★ ${String(d.rating).replace('.', ',')} aus ${d.count} Google-Bewertungen` : d.placeId ? (d.apiKey ? 'Google liefert noch keine Bewertungen.' : 'GOOGLE_PLACES_API_KEY fehlt in Vercel.') : 'Noch keine Place-ID – auf der Website erscheinen keine Sterne.'} · Regeln: keine Gegenleistung für Bewertungen, alle Kunden gleich fragen, keine eigenen oder gekauften Bewertungen.</p>`;
+  box.innerHTML = `<h2>Google reviews</h2>
+    <ol class="wa-steps"><li>Create a Google Business Profile: <a href="https://business.google.com" target="_blank" rel="noopener">business.google.com</a> (service-area business without a storefront – hide the address).</li>
+      <li>In the profile choose "Ask for reviews" and paste the link (https://g.page/r/…) here – "Review us on Google" then appears in customer accounts and the Business Portal.</li>
+      <li>Optional, for stars on the website: enter the Place ID (<a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Place ID Finder</a>) and set GOOGLE_PLACES_API_KEY in Vercel.</li></ol>
+    <form id="rvF" class="wa-grid2"><label>Review link<input name="reviewUrl" type="url" value="${esc(d.reviewUrl || '')}" placeholder="https://g.page/r/…"></label><label>Place ID (optional)<input name="placeId" value="${esc(d.placeId || '')}" placeholder="ChIJ…"></label>
+      <div><button class="btn btn-dark" type="submit">Save</button> <span class="form-note" id="rvMsg" role="status"></span></div></form>
+    <p class="form-note">Status: ${d.rating ? `★ ${Number(d.rating).toFixed(1)} from ${d.count} Google reviews` : d.placeId ? (d.apiKey ? 'Google returns no reviews yet.' : 'GOOGLE_PLACES_API_KEY is missing in Vercel.') : 'No Place ID yet – no stars appear on the website.'} · Rules (FTC): no incentives for reviews, ask every customer the same way, no self-written or bought reviews.</p>`;
   v.append(box);
   box.querySelector('#rvF').onsubmit = async (e) => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.target));
     const x = await api('/api/admin/reviews', { method: 'POST', body: JSON.stringify(f) });
-    box.querySelector('#rvMsg').textContent = x.ok ? 'Gespeichert.' : x.data?.error || 'Fehler';
+    box.querySelector('#rvMsg').textContent = x.ok ? 'Saved.' : x.data?.error || 'Error';
   };
 }
 

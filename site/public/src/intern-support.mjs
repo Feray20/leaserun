@@ -1,10 +1,10 @@
-// Web-Admin „Technische Probleme“: Meldungen mit Screenshots aus Privatkonto (B2C) bzw. Unternehmensportal (B2B).
-// Ziel: Antwort innerhalb von 12 Stunden – überfällige Meldungen stehen oben und sind rot markiert.
+// Web-Admin "Technical problems": reports with screenshots from consumer accounts (B2C) or the Business Portal (B2B).
+// Goal: an answer within 12 hours – overdue reports are on top and marked red.
 import { api, dtt, esc } from './sess.mjs?v=892f3666';
 
-const CATS = { anmeldung: 'Anmeldung & Konto', zahlung: 'Bezahlung & Tarif', anzeige: 'Darstellung & Bedienung', werkzeug: 'Rechner & Werkzeuge', dokument: 'PDF, Kreditmappe & Dokumente', langsam: 'Langsam / lädt nicht', sonstiges: 'Sonstiges' };
-const SEV = { blockiert: ['Blockiert', 'bad'], stoert: ['Stört', 'warn'], klein: ['Kleinigkeit', ''] };
-const STATUS = { neu: 'Neu', in_arbeit: 'In Bearbeitung', rueckfrage: 'Rückfrage an Kunden', geloest: 'Gelöst', geschlossen: 'Geschlossen' };
+const CATS = { anmeldung: 'Sign-in & account', zahlung: 'Payment & plan', anzeige: 'Display & usability', werkzeug: 'Calculators & tools', dokument: 'PDF, Lender Package & documents', langsam: "Slow / won't load", sonstiges: 'Other' };
+const SEV = { blockiert: ['Blocked', 'bad'], stoert: ['Annoying', 'warn'], klein: ['Minor', ''] };
+const STATUS = { neu: 'New', in_arbeit: 'In progress', rueckfrage: 'Waiting for customer', geloest: 'Resolved', geschlossen: 'Closed' };
 const OPEN = ['neu', 'in_arbeit', 'rueckfrage'];
 const CSS = `.tk-list{display:grid;gap:12px}.tk{border:1px solid #E2E8F0;border-radius:14px;background:#fff;padding:14px 16px;display:grid;gap:10px}
 .tk.late{border-color:#FCA5A5;box-shadow:inset 4px 0 0 #DC2626}.tk-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:baseline}
@@ -19,38 +19,38 @@ const CSS = `.tk-list{display:grid;gap:12px}.tk{border:1px solid #E2E8F0;border-
 export async function probleme(v, seg, msg = () => {}, filter = 'open') {
   if (!document.getElementById('tkCss')) { const s = document.createElement('style'); s.id = 'tkCss'; s.textContent = CSS; document.head.append(s); }
   const r = await api(`/api/admin/tickets?area=${seg === 'b2b' ? 'b2b' : 'b2c'}`);
-  if (!r.ok) { v.innerHTML = `<p class="auth-message error">${esc(r.data?.error || 'Meldungen konnten nicht geladen werden.')}</p>`; return; }
+  if (!r.ok) { v.innerHTML = `<p class="auth-message error">${esc(r.data?.error || 'Reports could not be loaded.')}</p>`; return; }
   const now = Date.now();
   const all = (r.data.items || []).sort((a, b) => (OPEN.includes(b.status) - OPEN.includes(a.status)) || (Date.parse(a.due_at) - Date.parse(b.due_at)));
   const items = filter === 'open' ? all.filter((t) => OPEN.includes(t.status)) : all;
   const late = all.filter((t) => OPEN.includes(t.status) && Date.parse(t.due_at) < now).length;
-  v.innerHTML = `<section class="wa-card"><h2>Technische Probleme · ${seg === 'b2b' ? 'Unternehmen' : 'Privatkunden'}</h2>
-    <p class="form-note">Meldungen aus ${seg === 'b2b' ? 'dem Unternehmensportal („Technischer Support“)' : 'dem Kundenkonto („Technischer Support“)'} inkl. Screenshots und Geräteangaben. Ziel: Antwort innerhalb von 12 Stunden. Neue Meldungen kommen sofort als Mitteilung in die LeaseRun-App und per E-Mail.</p>
-    <div class="tk-filter"><button type="button" class="btn btn-outline" data-tf="open" aria-pressed="${filter === 'open'}">Offen (${r.data.open || 0})</button><button type="button" class="btn btn-outline" data-tf="all" aria-pressed="${filter !== 'open'}">Alle (${all.length})</button>${late ? `<span class="st bad">${late} über 12 Std.</span>` : ''}</div>
+  v.innerHTML = `<section class="wa-card"><h2>Technical problems · ${seg === 'b2b' ? 'Business' : 'Consumers'}</h2>
+    <p class="form-note">Reports from ${seg === 'b2b' ? 'the Business Portal ("Technical support")' : 'customer accounts ("Technical support")'} including screenshots and device details. Goal: answer within 12 hours. New reports arrive instantly as a notification in the LeaseRun app.</p>
+    <div class="tk-filter"><button type="button" class="btn btn-outline" data-tf="open" aria-pressed="${filter === 'open'}">Open (${r.data.open || 0})</button><button type="button" class="btn btn-outline" data-tf="all" aria-pressed="${filter !== 'open'}">All (${all.length})</button>${late ? `<span class="st bad">${late} over 12 hrs</span>` : ''}</div>
     <div class="tk-list">${items.map((t) => { const isLate = OPEN.includes(t.status) && Date.parse(t.due_at) < now; const [sl, sc] = SEV[t.severity] || [t.severity, '']; const dev = t.device || {};
       return `<article class="tk${isLate ? ' late' : ''}" data-id="${esc(t.id)}"><div class="tk-h"><strong>${esc(t.ref)} · ${esc(t.title)}</strong><span class="st ${sc}">${sl}</span></div>
-      <div class="tk-m"><span>${esc(t.company ? `${t.company} · ` : '')}${esc(t.user_email || '')}</span><span>${esc(CATS[t.category] || t.category)}</span><span>gemeldet ${dtt(t.created_at)}</span><span${isLate ? ' style="color:#B91C1C;font-weight:700"' : ''}>${OPEN.includes(t.status) ? `fällig ${dtt(t.due_at)}` : `Status: ${STATUS[t.status]}`}</span>${t.page ? `<span>Seite: ${esc(t.page)}</span>` : ''}</div>
-      <p class="tk-t">${esc(t.text)}</p>${t.expected ? `<p class="tk-x"><b>Erwartet:</b> ${esc(t.expected)}</p>` : ''}
-      ${(t.shotUrls || []).length ? `<div class="tk-shots">${t.shotUrls.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener" title="Screenshot ${i + 1} öffnen"><img src="${esc(u)}" alt="Screenshot ${i + 1}" loading="lazy"></a>`).join('')}</div>` : ''}
-      <details class="tk-dev"><summary>Gerät & Browser${(dev.errors || []).length ? ` · ${dev.errors.length} Skriptfehler` : ''}</summary><pre>${esc([dev.ua, dev.vw ? `Fenster ${dev.vw}×${dev.vh} @${dev.dpr}x` : '', dev.standalone ? 'als App (Home-Bildschirm)' : '', dev.online === false ? 'offline' : '', dev.tz, ...(dev.errors || []).map((e) => 'Fehler: ' + e)].filter(Boolean).join('\n'))}</pre></details>
-      <form class="tk-f"><textarea name="answer" maxlength="4000" placeholder="Antwort an den Kunden (erscheint im Konto, auf Wunsch zusätzlich per E-Mail)">${esc(t.answer || '')}</textarea>
-        <textarea name="note" maxlength="2000" placeholder="Interne Notiz (sieht der Kunde nicht)" style="min-height:44px">${esc(t.admin_note || '')}</textarea>
+      <div class="tk-m"><span>${esc(t.company ? `${t.company} · ` : '')}${esc(t.user_email || '')}</span><span>${esc(CATS[t.category] || t.category)}</span><span>reported ${dtt(t.created_at)}</span><span${isLate ? ' style="color:#B91C1C;font-weight:700"' : ''}>${OPEN.includes(t.status) ? `due ${dtt(t.due_at)}` : `Status: ${STATUS[t.status]}`}</span>${t.page ? `<span>Page: ${esc(t.page)}</span>` : ''}</div>
+      <p class="tk-t">${esc(t.text)}</p>${t.expected ? `<p class="tk-x"><b>Expected:</b> ${esc(t.expected)}</p>` : ''}
+      ${(t.shotUrls || []).length ? `<div class="tk-shots">${t.shotUrls.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener" title="Open screenshot ${i + 1}"><img src="${esc(u)}" alt="Screenshot ${i + 1}" loading="lazy"></a>`).join('')}</div>` : ''}
+      <details class="tk-dev"><summary>Device & browser${(dev.errors || []).length ? ` · ${dev.errors.length} script error(s)` : ''}</summary><pre>${esc([dev.ua, dev.vw ? `Window ${dev.vw}×${dev.vh} @${dev.dpr}x` : '', dev.standalone ? 'as app (home screen)' : '', dev.online === false ? 'offline' : '', dev.tz, ...(dev.errors || []).map((e) => 'Error: ' + e)].filter(Boolean).join('\n'))}</pre></details>
+      <form class="tk-f"><textarea name="answer" maxlength="4000" placeholder="Answer to the customer (shown in their account, optionally also by email)">${esc(t.answer || '')}</textarea>
+        <textarea name="note" maxlength="2000" placeholder="Internal note (not visible to the customer)" style="min-height:44px">${esc(t.admin_note || '')}</textarea>
         <div class="tk-row"><select name="status" aria-label="Status">${Object.entries(STATUS).map(([k, l]) => `<option value="${k}"${t.status === k ? ' selected' : ''}>${l}</option>`).join('')}</select>
-          <label class="chk"><input type="checkbox" name="notify" checked> Antwort per E-Mail senden</label>
-          <button class="btn btn-dark" type="submit">Speichern</button><span class="form-note" data-tm role="status"></span></div></form></article>`; }).join('') || '<div class="wa-state"><strong>Keine offenen Meldungen</strong><span>Alles erledigt – neue Meldungen erscheinen hier und als Mitteilung in der App.</span></div>'}</div></section>`;
+          <label class="chk"><input type="checkbox" name="notify" checked> Also send answer by email</label>
+          <button class="btn btn-dark" type="submit">Save</button><span class="form-note" data-tm role="status"></span></div></form></article>`; }).join('') || '<div class="wa-state"><strong>No open reports</strong><span>All done – new reports appear here and as a notification in the app.</span></div>'}</div></section>`;
   v.querySelectorAll('[data-tf]').forEach((b) => b.onclick = () => probleme(v, seg, msg, b.dataset.tf));
   v.querySelectorAll('.tk-f').forEach((f) => f.onsubmit = async (e) => {
     e.preventDefault();
     const id = f.closest('.tk').dataset.id, out = f.querySelector('[data-tm]'), btn = f.querySelector('[type=submit]');
     const answer = f.answer.value.trim();
     let status = f.status.value;
-    // Antwort ohne Statuswechsel: „Neu“ automatisch auf „In Bearbeitung“ setzen.
+    // Answer without a status change: set "New" to "In progress" automatically.
     if (answer && status === 'neu') status = 'in_arbeit';
-    btn.disabled = true; out.textContent = 'Wird gespeichert …';
+    btn.disabled = true; out.textContent = 'Saving …';
     const x = await api('/api/admin/tickets', { method: 'POST', body: JSON.stringify({ id, status, answer: answer || null, adminNote: f.note.value.trim() || null, notify: f.notify.checked && Boolean(answer) }) });
     btn.disabled = false;
-    if (!x.ok) { out.textContent = x.data?.error || 'Fehler'; msg(x.data?.error || 'Speichern fehlgeschlagen.', true); return; }
-    msg(x.data.mailed ? 'Gespeichert – Antwort per E-Mail gesendet.' : 'Gespeichert.');
+    if (!x.ok) { out.textContent = x.data?.error || 'Error'; msg(x.data?.error || 'Saving failed.', true); return; }
+    msg(x.data.mailed ? 'Saved – answer sent by email.' : 'Saved.');
     probleme(v, seg, msg, filter);
   });
 }
