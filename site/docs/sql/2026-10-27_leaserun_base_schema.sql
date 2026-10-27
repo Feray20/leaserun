@@ -2752,7 +2752,7 @@ end $function$;
 REVOKE ALL ON FUNCTION public.lr_card_authorize(p_card uuid, p_amount bigint, p_key text, p_merchant text, p_category text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.lr_card_authorize(p_card uuid, p_amount bigint, p_key text, p_merchant text, p_category text) TO service_role;
 
-CREATE OR REPLACE FUNCTION public.lr_card_available(l lr_card_limits)
+CREATE OR REPLACE FUNCTION public.lr_card_available(l public.lr_card_limits)
  RETURNS bigint
  LANGUAGE sql
  IMMUTABLE
@@ -2761,8 +2761,8 @@ AS $function$
   select greatest(0, l.monthly_limit_cents - l.settled_cents - l.reserved_cents + case when l.refunds_release_limit then l.refunded_cents else 0 end);
 $function$;
 
-REVOKE ALL ON FUNCTION public.lr_card_available(l lr_card_limits) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.lr_card_available(l lr_card_limits) TO PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.lr_card_available(l public.lr_card_limits) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.lr_card_available(l public.lr_card_limits) TO PUBLIC, anon, authenticated, service_role;
 
 CREATE OR REPLACE FUNCTION public.lr_card_next_reset(p_at timestamp with time zone DEFAULT now())
  RETURNS timestamp with time zone
@@ -2853,7 +2853,7 @@ REVOKE ALL ON FUNCTION public.lr_consume_share(p_token_hash text) FROM PUBLIC, a
 GRANT EXECUTE ON FUNCTION public.lr_consume_share(p_token_hash text) TO service_role;
 
 CREATE OR REPLACE FUNCTION public.lr_create_invoice(p jsonb)
- RETURNS lr_invoices
+ RETURNS public.lr_invoices
  LANGUAGE plpgsql
  SET search_path TO ''
 AS $function$
@@ -4267,3 +4267,111 @@ SELECT '2026-10', 'US Creator Partner Agreement – draft, to be reviewed', b, e
 FROM (SELECT 'US Creator Partner Agreement – draft, to be reviewed. This placeholder replaces the German source agreement and must be reviewed by counsel before publication.'::text AS b) x
 WHERE NOT EXISTS (SELECT 1 FROM public.lr_creator_agreements);
 
+
+-- ===================== 3a: RLS early + US document categories (applied as leaserun_base_3a_enable_rls_and_us_categories) =====================
+-- US document categories (superset: German keys stay allowed). Requested by coordinator 2026-10-27.
+ALTER TABLE public.lr_documents DROP CONSTRAINT IF EXISTS lr_documents_category_chk;
+ALTER TABLE public.lr_documents ADD CONSTRAINT lr_documents_category_chk CHECK ((category IS NULL) OR (category = ANY (ARRAY['objekt'::text,'miete'::text,'weg'::text,'grundbuch'::text,'technik'::text,'finanzen'::text,'steuer'::text,'id'::text,'pay_stubs'::text,'w2'::text,'form_1099'::text,'tax_returns'::text,'bank_statements'::text,'purchase_agreement'::text,'leases'::text,'insurance'::text,'llc'::text,'appraisal'::text,'inspection'::text,'hoa'::text,'title'::text,'other'::text])));
+ALTER TABLE public.lr_document_requests DROP CONSTRAINT IF EXISTS lr_document_requests_category_check;
+ALTER TABLE public.lr_document_requests ADD CONSTRAINT lr_document_requests_category_check CHECK (category = ANY (ARRAY['objekt'::text,'miete'::text,'weg'::text,'grundbuch'::text,'technik'::text,'finanzen'::text,'steuer'::text,'id'::text,'pay_stubs'::text,'w2'::text,'form_1099'::text,'tax_returns'::text,'bank_statements'::text,'purchase_agreement'::text,'leases'::text,'insurance'::text,'llc'::text,'appraisal'::text,'inspection'::text,'hoa'::text,'title'::text,'other'::text]));
+-- Enable RLS on all new tables early (policies follow in a later part).
+ALTER TABLE public.api_audit_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_idempotency_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_rate_counters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_tenant_policies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_validation_runs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_webhook_deliveries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.api_webhook_endpoints ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_access_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_access_grants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_admin_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_admin_push_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_admin_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_audit_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_contact ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_invites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_partner_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_usage ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_b2b_verification_docs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_bank_packages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_bank_pdf_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_bank_pdf_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_bank_share_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_bank_share_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_card_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_card_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_card_limits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_card_pricing_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_card_pricing_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_card_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_cards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_client_errors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_adjustments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_admin_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_agreement_acceptances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_agreements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_attributions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_bank_imports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_benefits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_business ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_campaign_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_commission_rules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_commissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_content ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_conversions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_payout_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_payouts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_refunds ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_socials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creator_statements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_creators ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_crm_activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_crm_contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_data_room_access_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_data_room_shares ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_deals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_document_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_document_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_entitlements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_kaeufe ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_kreditmappe_credits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_kreditmappe_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_mail_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_newsletter ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_newsletter_deliveries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_newsletter_sends ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_outreach_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_partners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_reminder_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_review_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_security_blocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_security_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_support_tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_suppression ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_user_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_verify_views ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_webhook_log ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lr_counters ENABLE ROW LEVEL SECURITY;

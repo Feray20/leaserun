@@ -1,4 +1,4 @@
-// Cursor-Paginierung über (created_at, id) – stabil auch bei gleichen Zeitstempeln.
+// Cursor pagination over (created_at, id) – stable even with identical timestamps.
 import { ApiError } from '@/lib/api/errors';
 
 export type Cursor = { t: string; id: string };
@@ -25,9 +25,9 @@ export function pageParams(url: URL, max = 100): { limit: number; cursor: Cursor
   return { limit, cursor: decodeCursor(url.searchParams.get('cursor')) };
 }
 
-// PostgREST-Filter „älter als Cursor“ für absteigende Sortierung nach created_at, id.
+// PostgREST filter "older than cursor" for descending order by created_at, id.
 export function cursorFilter(c: Cursor, timeCol = 'created_at'): string {
-  const t = c.t.replace(/"/g, ''); // unverändert aus der Datenbank (Mikrosekunden bleiben erhalten)
+  const t = c.t.replace(/"/g, ''); // unchanged from the database (microseconds are preserved)
   return `${timeCol}.lt."${t}",and(${timeCol}.eq."${t}",id.lt.${c.id})`;
 }
 

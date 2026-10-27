@@ -71,52 +71,52 @@ export async function reviewsAdmin(v) {
   };
 }
 
-// Nutzer (B2C) → „Zugriff freischalten“: Werkzeuge unabhängig vom bezahlten Tarif freigeben, befristet oder dauerhaft.
+// Users (B2C) → "Grant access": unlock tools independently of the paid plan, temporary or permanent.
 export async function accessDialog(userId, mail, msg = () => {}) {
   if (!document.getElementById('accCss')) { const st = document.createElement('style'); st.id = 'accCss'; st.textContent = `.acc-feat{border:1px solid #E2E8F0;border-radius:12px;padding:10px 12px;display:grid;gap:10px}.acc-grp{display:grid;gap:6px}.acc-grp>strong{color:#0F2C59;font-size:13px;text-transform:uppercase;letter-spacing:.05em}.acc-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px;padding:6px 0;border-top:1px solid #F1F5F9}.acc-row small{color:#64748B;font-size:12px;margin-left:4px;text-transform:none;letter-spacing:0;display:inline}.acc-seg{display:inline-flex;background:#F1F5F9;border-radius:999px;padding:3px}.acc-seg label{margin:0}.acc-seg input{position:absolute;opacity:0;pointer-events:none}.acc-seg span{display:block;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700;color:#475569;cursor:pointer}.acc-seg input:checked+span{background:#0F2C59;color:#fff}.acc-seg input[value=off]:checked+span{background:#B91C1C}.acc-seg input[value=on]:checked+span{background:#047857}.acc-seg input:focus-visible+span{outline:2px solid #0284C7}`; document.head.append(st); }
   const r = await api('/api/admin/access?user=' + encodeURIComponent(userId));
-  if (!r.ok) { msg(r.data?.error || 'Nicht verfügbar.', true); return; }
+  if (!r.ok) { msg(r.data?.error || 'Not available.', true); return; }
   const g = r.data.grant;
   let d = document.getElementById('accDlg');
   if (!d) { d = document.createElement('dialog'); d.id = 'accDlg'; d.className = 'wa-dlg'; document.body.append(d); }
   const until = g?.valid_until ? String(g.valid_until).slice(0, 10) : '';
   d.innerHTML = `<form method="dialog" class="acc-f">
-    <h2>Zugriff freischalten</h2><p class="form-note">${esc(mail)} · ${g ? `aktuell: <b>${g.tier === 'pro' ? 'Alle Werkzeuge (wie Investor Pro)' : g.tier === 'starter' ? 'Kauf-Werkzeuge (wie Käufer-Pass)' : 'Einzelfreigaben'}</b>, seit ${dtt(g.updated_at)} von ${esc(g.granted_by)}` : 'bisher nur der bezahlte Tarif'}</p>
-    <fieldset class="acc-t"><legend>Freigeschaltete Werkzeuge</legend>
-      <label class="chk"><input type="radio" name="tier" value="free"${g?.tier === 'free' ? ' checked' : ''}> <span><b>Nur einzelne Funktionen</b> – Tarif bleibt, es gelten nur die Einzelfreigaben unten</span></label>
-      <label class="chk"><input type="radio" name="tier" value="starter"${g && g.tier === 'starter' || !g ? ' checked' : ''}> <span><b>Kauf-Werkzeuge</b> – wie Käufer-Pass: Objekte unbegrenzt, Bankangebote vergleichen, Bankgespräch, Druck/PDF</span></label>
-      <label class="chk"><input type="radio" name="tier" value="pro"${g?.tier === 'pro' ? ' checked' : ''}> <span><b>Alle Werkzeuge</b> – wie Investor Pro: zusätzlich Portfolio, Anschluss & Forward, Betriebskosten, Kreditmappen unbegrenzt</span></label></fieldset>
-    <fieldset class="acc-feat"><legend>Einzelne Funktionen freigeben oder entziehen</legend>
-      <p class="form-note">„Nach Tarif“ folgt dem bezahlten bzw. oben gewählten Umfang. „Frei“ schaltet die Funktion zusätzlich frei, „Gesperrt“ nimmt sie weg – auch wenn der Tarif sie enthält.</p>
+    <h2>Grant access</h2><p class="form-note">${esc(mail)} · ${g ? `current: <b>${g.tier === 'pro' ? 'All tools (like Investor Pro)' : g.tier === 'starter' ? 'Buying tools (like Buyer Pass)' : 'Individual grants'}</b>, since ${dtt(g.updated_at)} by ${esc(g.granted_by)}` : 'so far only the paid plan'}</p>
+    <fieldset class="acc-t"><legend>Unlocked tools</legend>
+      <label class="chk"><input type="radio" name="tier" value="free"${g?.tier === 'free' ? ' checked' : ''}> <span><b>Individual features only</b> – the plan stays; only the individual grants below apply</span></label>
+      <label class="chk"><input type="radio" name="tier" value="starter"${g && g.tier === 'starter' || !g ? ' checked' : ''}> <span><b>Buying tools</b> – like Buyer Pass: unlimited properties, compare loan offers, lender meeting prep, print/PDF</span></label>
+      <label class="chk"><input type="radio" name="tier" value="pro"${g?.tier === 'pro' ? ' checked' : ''}> <span><b>All tools</b> – like Investor Pro: plus portfolio, refinance & rate lock, operating expenses, unlimited Lender Packages</span></label></fieldset>
+    <fieldset class="acc-feat"><legend>Grant or revoke individual features</legend>
+      <p class="form-note">"By plan" follows the paid or above-selected scope. "On" unlocks the feature in addition, "Off" removes it – even if the plan includes it.</p>
       ${(() => { const cat = r.data.catalog || {}, f = g?.features || {}; const groups = {}; for (const [k, [grp, label, need]] of Object.entries(cat)) (groups[grp] ||= []).push([k, label, need]);
-        const NEED = { free: 'kostenlos', starter: 'ab Käufer-Pass', pro: 'Investor Pro' };
-        return Object.entries(groups).map(([grp, list]) => `<div class="acc-grp"><strong>${esc(grp)}</strong>${list.map(([k, label, need]) => `<div class="acc-row"><span>${esc(label)} <small>${NEED[need] || ''}</small></span><span class="acc-seg" role="radiogroup" aria-label="${esc(label)}">${[['auto', 'Nach Tarif'], ['on', 'Frei'], ['off', 'Gesperrt']].map(([v, l]) => `<label><input type="radio" name="f_${k}" value="${v}"${(f[k] || 'auto') === v ? ' checked' : ''}><span>${l}</span></label>`).join('')}</span></div>`).join('')}</div>`).join(''); })()}
+        const NEED = { free: 'free', starter: 'Buyer Pass and up', pro: 'Investor Pro' };
+        return Object.entries(groups).map(([grp, list]) => `<div class="acc-grp"><strong>${esc(grp)}</strong>${list.map(([k, label, need]) => `<div class="acc-row"><span>${esc(label)} <small>${NEED[need] || ''}</small></span><span class="acc-seg" role="radiogroup" aria-label="${esc(label)}">${[['auto', 'By plan'], ['on', 'On'], ['off', 'Off']].map(([v, l]) => `<label><input type="radio" name="f_${k}" value="${v}"${(f[k] || 'auto') === v ? ' checked' : ''}><span>${l}</span></label>`).join('')}</span></div>`).join('')}</div>`).join(''); })()}
     </fieldset>
-    <div class="wa-grid2"><label>Zusätzliche Kreditmappen<input name="creditMaps" type="number" min="0" max="1000" value="${Number(g?.credit_maps || 0)}"></label>
-      <label>Gültig bis (leer = unbefristet)<input name="validUntil" type="date" value="${esc(until)}"></label></div>
-    <label class="chk"><input type="checkbox" name="leitfaden"${g?.leitfaden ? ' checked' : ''}> Notar-Checkliste & Verhandlungsleitfaden freischalten</label>
-    <label>Interne Notiz (z. B. Grund)<textarea name="note" rows="2" maxlength="500">${esc(g?.note || '')}</textarea></label>
-    <p class="form-note">Der Kunde sieht die Werkzeuge nach dem nächsten Neuladen. Bezahlte Tarife bleiben unberührt; es gilt die höhere Stufe. Jede Änderung wird protokolliert.</p>
-    <div class="pt-row"><button class="btn btn-dark" type="button" id="accSave">Speichern</button>${g ? '<button class="btn btn-outline" type="button" id="accDel">Freischaltung entfernen</button>' : ''}<button class="btn btn-ghost" value="x">Abbrechen</button></div>
+    <div class="wa-grid2"><label>Extra Lender Packages<input name="creditMaps" type="number" min="0" max="1000" value="${Number(g?.credit_maps || 0)}"></label>
+      <label>Valid until (empty = no end date)<input name="validUntil" type="date" value="${esc(until)}"></label></div>
+    <label class="chk"><input type="checkbox" name="leitfaden"${g?.leitfaden ? ' checked' : ''}> Unlock closing checklist & negotiation guide</label>
+    <label>Internal note (e.g. reason)<textarea name="note" rows="2" maxlength="500">${esc(g?.note || '')}</textarea></label>
+    <p class="form-note">The customer sees the tools after the next reload. Paid plans stay untouched; the higher level applies. Every change is logged.</p>
+    <div class="pt-row"><button class="btn btn-dark" type="button" id="accSave">Save</button>${g ? '<button class="btn btn-outline" type="button" id="accDel">Remove grant</button>' : ''}<button class="btn btn-ghost" value="x">Cancel</button></div>
     <p class="form-note" id="accMsg" role="status"></p></form>`;
   const f = d.querySelector('form');
-  // Enter im Formular = Speichern (nicht Schließen ohne Wirkung).
+  // Enter in the form = Save (not closing without effect).
   f.addEventListener('submit', (e) => { if (e.submitter?.value !== 'x') { e.preventDefault(); d.querySelector('#accSave').click(); } });
   d.querySelector('#accSave').onclick = async () => {
     const fd = new FormData(f), out = d.querySelector('#accMsg'), sb = d.querySelector('#accSave');
     const features = {}; for (const k of Object.keys(r.data.catalog || {})) features[k] = fd.get('f_' + k) || 'auto';
     const body = { user: userId, features, tier: fd.get('tier'), creditMaps: Number(fd.get('creditMaps') || 0), leitfaden: fd.get('leitfaden') === 'on', validUntil: fd.get('validUntil') || null, note: String(fd.get('note') || '') };
-    sb.disabled = true; f.classList.add('acc-busy'); out.className = 'form-note'; out.textContent = 'Wird gespeichert …';
+    sb.disabled = true; f.classList.add('acc-busy'); out.className = 'form-note'; out.textContent = 'Saving …';
     out.scrollIntoView({ block: 'nearest' });
-    const x = await api('/api/admin/access', { method: 'POST', body: JSON.stringify(body) }).catch(() => ({ ok: false, data: { error: 'Keine Verbindung.' } }));
+    const x = await api('/api/admin/access', { method: 'POST', body: JSON.stringify(body) }).catch(() => ({ ok: false, data: { error: 'No connection.' } }));
     sb.disabled = false; f.classList.remove('acc-busy');
-    if (x.ok) { out.className = 'form-note ok'; out.textContent = `Gespeichert: ${body.tier === 'pro' ? 'alle Werkzeuge' : body.tier === 'starter' ? 'Kauf-Werkzeuge' : 'Einzelfreigaben'}${Object.values(features).filter((v) => v !== 'auto').length ? ` · ${Object.values(features).filter((v) => v !== 'auto').length} Funktionen einzeln eingestellt` : ''}.`; setTimeout(() => { d.close(); msg(`Zugriff für ${mail} gespeichert.`); }, 700); }
-    else { out.className = 'form-note err'; out.textContent = x.data?.error || 'Speichern fehlgeschlagen.'; }
+    if (x.ok) { out.className = 'form-note ok'; out.textContent = `Saved: ${body.tier === 'pro' ? 'all tools' : body.tier === 'starter' ? 'buying tools' : 'individual grants'}${Object.values(features).filter((v) => v !== 'auto').length ? ` · ${Object.values(features).filter((v) => v !== 'auto').length} features set individually` : ''}.`; setTimeout(() => { d.close(); msg(`Access for ${mail} saved.`); }, 700); }
+    else { out.className = 'form-note err'; out.textContent = x.data?.error || 'Saving failed.'; }
   };
   d.querySelector('#accDel')?.addEventListener('click', async () => {
-    if (!confirm('Manuelle Freischaltung entfernen? Es gilt dann nur noch der bezahlte Tarif.')) return;
+    if (!confirm('Remove the manual grant? Only the paid plan will apply then.')) return;
     const x = await api('/api/admin/access?user=' + encodeURIComponent(userId), { method: 'DELETE' });
-    if (x.ok) { d.close(); msg(`Freischaltung für ${mail} entfernt.`); } else d.querySelector('#accMsg').textContent = x.data?.error || 'Fehler';
+    if (x.ok) { d.close(); msg(`Grant for ${mail} removed.`); } else d.querySelector('#accMsg').textContent = x.data?.error || 'Error';
   });
   if (d.showModal) d.showModal(); else d.setAttribute('open', '');
 }

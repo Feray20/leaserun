@@ -1,4 +1,4 @@
-// Öffentliche Darstellungen der Ressourcen (nur Felder, die der jeweilige Scope braucht).
+// Public representations of resources (only fields the scope needs).
 import type { CaseData } from '@/lib/api/schemas';
 
 export type CaseRow = { id: string; tenant_id: string; environment: string; external_reference: string | null; status: string; data: CaseData; metadata: Record<string, unknown>; created_at: string; updated_at: string; deleted_at: string | null };

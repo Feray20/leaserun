@@ -107,7 +107,7 @@ export async function hq(v, { goTab, msg }) {
         <div class="hq-ring" id="hqRing">
           <div class="hq-core"><div class="hq-orb" aria-hidden="true"><span></span><span></span><span class="hq-orb-logo"><img src="/logo-icon.svg" alt="" width="54" height="46"></span></div>
             <button type="button" class="hq-pill" id="hqAll"><span class="hq-mk">${MARK}</span><b>LeaseRun</b><small>Intelligence · everyone to work</small></button></div>
-          ${ORBIT.map((d, i) => { const a = AGENTS.find((x) => x.id === d.agent); return `<button type="button" class="hq-dep${d.founder ? ' founder' : ''}" data-dep="${d.k}" style="--i:${i};--n:${ORBIT.length}">${d.founder ? '<span class="hq-dep-ic hq-face"><img src="/img/gruender-240.webp" alt="Head of Operations" width="40" height="40" loading="lazy"></span>' : `<span class="hq-dep-ic" style="--c:${a?.color || d.c}">${a ? `<span class="hq-ini">${initials(a)}</span>` : ic(d.icon, 20)}</span>`}<span class="hq-dep-t"><b>${esc(d.founder ? 'Feray Korkmaz' : `${a.name} ${a.last}`)}</b><small data-dl>${d.founder ? 'Head of Operations' : `<i class="dot"></i>${esc(d.n)}`}</small></span><em class="hq-dep-b" data-db hidden></em></button>`; }).join('')}
+          ${ORBIT.map((d, i) => { const a = AGENTS.find((x) => x.id === d.agent); return `<button type="button" class="hq-dep${d.founder ? ' founder' : ''}" data-dep="${d.k}" style="--i:${i};--n:${ORBIT.length}">${d.founder ? '<span class="hq-dep-ic hq-face"><img src="/img/gruender-240.webp" alt="Head of Operations" width="40" height="40" loading="lazy"></span>' : `<span class="hq-dep-ic" style="--c:${a?.color || d.c}">${a ? `<span class="hq-ini">${initials(a)}</span>` : ic(d.icon, 20)}</span>`}<span class="hq-dep-t"><b>${esc(d.founder ? 'Head of Operations' : `${a.name} ${a.last}`)}</b><small data-dl>${d.founder ? 'Owner' : `<i class="dot"></i>${esc(d.n)}`}</small></span><em class="hq-dep-b" data-db hidden></em></button>`; }).join('')}
         </div>
         <div class="hq-sheet" id="hqSheet" aria-live="polite"></div>
         <div class="hq-orbit-foot"><span id="hqShift">Shift starting …</span></div>
@@ -224,18 +224,18 @@ export async function hq(v, { goTab, msg }) {
     if (!d) { box.innerHTML = ''; return; }
     if (d.founder) {
       const wait = AGENTS.filter((a) => shift[a.id] && shift[a.id].status !== 'ok');
-      box.innerHTML = `<div class="hq-sh"><div class="hq-sh-h"><span class="hq-dep-ic hq-face"><img src="/img/gruender-240.webp" alt="Feray Korkmaz" width="44" height="44" loading="lazy"></span><div><b>Feray Korkmaz</b><small>Head of Operations</small></div><button type="button" class="hq-rc-x" data-x aria-label="Schließen">×</button></div>
-        ${wait.length ? `<ul class="hq-fl">${wait.map((a) => `<li><button type="button" data-open="${a.id}"><span class="hq-ini sm" style="background:${a.color}">${initials(a)}</span><span><b>${esc(a.name)} · ${esc(a.role)}</b><small>${esc(shift[a.id].line)}</small></span></button></li>`).join('')}</ul>` : '<p class="hq-sh-l">✓ Alles erledigt.</p>'}
-        ${proposals.length ? `<h4 class="hq-h4">Lösungen zur Freigabe (${proposals.filter((p) => p.status === 'offen').length})</h4><ul class="hq-prop">${proposals.map(propHtml).join('')}</ul>` : ''}
-        ${ai?.configured ? `<details class="hq-set"><summary>LeaseRun Intelligence · Einstellungen</summary>
+      box.innerHTML = `<div class="hq-sh"><div class="hq-sh-h"><span class="hq-dep-ic hq-face"><img src="/img/gruender-240.webp" alt="Head of Operations" width="44" height="44" loading="lazy"></span><div><b>Head of Operations</b><small>Owner</small></div><button type="button" class="hq-rc-x" data-x aria-label="Close">×</button></div>
+        ${wait.length ? `<ul class="hq-fl">${wait.map((a) => `<li><button type="button" data-open="${a.id}"><span class="hq-ini sm" style="background:${a.color}">${initials(a)}</span><span><b>${esc(a.name)} · ${esc(a.role)}</b><small>${esc(shift[a.id].line)}</small></span></button></li>`).join('')}</ul>` : '<p class="hq-sh-l">✓ All done.</p>'}
+        ${proposals.length ? `<h4 class="hq-h4">Solutions for approval (${proposals.filter((p) => p.status === 'offen').length})</h4><ul class="hq-prop">${proposals.map(propHtml).join('')}</ul>` : ''}
+        ${ai?.configured ? `<details class="hq-set"><summary>LeaseRun Intelligence · Settings</summary>
           <form class="hq-setf" data-set>
-            <label>Zentrale &amp; Lagebild<select name="top">${ai.models.map((m) => `<option value="${m.id}" ${m.id === ai.settings.top ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
-            <label>Alle übrigen Abteilungen (Chat mit dir)<select name="rest">${ai.models.map((m) => `<option value="${m.id}" ${m.id === ai.settings.rest ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
-            <label>Hintergrund (Wache, Tagesrunde, Entwürfe – am meisten Aufrufe)<select name="bg">${ai.models.map((m) => `<option value="${m.id}" ${m.id === ai.settings.bg ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
-            <label class="hq-chk"><input name="off" type="checkbox" ${ai.settings.off ? 'checked' : ''}> KI aus (keine Anthropic-Kosten – Agenten arbeiten regelbasiert)</label>
-            <label class="hq-chk"><input name="auto" type="checkbox" ${ai.settings.auto ? 'checked' : ''}> Neue Funde automatisch analysieren und beheben</label>
-            <label class="hq-chk"><input name="daily" type="checkbox" ${ai.settings.daily ? 'checked' : ''}> Tagesrunde ab 6 Uhr (Lösungen je Abteilung)</label>
-            <div class="hq-sh-a"><button type="submit" class="hq-btn hq-btn-p">Speichern</button><button type="button" class="hq-btn" data-daily>Tagesrunde jetzt</button></div>
+            <label>Command center &amp; daily briefing<select name="top">${ai.models.map((m) => `<option value="${m.id}" ${m.id === ai.settings.top ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
+            <label>All other departments (chat with you)<select name="rest">${ai.models.map((m) => `<option value="${m.id}" ${m.id === ai.settings.rest ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
+            <label>Background (watch, daily round, drafts – most calls)<select name="bg">${ai.models.map((m) => `<option value="${m.id}" ${m.id === ai.settings.bg ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
+            <label class="hq-chk"><input name="off" type="checkbox" ${ai.settings.off ? 'checked' : ''}> AI off (no Anthropic cost – agents work rule-based)</label>
+            <label class="hq-chk"><input name="auto" type="checkbox" ${ai.settings.auto ? 'checked' : ''}> Automatically analyze and fix new findings</label>
+            <label class="hq-chk"><input name="daily" type="checkbox" ${ai.settings.daily ? 'checked' : ''}> Daily round from 6 a.m. (solutions per department)</label>
+            <div class="hq-sh-a"><button type="submit" class="hq-btn hq-btn-p">Save</button><button type="button" class="hq-btn" data-daily>Run daily round now</button></div>
           </form>
         </details>` : ''}</div>`;
       box.querySelector('[data-x]').onclick = () => { openDep = null; paintAll(); };
@@ -246,48 +246,48 @@ export async function hq(v, { goTab, msg }) {
         f.onsubmit = async (e) => {
           e.preventDefault(); const fd = new FormData(f);
           const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'settings', settings: { top: fd.get('top'), rest: fd.get('rest'), bg: fd.get('bg'), auto: fd.get('auto') === 'on', daily: fd.get('daily') === 'on', off: fd.get('off') === 'on' } }) });
-          if (!r.ok) { msg(r.data?.error || 'Nicht gespeichert.', true); return; }
-          ai = r.data.ai; msg('Gespeichert.'); paintAi(); paintAll();
+          if (!r.ok) { msg(r.data?.error || 'Not saved.', true); return; }
+          ai = r.data.ai; msg('Saved.'); paintAi(); paintAll();
         };
         f.querySelector('[data-daily]').onclick = async (e) => {
-          const b = e.currentTarget; b.disabled = true; b.textContent = 'Läuft … (bis zu einer Minute)';
+          const b = e.currentTarget; b.disabled = true; b.textContent = 'Running … (up to a minute)';
           const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'tagesrunde' }) });
-          if (r.ok) { shift = r.data.agents || shift; msg(r.data.done?.length ? `Tagesrunde: ${r.data.done.map((id) => AGENTS.find((x) => x.id === id)?.name || id).join(', ')} haben Vorschläge gemacht.` : r.data.skipped || 'Für heute ist die Tagesrunde schon komplett.'); } else msg(r.data?.error || 'Nicht möglich.', true);
+          if (r.ok) { shift = r.data.agents || shift; msg(r.data.done?.length ? `Daily round: ${r.data.done.map((id) => AGENTS.find((x) => x.id === id)?.name || id).join(', ')} made proposals.` : r.data.skipped || "Today's daily round is already complete."); } else msg(r.data?.error || 'Not possible.', true);
           refreshAi(); paintAll();
         };
       }
       return;
     }
     const a = AGENTS.find((x) => x.id === d.agent), r = shift[a.id], b = busy.has(a.id);
-    const [c, l] = b ? ['info', 'Arbeitet …'] : r ? ST[r.status] || ST.ok : ['off', 'Wartet'];
+    const [c, l] = b ? ['info', 'Working …'] : r ? ST[r.status] || ST.ok : ['off', 'Waiting'];
     const acts = (r?.actions || []).filter((x) => x.id !== 'open' || r.status !== 'ok');
     const h = chat[a.id] || [];
-    box.innerHTML = `<div class="hq-sh"><div class="hq-sh-h"><span class="hq-dep-ic" style="--c:${a.color}"><span class="hq-ini">${initials(a)}</span></span><div><b>${esc(a.name)} ${esc(a.last)}</b><small>${esc(a.role)}</small></div><span class="hq-st ${c}">${l}</span><button type="button" class="hq-rc-x" data-x aria-label="Schließen">×</button></div>
-      <p class="hq-sh-l">${r ? `${esc(r.line)} <span>· ${agoS(r.at)}</span>` : 'Hat noch nicht gearbeitet.'}</p>
+    box.innerHTML = `<div class="hq-sh"><div class="hq-sh-h"><span class="hq-dep-ic" style="--c:${a.color}"><span class="hq-ini">${initials(a)}</span></span><div><b>${esc(a.name)} ${esc(a.last)}</b><small>${esc(a.role)}</small></div><span class="hq-st ${c}">${l}</span><button type="button" class="hq-rc-x" data-x aria-label="Close">×</button></div>
+      <p class="hq-sh-l">${r ? `${esc(r.line)} <span>· ${agoS(r.at)}</span>` : "Hasn't worked yet."}</p>
       ${aiBox(r)}
       ${a.id === 'freigaben' ? '<div class="hq-pk" data-pk></div>' : ''}
-      ${(() => { const mine = proposals.filter((p) => p.agent === a.id); return mine.length ? `<h4 class="hq-h4">Lösungen</h4><ul class="hq-prop">${mine.map(propHtml).join('')}</ul>` : ''; })()}
-      <div class="hq-sh-a">${acts.map((x, i) => `<button type="button" class="hq-btn ${x.id === 'remind' ? 'hq-btn-p' : ''}" data-ai="${i}">${esc(x.label)}</button>`).join('')}<button type="button" class="hq-btn hq-btn-p" data-run ${b ? 'disabled' : ''}>${b ? 'Arbeitet …' : 'Jetzt erledigen'}</button></div>
+      ${(() => { const mine = proposals.filter((p) => p.agent === a.id); return mine.length ? `<h4 class="hq-h4">Solutions</h4><ul class="hq-prop">${mine.map(propHtml).join('')}</ul>` : ''; })()}
+      <div class="hq-sh-a">${acts.map((x, i) => `<button type="button" class="hq-btn ${x.id === 'remind' ? 'hq-btn-p' : ''}" data-ai="${i}">${esc(x.label)}</button>`).join('')}<button type="button" class="hq-btn hq-btn-p" data-run ${b ? 'disabled' : ''}>${b ? 'Working …' : 'Do it now'}</button></div>
       <div class="hq-chat"${ai?.settings?.off && !h.length ? ' hidden' : ''}>${h.map((m) => `<p class="hq-msg ${m.me ? 'me' : ''}${m.wait ? ' wait' : ''}">${rich(m.t)}</p>`).join('')}</div>
-      ${ai?.settings?.off ? '<p class="form-note">KI aus: Dieser Agent prüft und korrigiert automatisch nach festen Regeln (kein Chat, keine Kosten). Die Knöpfe unten führen feste Aufgaben sofort aus.</p>' : `<form class="hq-ask" data-ask><input name="q" autocomplete="off" maxlength="1500" placeholder="Auftrag an ${esc(a.name)} …" aria-label="Auftrag an ${esc(a.name)}"><button type="submit" class="hq-btn hq-btn-p">Los</button></form>`}
+      ${ai?.settings?.off ? '<p class="form-note">AI off: this agent checks and fixes automatically by fixed rules (no chat, no cost). The buttons below run fixed tasks right away.</p>' : `<form class="hq-ask" data-ask><input name="q" autocomplete="off" maxlength="1500" placeholder="Task for ${esc(a.name)} …" aria-label="Task for ${esc(a.name)}"><button type="submit" class="hq-btn hq-btn-p">Go</button></form>`}
       <div class="hq-chips2">${(cmds[a.id] || []).map((t) => `<button type="button" data-cmd="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`;
     box.querySelector('[data-x]').onclick = () => { openDep = null; paintAll(); };
     bindProps(box);
     box.querySelector('[data-run]').onclick = () => doNow(a.id);
     if (a.id === 'freigaben') paintPk(box.querySelector('[data-pk]'));
     const th = box.querySelector('[data-think]');
-    if (th) th.onclick = async () => { th.disabled = true; th.textContent = 'Claude arbeitet …'; const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'analyse', agents: [a.id] }) }); if (r.ok) { shift = r.data.agents || shift; if (r.data.skipped) msg(r.data.skipped, true); } else msg(r.data?.error || 'Analyse nicht möglich.', true); refreshAi(); paintAll(); };
+    if (th) th.onclick = async () => { th.disabled = true; th.textContent = 'Claude is working …'; const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'analyse', agents: [a.id] }) }); if (r.ok) { shift = r.data.agents || shift; if (r.data.skipped) msg(r.data.skipped, true); } else msg(r.data?.error || 'Analysis not possible.', true); refreshAi(); paintAll(); };
     box.querySelectorAll('[data-ai]').forEach((btn) => btn.onclick = () => act(a.id, acts[Number(btn.dataset.ai)], btn));
     const send = async (text) => {
       if (!text.trim()) return;
       (chat[a.id] ||= []).push({ me: true, t: text });
       const hist = chat[a.id].slice(0, -1).filter((m) => !m.wait).slice(-8).map((m) => ({ me: Boolean(m.me), t: m.t }));
-      const wait = { t: `${a.name} arbeitet …`, wait: true };
+      const wait = { t: `${a.name} is working …`, wait: true };
       chat[a.id].push(wait); paintSheet();
       const f = box.querySelector('[data-ask]'); if (f) f.querySelector('input').disabled = true;
       const x = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ agent: a.id, command: text, history: hist }) });
       chat[a.id] = chat[a.id].filter((m) => m !== wait);
-      chat[a.id].push({ t: x.ok ? x.data.reply : (x.status === 504 ? 'Das war zu viel auf einmal – ich habe einen Teil erledigt. Schreib „weiter“, dann mache ich weiter.' : x.data?.error || 'Das hat nicht geklappt – bitte noch einmal senden.'), claude: Boolean(x.ok && x.data.ai) });
+      chat[a.id].push({ t: x.ok ? x.data.reply : (x.status === 504 ? 'That was a lot at once – I finished part of it. Write "continue" and I will keep going.' : x.data?.error || "That didn't work – please send it again."), claude: Boolean(x.ok && x.data.ai) });
       if (x.ok && x.data.actions?.length && shift[a.id]) shift[a.id] = { ...shift[a.id], actions: x.data.actions };
       if (x.ok && x.data.ai) refreshAi();
       paintSheet(); box.querySelector('[data-ask] input')?.focus();
@@ -296,15 +296,15 @@ export async function hq(v, { goTab, msg }) {
     if (autoAsk) { const q = autoAsk; autoAsk = null; send(q); }
     box.querySelectorAll('[data-cmd]').forEach((x) => x.onclick = () => send(x.dataset.cmd));
   };
-  // Live-Feed: was die Agenten zuletzt erledigt haben bzw. an dich übergeben – nur echte Ergebnisse.
+  // Live feed: what the agents recently finished or handed to you – real results only.
   const feedItems = () => AGENTS.filter((a) => shift[a.id]).map((a) => ({ a, r: shift[a.id], d: ORBIT.find((x) => x.agent === a.id) }))
     .sort((x, y) => (x.r.status === 'ok') - (y.r.status === 'ok') || String(y.r.at).localeCompare(String(x.r.at)));
   const paintFeed = () => {
     const it = feedItems(), box = $('#hqFeed');
-    if (busy.size) { box.innerHTML = `<div class="hq-fd busy"><i></i><div><small>${busy.size} arbeiten</small><p>${[...busy].map((id) => AGENTS.find((a) => a.id === id)?.name).join(', ')} …</p></div></div>`; return; }
+    if (busy.size) { box.innerHTML = `<div class="hq-fd busy"><i></i><div><small>${busy.size} working</small><p>${[...busy].map((id) => AGENTS.find((a) => a.id === id)?.name).join(', ')} …</p></div></div>`; return; }
     if (!it.length) { box.innerHTML = ''; return; }
     const show = it.slice(feedIx % it.length).concat(it.slice(0, feedIx % it.length)).slice(0, 2);
-    box.innerHTML = show.map(({ a, r, d }) => `<button type="button" class="hq-fd s-${r.status}" data-fd="${d.k}"><i></i><div><small>${esc(a.name)} · ${r.status === 'ok' ? 'erledigt' : `→ ${FOUNDER}`}</small><p>${esc(String(r.line || '').slice(0, 110))}</p></div></button>`).join('');
+    box.innerHTML = show.map(({ a, r, d }) => `<button type="button" class="hq-fd s-${r.status}" data-fd="${d.k}"><i></i><div><small>${esc(a.name)} · ${r.status === 'ok' ? 'done' : `→ ${FOUNDER}`}</small><p>${esc(String(r.line || '').slice(0, 110))}</p></div></button>`).join('');
     box.querySelectorAll('[data-fd]').forEach((b) => b.onclick = () => { openDep = b.dataset.fd; paintAll(); });
   };
   const paintAll = () => {
@@ -313,7 +313,7 @@ export async function hq(v, { goTab, msg }) {
       const st = depState(d); el.dataset.state = st; el.setAttribute('aria-pressed', String(openDep === d.k));
       const badge = el.querySelector('[data-db]');
       if (d.agent) {
-        el.querySelector('[data-dl]').innerHTML = `<i class="dot"></i>${esc(d.n)} · ${st === 'busy' ? 'arbeitet …' : st === 'ok' ? 'erledigt' : st === 'todo' ? 'braucht dich' : st === 'error' ? 'Problem' : 'wartet'}`;
+        el.querySelector('[data-dl]').innerHTML = `<i class="dot"></i>${esc(d.n)} · ${st === 'busy' ? 'working …' : st === 'ok' ? 'done' : st === 'todo' ? 'needs you' : st === 'error' ? 'problem' : 'waiting'}`;
       }
       if (d.agent || d.founder) { badge.hidden = st !== 'todo' && st !== 'error'; badge.textContent = '!'; }
       el.onclick = () => { if (ring.dragged) return; openDep = openDep === d.k ? null : d.k; paintAll(); if (openDep && d.agent) autoThink(d.agent); if (openDep && innerWidth < 900) $('#hqSheet').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
@@ -321,17 +321,17 @@ export async function hq(v, { goTab, msg }) {
     paintSheet(); paintFeed(); paintDec();
     const todo = AGENTS.filter((a) => shift[a.id] && shift[a.id].status !== 'ok').length;
     const last = Object.values(shift).map((x) => x.at).sort().pop();
-    $('#hqShift').textContent = busy.size ? `${busy.size} von ${AGENTS.length} arbeiten …` : `${AGENTS.length} Agenten · ${last ? agoS(last) : '–'} · ${todo ? `${todo} brauchen dich` : 'alles erledigt'}`;
-    const pill = $('#hqAll'); pill.classList.toggle('busy', busy.size > 0); pill.querySelector('small').textContent = busy.size ? `Intelligence · ${busy.size} arbeiten …` : 'Intelligence · alle an die Arbeit';
+    $('#hqShift').textContent = busy.size ? `${busy.size} of ${AGENTS.length} working …` : `${AGENTS.length} agents · ${last ? agoS(last) : '–'} · ${todo ? `${todo} need you` : 'all done'}`;
+    const pill = $('#hqAll'); pill.classList.toggle('busy', busy.size > 0); pill.querySelector('small').textContent = busy.size ? `Intelligence · ${busy.size} working …` : 'Intelligence · everyone to work';
     $('#hqOrbit').dataset.busy = busy.size ? '1' : '';
   };
   const paintCrew = paintAll;
   const refreshAi = async () => { const r = await api('/api/admin/hq'); if (r.ok && v.isConnected) { ai = r.data.ai || ai; proposals = r.data.proposals || proposals; umsetzungSofort = Boolean(r.data.umsetzung); uBlock = r.data.blocked || null; paintAi(); } };
-  // Jede Gruppe von drei Agenten ist eine eigene Anfrage: Ergebnisse erscheinen nach und nach, keine Anfrage läuft länger
-  // als nötig, und ein Tipp während einer laufenden Runde wird nie verschluckt (Rückmeldung oder nächste Runde).
+  // Each group of three agents is its own request: results appear step by step, no request runs longer than needed,
+  // and a tap during a running round is never swallowed (feedback or next round).
   const work = async (ids = AGENTS.map((a) => a.id), force = false) => {
     const open = ids.filter((x) => !busy.has(x));
-    if (!open.length) { if (force) { queued = true; msg(`${busy.size} Agenten arbeiten gerade – die nächste Runde startet direkt danach.`); paintCrew(); } return; }
+    if (!open.length) { if (force) { queued = true; msg(`${busy.size} agents are working – the next round starts right after.`); paintCrew(); } return; }
     open.forEach((x) => busy.add(x)); paintCrew();
     const groups = []; for (let i = 0; i < open.length; i += 3) groups.push(open.slice(i, i + 3));
     let failed = 0;
@@ -343,38 +343,38 @@ export async function hq(v, { goTab, msg }) {
       paintCrew();
     }));
     if (!v.isConnected) return;
-    if (failed) msg(`${failed} Agenten konnten diese Runde nicht arbeiten – ich versuche es in der nächsten Runde erneut.`, true);
-    else if (force) { const todo = AGENTS.filter((a) => shift[a.id] && shift[a.id].status !== 'ok').length; msg(todo ? `Runde fertig – ${todo} ${todo === 1 ? 'Punkt braucht' : 'Punkte brauchen'} dich.` : 'Runde fertig – alles erledigt.'); }
+    if (failed) msg(`${failed} agents couldn't work this round – I'll try again next round.`, true);
+    else if (force) { const todo = AGENTS.filter((a) => shift[a.id] && shift[a.id].status !== 'ok').length; msg(todo ? `Round finished – ${todo} ${todo === 1 ? 'item needs' : 'items need'} you.` : 'Round finished – all done.'); }
     if (force) loadOverview();
     if (queued && !busy.size) { queued = false; work(AGENTS.map((a) => a.id), true); return; }
-    // Neue wichtige Funde: Claude analysiert und behebt sofort (höchstens zwei je Runde, 6 Stunden nicht doppelt).
+    // New important findings: Claude analyzes and fixes right away (at most two per round, not again within 6 hours).
     if (ai?.configured && ai.settings?.auto && !ai.blocked && Object.values(shift).some((r) => r.aiQueue?.length)) {
       const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'analyse' }) });
-      if (r.ok && v.isConnected) { shift = r.data.agents || shift; refreshAi(); paintCrew(); if (r.data.done?.length) msg(`Claude hat ${r.data.done.map((id) => AGENTS.find((x) => x.id === id)?.name || id).join(' und ')} geholfen – Lösung steht in der Karte.`); }
+      if (r.ok && v.isConnected) { shift = r.data.agents || shift; refreshAi(); paintCrew(); if (r.data.done?.length) msg(`Claude helped ${r.data.done.map((id) => AGENTS.find((x) => x.id === id)?.name || id).join(' and ')} – the solution is in the card.`); }
     }
   };
-  // „Jetzt erledigen“: Agent arbeitet, Claude behebt und legt Lösungen an, danach wird nachgeprüft (bis ~1 Minute).
-  // fromDec: von Feray per „Erledigen“ ausgelöst → Punkt gilt als bearbeitet und bleibt 24 Std. weg,
-  // außer die Lage ändert sich wirklich (anderer Inhalt oder schlechterer Status). Automatische Läufe blenden nichts aus.
+  // "Do it now": agent works, Claude fixes and creates solutions, then it is re-checked (up to ~1 minute).
+  // fromDec: triggered by the owner via "Do it" → item counts as handled and stays hidden for 24 h,
+  // unless the situation really changes (different content or worse status). Automatic runs hide nothing.
   const doNow = async (id, fromDec = false) => {
     if (busy.has(id)) return;
     const before = shift[id] ? aKey(id, shift[id]) : null;
-    // Sofort auf dem Server merken – nicht erst nach dem Lauf (bis ~1 Min.). Wer das HQ in der Zwischenzeit verlässt
-    // (z. B. ins Postfach), findet den Punkt sonst beim Zurückkommen wieder.
+    // Remember on the server right away – not only after the run (up to ~1 min). Otherwise anyone leaving HQ meanwhile
+    // (e.g. to the Inbox) would find the item again when coming back.
     if (fromDec && before) hide(before);
     busy.add(id); paintCrew();
     const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'erledigen', agents: [id] }) });
     busy.delete(id);
-    // Auch das Ergebnis des Laufs merken, selbst wenn die Seite inzwischen gewechselt wurde.
+    // Also remember the run's result, even if the page changed in the meantime.
     if (r.ok && fromDec) { const now = r.data.agents?.[id]; if (now && now.status !== 'ok') hide(aKey(id, now)); }
     if (!v.isConnected) return;
     if (r.ok) {
       shift = r.data.agents || shift; proposals = r.data.proposals || proposals;
-      msg(r.data.text || 'Erledigt.');
-    } else msg(r.data?.error || 'Nicht erledigt.', true);
+      msg(r.data.text || 'Done.');
+    } else msg(r.data?.error || 'Not done.', true);
     paintCrew(); paintDec(); loadOverview();
   };
-  // Karte geöffnet, Punkt offen, noch keine frische Analyse: einmal von selbst Lösungen erarbeiten lassen.
+  // Card opened, item open, no fresh analysis yet: work out solutions once automatically.
   const autoDone = new Set();
   const autoThink = (id) => {
     const r = shift[id];
@@ -384,96 +384,96 @@ export async function hq(v, { goTab, msg }) {
   };
   const act = async (agentId, x, btn) => {
     if (x.tab) { goTab(x.tab, x.sg); return; }
-    if (x.id === 'opt') { openDep = 'optimierung'; autoAsk = 'Vorschläge zeigen'; paintAll(); return; }
+    if (x.id === 'opt') { openDep = 'optimierung'; autoAsk = 'Show proposals'; paintAll(); return; }
     if (x.id === 'ask' && x.q) { openDep = agentId; autoAsk = x.q; paintAll(); return; }
     if (x.id === 'remind') {
-      if (!confirm(x.confirm || 'Jetzt senden?')) return;
-      btn.disabled = true; btn.textContent = 'Wird gesendet …';
+      if (!confirm(x.confirm || 'Send now?')) return;
+      btn.disabled = true; btn.textContent = 'Sending …';
       let ok = 0, bad = 0;
       for (const id of x.ids || []) { const y = await api('/api/admin/invoices', { method: 'POST', headers: { 'x-admin-scope': 'b2b' }, body: JSON.stringify({ action: 'remind', invoiceId: id }) }); if (y.ok) ok++; else bad++; }
-      msg(`${ok} Erinnerung${ok === 1 ? '' : 'en'} gesendet${bad ? ` · ${bad} nicht möglich` : ''}.`, bad > 0);
+      msg(`${ok} reminder${ok === 1 ? '' : 's'} sent${bad ? ` · ${bad} not possible` : ''}.`, bad > 0);
       work([agentId], true);
     }
   };
-  // ---------- Jetzt wichtig: eine Warteschlange für alles, nach Priorität gruppiert ----------
-  // JETZT (kritisch oder heute nötig) · FREIGABEN (wartet auf dein Okay) · HEUTE (kann warten) · AKTIV (läuft gerade).
-  // Je Punkt höchstens zwei Knöpfe; Details (und „Agent öffnen“) eingeklappt. Erledigtes/Verworfenes bleibt 24 Std. weg –
-  // gilt für Web-Admin UND Admin-App (Server) – außer die Lage ändert sich wirklich (anderer Punkt oder schlechterer Status).
+  // ---------- Now important: one queue for everything, grouped by priority ----------
+  // NOW (critical or needed today) · APPROVALS (waiting for your okay) · TODAY (can wait) · ACTIVE (running).
+  // At most two buttons per item ("Do it" / "Dismiss"); details (and "Open agent") collapsed. Done/dismissed stays hidden 24 h –
+  // applies to Web-Admin AND admin app (server) – unless the situation really changes (different item or worse status).
   const LV = { hoch: 0, mittel: 1, niedrig: 2 };
-  // Wichtigster offener Punkt eines Agenten. Seine ID bleibt über die Runden gleich, auch wenn sich Zahlen im Text ändern.
+  // An agent's most important open item. Its ID stays the same across rounds, even if numbers in the text change.
   function topIssue(r) { return [...(r.issues || [])].sort((x, y) => (LV[x.level] ?? 3) - (LV[y.level] ?? 3))[0] || null; }
-  // Gleicher Schlüssel in der Admin-App (admin-app/app/(tabs)/hq.js).
+  // Same key in the admin app (admin-app/app/(tabs)/hq.js).
   function aKey(id, r) { const t = topIssue(r); return `a|${id}|${r.status}|${t?.id || String(r.line || '').replace(/\d+(?:[.,]\d+)*/g, '#')}`; }
-  // Gleiche Lage aus verschiedenen Quellen nur einmal zeigen (Groß-/Kleinschreibung, Zahlen und Satzzeichen zählen nicht).
+  // Show the same situation from different sources only once (case, numbers and punctuation don't count).
   const topic = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\d+(?:[.,]\d+)*/g, '#').replace(/[^a-z#]+/g, ' ').trim();
   let dismissed = {};
   const hidden = () => { const now = Date.now(), m = {}; for (const k in dismissed) if (dismissed[k] > now) m[k] = 1; return m; };
-  // Nacheinander speichern: Gleichzeitige Anfragen (z. B. „Alles erledigen“) würden sich auf dem Server gegenseitig überschreiben.
+  // Save sequentially: concurrent requests (e.g. "Fix all") would overwrite each other on the server.
   let hideQ = Promise.resolve();
   const hide = (k) => {
     dismissed[k] = Date.now() + 86400_000;
     hideQ = hideQ.then(() => api('/api/admin/os/dismiss', { method: 'POST', body: JSON.stringify({ key: k }) })).then((r) => { if (r?.ok) dismissed = { ...(r.data.dismissed || {}), ...dismissed }; }, () => {});
   };
-  // Erst zeichnen, wenn bekannt ist, was schon erledigt/verworfen wurde – sonst blitzen erledigte Punkte kurz wieder auf.
+  // Only paint once we know what was already done/dismissed – otherwise done items flash up briefly.
   let disReady = false;
   api('/api/admin/os/dismiss').then((r) => { if (r.ok) dismissed = { ...(r.data.dismissed || {}), ...dismissed }; }, () => {}).finally(() => { disReady = true; if (v.isConnected) paintDec(); });
-  const FSEV = { critical: 'bad', warning: 'warn', info: 'info' }, SL = { bad: 'Kritisch', warn: 'Wichtig', dec: 'Freigabe', info: 'Hinweis' };
+  const FSEV = { critical: 'bad', warning: 'warn', info: 'info' }, SL = { bad: 'Critical', warn: 'Important', dec: 'Approval', info: 'Note' };
   const fixF = async (body) => {
     const r = await api('/api/admin/fix', { method: 'POST', body: JSON.stringify(body) });
-    if (!r.ok) { msg(r.data?.error || 'Nicht möglich.', true); return loadFix(); }
+    if (!r.ok) { msg(r.data?.error || 'Not possible.', true); return loadFix(); }
     findings = (r.data.findings || []); const bad = (r.data.results || []).filter((x) => !x.ok);
-    msg(body.dismiss ? 'Verworfen.' : bad.length ? bad.map((x) => x.text).join(' · ') : 'Erledigt.', bad.length > 0);
+    msg(body.dismiss ? 'Dismissed.' : bad.length ? bad.map((x) => x.text).join(' · ') : 'Done.', bad.length > 0);
     paintDec(); work(['sicherheit', 'postfach', 'technik'], true); loadOverview();
   };
   const decide = async (id, decision) => {
     const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ action: 'proposal', proposalId: id, decision }) });
-    if (!r.ok) { msg(r.data?.error || 'Nicht möglich.', true); paintDec(); return; }
-    proposals = r.data.proposals || []; msg(decision === 'verworfen' ? 'Verworfen.' : r.data.warn ? `Neuer Versuch gestartet – aber: ${r.data.warn}` : r.data.started ? 'Wird umgesetzt.' : 'Freigegeben.', Boolean(r.data.warn)); paintAll();
+    if (!r.ok) { msg(r.data?.error || 'Not possible.', true); paintDec(); return; }
+    proposals = r.data.proposals || []; msg(decision === 'verworfen' ? 'Dismissed.' : r.data.warn ? `New attempt started – but: ${r.data.warn}` : r.data.started ? 'Being implemented.' : 'Approved.', Boolean(r.data.warn)); paintAll();
   };
   const decItems = () => {
     const H = hidden(), out = [];
     for (const f of findings) {
       const sev = FSEV[f.sev] || 'info';
       out.push({ k: `f|${f.id}`, grp: sev === 'info' ? 'today' : 'now', sev, area: f.area, title: f.title, detail: f.auto ? '' : f.how,
-        yes: f.auto ? ['Erledigen', () => fixF({ ids: [f.id] })] : ['Erledigt', () => fixF({ dismiss: f.id })],
-        no: f.auto ? ['Verwerfen', () => fixF({ dismiss: f.id })] : null });
+        yes: f.auto ? ['Do it', () => fixF({ ids: [f.id] })] : ['Done', () => fixF({ dismiss: f.id })],
+        no: f.auto ? ['Dismiss', () => fixF({ dismiss: f.id })] : null });
     }
-    // Lösungen der Agenten verändern etwas (Website, Texte, Einstellungen) → Freigabe mit Bestätigung (zweites Tippen).
+    // Agent solutions change something (website, copy, settings) → approval with confirmation (second tap).
     for (const p of proposals.filter((x) => x.status === 'offen')) {
-      const a = AGENTS.find((x) => x.id === p.agent), kind = KIND[p.kind] || 'Lösung';
+      const a = AGENTS.find((x) => x.id === p.agent), kind = KIND[p.kind] || 'Solution';
       out.push({ k: `p|${p.id}`, grp: 'approve', sev: 'dec', area: a ? a.name : p.agent, color: a?.color, kind, title: p.title,
         detail: [p.detail, p.why].filter(Boolean).join('\n\n'), doc: p.doc ? p.id : null,
-        confirm: p.kind === 'dokument' ? null : `${kind} wird umgesetzt`,
-        yes: ['Erledigen', () => decide(p.id, 'erledigen')], no: ['Verwerfen', () => decide(p.id, 'verworfen')] });
+        confirm: p.kind === 'dokument' ? null : `${kind} will be implemented`,
+        yes: ['Do it', () => decide(p.id, 'erledigen')], no: ['Dismiss', () => decide(p.id, 'verworfen')] });
     }
     for (const a of AGENTS) {
-      // Ethan (Lagebild) fasst nur die anderen zusammen – seine Punkte stehen schon bei den jeweiligen Agenten.
+      // Ethan (daily briefing) only summarizes the others – his items are already listed with the respective agents.
       const r = shift[a.id]; if (!r || r.status === 'ok' || a.id === 'briefing') continue;
       const k = aKey(a.id, r); if (H[k]) continue;
       const t = topIssue(r), more = (r.issues || []).filter((i) => i !== t && i.level !== 'niedrig').length;
       const detail = [r.line, r.ai?.text].filter(Boolean).join('\n\n');
       if (a.id === 'freigaben') {
-        // Ava: alles, was nach außen ginge – öffnet den Bereich zum Prüfen, sendet selbst nie.
+        // Ava: everything that would go out – opens the area for review, never sends herself.
         const go = (r.actions || []).find((x) => x.tab);
         out.push({ k, grp: 'approve', sev: 'dec', area: a.name, color: a.color, title: t?.title || r.line, detail, open: d0(a.id),
-          yes: go ? ['Prüfen', () => goTab(go.tab, go.sg)] : null, no: ['Verwerfen', () => { hide(k); paintDec(); }] });
+          yes: go ? ['Do it', () => goTab(go.tab, go.sg)] : null, no: ['Dismiss', () => { hide(k); paintDec(); }] });
         continue;
       }
       const extra = (r.actions || []).find((x) => x.id === 'remind');
       const urgent = r.status === 'error' || t?.level === 'hoch';
       out.push({ k, grp: urgent ? 'now' : 'today', sev: r.status === 'error' ? 'bad' : urgent ? 'warn' : 'info', area: a.name, color: a.color,
-        title: `${t?.title || r.line}${more ? ` · +${more} weitere` : ''}`, detail, busy: busy.has(a.id), open: d0(a.id),
-        yes: extra ? [extra.label, (btn) => act(a.id, extra, btn)] : ['Erledigen', () => doNow(a.id, true)], no: ['Verwerfen', () => { hide(k); paintDec(); }] });
+        title: `${t?.title || r.line}${more ? ` · +${more} more` : ''}`, detail, busy: busy.has(a.id), open: d0(a.id),
+        yes: extra ? [extra.label, (btn) => act(a.id, extra, btn)] : ['Do it', () => doNow(a.id, true)], no: ['Dismiss', () => { hide(k); paintDec(); }] });
     }
     for (const al of alerts) {
       const k = `l|${al.id}|${al.at || ''}`; if (H[k]) continue;
       const g = TARGET[al.target] || null, [cls] = SEV_L[al.severity] || SEV_L.info;
       const yes = al.action?.kind === 'ack_security' && al.action.kindKey
-        ? ['Erledigt', async () => { const x = await api('/api/admin/sec', { method: 'POST', body: JSON.stringify({ action: 'ack', kind: al.action.kindKey }) }); if (!x.ok) { msg(x.data?.error || 'Nicht möglich.', true); paintDec(); return; } msg('Erledigt.'); loadOverview(); work(['sicherheit'], true); }]
-        : g ? ['Öffnen', () => goTab(g[0], g[1] || 'system')] : null;
-      out.push({ k, grp: cls === 'info' ? 'today' : 'now', sev: cls, area: 'Lage', title: al.title, detail: al.detail, yes, no: ['Verwerfen', () => { hide(k); paintDec(); }] });
+        ? ['Do it', async () => { const x = await api('/api/admin/sec', { method: 'POST', body: JSON.stringify({ action: 'ack', kind: al.action.kindKey }) }); if (!x.ok) { msg(x.data?.error || 'Not possible.', true); paintDec(); return; } msg('Done.'); loadOverview(); work(['sicherheit'], true); }]
+        : g ? ['Do it', () => goTab(g[0], g[1] || 'system')] : null;
+      out.push({ k, grp: cls === 'info' ? 'today' : 'now', sev: cls, area: 'Status', title: al.title, detail: al.detail, yes, no: ['Dismiss', () => { hide(k); paintDec(); }] });
     }
-    // Wichtigstes zuerst; dieselbe Lage aus mehreren Quellen wird zu einem Punkt (Quellen werden zusammen genannt).
+    // Most important first; the same situation from several sources becomes one item (sources are named together).
     const G = { now: 0, approve: 1, today: 2 }, R = { bad: 0, warn: 1, dec: 2, info: 3 };
     out.sort((x, y) => G[x.grp] - G[y.grp] || R[x.sev] - R[y.sev]);
     const seen = new Map(), res = [];
@@ -484,10 +484,10 @@ export async function hq(v, { goTab, msg }) {
     }
     return res;
   };
-  // Läuft gerade: arbeitende Agenten und freigegebene Lösungen in Umsetzung (nur Anzeige, keine Knöpfe).
+  // Running now: working agents and approved solutions being implemented (display only, no buttons).
   const activeItems = () => [
-    ...[...busy].map((id) => AGENTS.find((x) => x.id === id)).filter(Boolean).map((a) => ({ t: `${a.name} arbeitet …`, s: a.role })),
-    ...proposals.filter((p) => p.status === 'auftrag' || p.status === 'in_arbeit').map((p) => ({ wait: p.status === 'auftrag', t: p.title, s: p.status === 'in_arbeit' ? 'Wird gerade umgesetzt' : uBlock ? (uBlock.reason === 'guthaben' ? 'Freigegeben · wartet auf Anthropic-Guthaben' : 'Freigegeben · wartet') : 'Freigegeben · wartet auf Umsetzung' })),
+    ...[...busy].map((id) => AGENTS.find((x) => x.id === id)).filter(Boolean).map((a) => ({ t: `${a.name} is working …`, s: a.role })),
+    ...proposals.filter((p) => p.status === 'auftrag' || p.status === 'in_arbeit').map((p) => ({ wait: p.status === 'auftrag', t: p.title, s: p.status === 'in_arbeit' ? 'Being implemented' : uBlock ? (uBlock.reason === 'guthaben' ? 'Approved · waiting for Anthropic credit' : 'Approved · waiting') : 'Approved · waiting for implementation' })),
   ];
   const d0 = (agentId) => ORBIT.find((o) => o.agent === agentId)?.k;
   let decFns = [];
@@ -499,28 +499,28 @@ export async function hq(v, { goTab, msg }) {
     const autoN = findings.filter((f) => f.auto).length;
     $('#hqDecAll').hidden = !autoN && !it.some((x) => x.grp === 'now' && x.k.startsWith('a|'));
     const card = (x, i) => `<li class="ck-it s-${x.sev}"><div class="ck-top"><span class="hq-st ${x.sev}">${SL[x.sev]}</span>${x.color ? `<span class="hq-ini sm" style="background:${esc(x.color)}" aria-hidden="true">${esc((x.area || '')[0] || '')}</span>` : ''}<span class="ck-area">${esc(x.area || '')}${x.kind ? ` · ${esc(x.kind)}` : ''}</span></div>
-      <strong>${esc(x.title)}</strong>${x.detail || x.open || x.doc ? `<details class="hq-more"><summary>Details</summary>${x.detail ? `<p>${rich(x.detail)}</p>` : ''}${x.open || x.doc ? `<div class="hq-more-a">${x.doc ? `<button type="button" class="hq-btn" data-doc="${esc(x.doc)}" data-f="pdf">PDF ansehen</button>` : ''}${x.open ? `<button type="button" class="hq-btn" data-o="${esc(x.open)}">${esc(String(x.area || 'Agent').split(' & ')[0])} öffnen</button>` : ''}</div>` : ''}</details>` : ''}
-      <div class="ck-act">${x.yes ? `<button type="button" class="hq-btn hq-btn-p" data-y="${i}" ${x.busy ? 'disabled' : ''}>${x.busy ? 'Arbeitet …' : esc(x.yes[0])}</button>` : ''}${x.no ? `<button type="button" class="hq-btn" data-n="${i}">${esc(x.no[0])}</button>` : ''}</div></li>`;
+      <strong>${esc(x.title)}</strong>${x.detail || x.open || x.doc ? `<details class="hq-more"><summary>Details</summary>${x.detail ? `<p>${rich(x.detail)}</p>` : ''}${x.open || x.doc ? `<div class="hq-more-a">${x.doc ? `<button type="button" class="hq-btn" data-doc="${esc(x.doc)}" data-f="pdf">View PDF</button>` : ''}${x.open ? `<button type="button" class="hq-btn" data-o="${esc(x.open)}">Open ${esc(String(x.area || 'agent').split(' & ')[0])}</button>` : ''}</div>` : ''}</details>` : ''}
+      <div class="ck-act">${x.yes ? `<button type="button" class="hq-btn hq-btn-p" data-y="${i}" ${x.busy ? 'disabled' : ''}>${x.busy ? 'Working …' : esc(x.yes[0])}</button>` : ''}${x.no ? `<button type="button" class="hq-btn" data-n="${i}">${esc(x.no[0])}</button>` : ''}</div></li>`;
     const list = (g) => `<ul class="ck-list">${it.map((x, i) => [x, i]).filter(([x]) => x.grp === g).map(([x, i]) => card(x, i)).join('')}</ul>`;
     const run = activeItems();
-    // Umsetzung pausiert (z. B. Guthaben leer): klar sagen, warum freigegebene Aufträge warten – sie laufen danach von selbst.
+    // Implementation paused (e.g. credit empty): say clearly why approved tasks wait – they run on their own afterward.
     const nWait = proposals.filter((p) => p.status === 'auftrag' || p.status === 'in_arbeit').length;
-    const blockHtml = uBlock && nWait ? `<div class="hq-block" role="alert"><strong>Umsetzung pausiert</strong><p>${uBlock.reason === 'guthaben' ? `Das Anthropic-Guthaben ist leer. ${nWait} freigegebene ${nWait === 1 ? 'Auftrag wartet' : 'Aufträge warten'} und ${nWait === 1 ? 'läuft' : 'laufen'} automatisch weiter, sobald Guthaben da ist (neuer Versuch alle 30 Minuten).` : esc(uBlock.text || 'Die Umsetzung ist gerade nicht möglich.')}</p>${uBlock.reason === 'guthaben' ? '<a class="hq-btn hq-btn-p" href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener">Guthaben aufladen</a>' : ''}</div>` : '';
-    box.innerHTML = blockHtml + (nNow ? `<h4 class="hq-g hq-g-now">Jetzt <span>${nNow}</span></h4>${list('now')}` : `<p class="hq-empty hq-ok">✓ Keine Aktion erforderlich.</p>`)
-      + (nAp ? `<h4 class="hq-g hq-g-dec">Freigaben <span>${nAp}</span></h4>${list('approve')}` : '')
-      + (nDay ? `<details class="hq-g-fold"${nNow || nAp ? '' : ' open'}><summary><h4 class="hq-g">Heute <span>${nDay}</span></h4><small>kann warten</small></summary>${list('today')}</details>` : '')
+    const blockHtml = uBlock && nWait ? `<div class="hq-block" role="alert"><strong>Implementation paused</strong><p>${uBlock.reason === 'guthaben' ? `The Anthropic credit balance is empty. ${nWait} approved ${nWait === 1 ? 'task is' : 'tasks are'} waiting and will continue automatically once credit is available (new attempt every 30 minutes).` : esc(uBlock.text || 'Implementation is not possible right now.')}</p>${uBlock.reason === 'guthaben' ? '<a class="hq-btn hq-btn-p" href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener">Add credit</a>' : ''}</div>` : '';
+    box.innerHTML = blockHtml + (nNow ? `<h4 class="hq-g hq-g-now">Now <span>${nNow}</span></h4>${list('now')}` : `<p class="hq-empty hq-ok">✓ No action needed.</p>`)
+      + (nAp ? `<h4 class="hq-g hq-g-dec">Approvals <span>${nAp}</span></h4>${list('approve')}` : '')
+      + (nDay ? `<details class="hq-g-fold"${nNow || nAp ? '' : ' open'}><summary><h4 class="hq-g">Today <span>${nDay}</span></h4><small>can wait</small></summary>${list('today')}</details>` : '')
       + (run.length ? (() => {
-        // Wartende Aufträge als eine Zeile zum Aufklappen statt langer Liste (der Grund steht im Hinweis oben).
+        // Waiting tasks as one expandable line instead of a long list (the reason is in the note above).
         const li = (a) => `<li><i class="dot" aria-hidden="true"></i><b>${esc(a.t)}</b><small>${esc(a.s)}</small></li>`;
         const work = run.filter((a) => !a.wait), wait = run.filter((a) => a.wait);
-        return `<h4 class="hq-g hq-g-run">Aktiv <span>${run.length}</span></h4>${work.length ? `<ul class="hq-actv">${work.map(li).join('')}</ul>` : ''}${wait.length ? `<details class="hq-g-fold hq-wait"><summary><b>${wait.length} freigegebene ${wait.length === 1 ? 'Auftrag wartet' : 'Aufträge warten'}</b><small>${esc(wait[0].s)}</small></summary><ul class="hq-actv">${wait.map(li).join('')}</ul></details>` : ''}`;
+        return `<h4 class="hq-g hq-g-run">Active <span>${run.length}</span></h4>${work.length ? `<ul class="hq-actv">${work.map(li).join('')}</ul>` : ''}${wait.length ? `<details class="hq-g-fold hq-wait"><summary><b>${wait.length} approved ${wait.length === 1 ? 'task waiting' : 'tasks waiting'}</b><small>${esc(wait[0].s)}</small></summary><ul class="hq-actv">${wait.map(li).join('')}</ul></details>` : ''}`;
       })() : '');
-    // Bestätigung ohne Pop-up: erstes Tippen zeigt, was passiert; erst das zweite Tippen (innerhalb von 5 Sek.) führt aus.
+    // Confirmation without a pop-up: the first tap shows what will happen; only the second tap (within 5 s) runs it.
     box.querySelectorAll('[data-y]').forEach((b) => b.onclick = () => {
       const x = decFns[+b.dataset.y]; if (!x) return;
       if (x.confirm && !b.dataset.armed) {
-        b.dataset.armed = '1'; b.classList.add('hq-arm'); b.textContent = 'Bestätigen'; b.setAttribute('aria-label', `${x.confirm}: ${x.title}. Zum Ausführen noch einmal tippen.`);
-        msg(`${x.confirm}: „${x.title}“ – zum Bestätigen noch einmal tippen.`);
+        b.dataset.armed = '1'; b.classList.add('hq-arm'); b.textContent = 'Confirm'; b.setAttribute('aria-label', `${x.confirm}: ${x.title}. Tap again to run.`);
+        msg(`${x.confirm}: "${x.title}" – tap again to confirm.`);
         setTimeout(() => { if (b.isConnected && b.dataset.armed) { delete b.dataset.armed; b.classList.remove('hq-arm'); b.textContent = x.yes[0]; b.removeAttribute('aria-label'); } }, 5000);
         return;
       }
@@ -531,35 +531,35 @@ export async function hq(v, { goTab, msg }) {
     bindProps(box);
     paintStatus(); paintSince();
   }
-  // ---------- Lage oben: Status nur aus echten Daten; was nicht geprüft werden konnte, gilt nie als „stabil“ ----------
+  // ---------- Status at the top: real data only; anything that couldn't be checked never counts as "stable" ----------
   let ov = null, ovFail = false, ovAt = 0, pullFail = 0;
   function paintStatus() {
     const hero = $('.hq-hero'); if (!hero) return;
     const it = decReady ? decFns : [], now = it.filter((x) => x.grp === 'now'), ap = it.filter((x) => x.grp === 'approve').length;
     const sy = ov?.systems || [], sysOk = sy.filter((s) => s.state === 'ok').length, sysBad = sy.some((s) => s.state === 'fail');
     let lvl, title, det;
-    if (!ov) { lvl = ovFail ? 'unknown' : 'load'; title = ovFail ? 'Status momentan nicht verfügbar' : 'Lage wird geprüft …'; det = ovFail ? 'Die Systemprüfung hat nicht geantwortet – „Aktualisieren“ versucht es erneut.' : ''; }
-    else if (ov.status?.level === 'critical' || sysBad || now.some((x) => x.sev === 'bad')) { lvl = 'critical'; title = 'Kritischer Vorgang'; det = now.find((x) => x.sev === 'bad')?.title || ov.status?.detail || 'Sofortige Aufmerksamkeit erforderlich.'; }
-    else if (now.length || ov.status?.level === 'warn') { lvl = 'warn'; title = 'Aufmerksamkeit erforderlich'; det = now.length ? `${now.length} ${now.length === 1 ? 'Punkt braucht' : 'Punkte brauchen'} deine Prüfung.` : ov.status?.detail || ''; }
-    else { lvl = 'ok'; title = 'Alles stabil'; det = ap ? `Nichts Dringendes · ${ap} ${ap === 1 ? 'Freigabe wartet' : 'Freigaben warten'} auf dich.` : 'Keine Entscheidung erforderlich.'; }
+    if (!ov) { lvl = ovFail ? 'unknown' : 'load'; title = ovFail ? 'Status not available right now' : 'Checking status …'; det = ovFail ? 'The system check did not respond – "Refresh" tries again.' : ''; }
+    else if (ov.status?.level === 'critical' || sysBad || now.some((x) => x.sev === 'bad')) { lvl = 'critical'; title = 'Critical issue'; det = now.find((x) => x.sev === 'bad')?.title || ov.status?.detail || 'Immediate attention needed.'; }
+    else if (now.length || ov.status?.level === 'warn') { lvl = 'warn'; title = 'Attention needed'; det = now.length ? `${now.length} ${now.length === 1 ? 'item needs' : 'items need'} your review.` : ov.status?.detail || ''; }
+    else { lvl = 'ok'; title = 'All stable'; det = ap ? `Nothing urgent · ${ap} ${ap === 1 ? 'approval is' : 'approvals are'} waiting for you.` : 'No decision needed.'; }
     hero.dataset.level = lvl; $('#hqStat').textContent = title; $('#hqDet').textContent = det;
     const bits = [];
-    if (sy.length) bits.push(sysOk === sy.length ? `${sy.length} Systeme ohne Befund` : `${sysOk} von ${sy.length} Systemen ohne Befund`);
-    if (decReady) { bits.push(now.length ? `${now.length} ${now.length === 1 ? 'braucht' : 'brauchen'} dich` : 'nichts Dringendes'); if (ap) bits.push(`${ap} ${ap === 1 ? 'Freigabe' : 'Freigaben'}`); }
+    if (sy.length) bits.push(sysOk === sy.length ? `${sy.length} systems without findings` : `${sysOk} of ${sy.length} systems without findings`);
+    if (decReady) { bits.push(now.length ? `${now.length} ${now.length === 1 ? 'needs' : 'need'} you` : 'nothing urgent'); if (ap) bits.push(`${ap} ${ap === 1 ? 'approval' : 'approvals'}`); }
     $('#hqBar').textContent = bits.join(' · ');
     paintAsof();
   }
-  // „Live“ nur, solange die Daten frisch sind; sonst steht ehrlich da, wann zuletzt aktualisiert wurde.
+  // "Live" only while the data is fresh; otherwise say honestly when it was last updated.
   function paintAsof() {
     const el = $('#hqAsof'); if (!el) return;
-    if (!ovAt) { el.textContent = ovFail ? 'Noch keine Daten geladen' : 'Wird geladen …'; return; }
+    if (!ovAt) { el.textContent = ovFail ? 'No data loaded yet' : 'Loading …'; return; }
     const s = Math.round((Date.now() - ovAt) / 1000), stale = ovFail || pullFail > 1 || s > 300;
     el.parentElement.classList.toggle('stale', stale);
     el.textContent = stale
-      ? `Zuletzt aktualisiert ${new Date(ovAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr · Daten möglicherweise nicht aktuell`
-      : `Live · ${s < 10 ? 'gerade aktualisiert' : s < 60 ? `vor ${s} Sek. aktualisiert` : `vor ${Math.round(s / 60)} Min. aktualisiert`}`;
+      ? `Last updated ${new Date(ovAt).toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' })} · data may be out of date`
+      : `Live · ${s < 10 ? 'just updated' : s < 60 ? `updated ${s} s ago` : `updated ${Math.round(s / 60)} min ago`}`;
   }
-  // „Seit deinem letzten Besuch“: nur in diesem Browser gemerkt (Zeitpunkt + offene Punkte), nichts auf dem Server.
+  // "Since your last visit": remembered only in this browser (time + open items), nothing on the server.
   const VISIT = 'leaserun_hq_visit';
   let sinceDone = false;
   function paintSince() {
@@ -569,33 +569,33 @@ export async function hq(v, { goTab, msg }) {
     if (prev?.at && Array.isArray(prev.keys)) {
       const ev = (ov.activity || []).filter((a) => Date.parse(a.at) > prev.at).length;
       const neu = keys.filter((k) => !prev.keys.includes(k)).length, weg = prev.keys.filter((k) => !keys.includes(k)).length;
-      const parts = [ev && `+${ev} ${ev === 1 ? 'Ereignis' : 'Ereignisse'}`, neu && `+${neu} ${neu === 1 ? 'neuer Punkt' : 'neue Punkte'}`, weg && `${weg} erledigt`].filter(Boolean);
+      const parts = [ev && `+${ev} ${ev === 1 ? 'event' : 'events'}`, neu && `+${neu} ${neu === 1 ? 'new item' : 'new items'}`, weg && `${weg} done`].filter(Boolean);
       const el = $('#hqSince'); el.hidden = false;
-      el.textContent = `Seit deinem letzten Besuch (${ago(new Date(prev.at).toISOString())}): ${parts.length ? parts.join(' · ') : 'keine Veränderung'}`;
+      el.textContent = `Since your last visit (${ago(new Date(prev.at).toISOString())}): ${parts.length ? parts.join(' · ') : 'no change'}`;
     }
-    // Erst nach 10 Minuten als neuer Besuch zählen – ein schnelles „Aktualisieren“ löscht den Vergleich nicht.
-    if (!prev?.at || at - prev.at > 10 * 60_000) { try { localStorage.setItem(VISIT, JSON.stringify({ at, keys })); } catch { /* privater Modus: ohne Vergleich weiter */ } }
+    // Count as a new visit only after 10 minutes – a quick "Refresh" doesn't reset the comparison.
+    if (!prev?.at || at - prev.at > 10 * 60_000) { try { localStorage.setItem(VISIT, JSON.stringify({ at, keys })); } catch { /* private mode: continue without comparison */ } }
   }
   const loadFix = async (fresh = false) => {
     const r = await api('/api/admin/fix' + (fresh ? '?fresh=1' : ''));
     if (!v.isConnected) return;
     findings = r.ok ? (r.data.findings || []).filter((x) => x.sev !== 'info' || x.auto) : findings;
-    if (!r.ok) msg(r.data?.error || 'Prüfung nicht möglich.', true);
+    if (!r.ok) msg(r.data?.error || 'Check not possible.', true);
     decReady = true; paintDec();
   };
-  $('#hqDecRun').onclick = async (e) => { const b = e.currentTarget; b.disabled = true; b.textContent = 'Prüft …'; await loadFix(true); b.disabled = false; b.textContent = 'Jetzt prüfen'; };
-  // „Alles erledigen“: alle automatisch behebbaren Prüfpunkte + eine Runde aller Agenten. Lösungen (Code) bleiben deine Einzelentscheidung.
+  $('#hqDecRun').onclick = async (e) => { const b = e.currentTarget; b.disabled = true; b.textContent = 'Checking …'; await loadFix(true); b.disabled = false; b.textContent = 'Check now'; };
+  // "Fix all": all auto-fixable findings + one round of all agents. Solutions (code) stay your individual decision.
   $('#hqDecAll').onclick = async (e) => {
-    const b = e.currentTarget; b.disabled = true; b.textContent = 'Wird erledigt …';
+    const b = e.currentTarget; b.disabled = true; b.textContent = 'Working on it …';
     if (findings.some((f) => f.auto)) await fixF({ all: true });
     for (const a of AGENTS) { const r = shift[a.id]; if (r && r.status !== 'ok' && a.id !== 'freigaben' && !(r.actions || []).some((x) => x.id === 'remind')) await doNow(a.id, true); }
-    b.disabled = false; b.textContent = 'Alles erledigen';
+    b.disabled = false; b.textContent = 'Fix all';
   };
   loadFix();
 
   $('#hqAll').onclick = () => work(AGENTS.map((a) => a.id), true);
-  // ---------- Firmen-OS: eine Leiste für alles – Apps, Agenten (mit Chat & Dokumenten), Daten; Enter ohne Auswahl = Auftrag ----------
-  const APPS = [['postfach', 'Postfach'], ['termine', 'Termine'], ['cockpit', 'Finanzen', 'b2b'], ['rechnungen', 'Rechnungen', 'b2b'], ['nutzer', 'Kunden'], ['partner', 'Unternehmen', 'b2b'], ['akquise', 'Akquise', 'b2b'], ['anfragen', 'Anfragen'], ['creator', 'Creator'], ['kennzahlen', 'Kennzahlen'], ['analyse', 'Analyse'], ['sicherheit', 'Sicherheit'], ['system', 'System & Dateien'], ['einrichtung', 'Einrichtung'], ['steuer', 'Steuer & Belege'], ['protokoll', 'Protokoll'], ['vorschlaege', 'Vorschläge'], ['probleme', 'Technische Probleme'], ['api', 'API']];
+  // ---------- Company OS: one bar for everything – apps, agents (with chat & documents), data; Enter without a selection = task ----------
+  const APPS = [['postfach', 'Inbox'], ['termine', 'Appointments'], ['cockpit', 'Finance', 'b2b'], ['rechnungen', 'Invoices', 'b2b'], ['nutzer', 'Customers'], ['partner', 'Businesses', 'b2b'], ['anfragen', 'Requests', 'b2b'], ['creator', 'Creators', 'b2b'], ['kennzahlen', 'Metrics'], ['analyse', 'Analytics'], ['sicherheit', 'Security'], ['system', 'System & files'], ['einrichtung', 'Setup'], ['steuer', 'CPA export', 'b2b'], ['protokoll', 'Audit log'], ['vorschlaege', 'Suggestions'], ['probleme', 'Technical issues'], ['api', 'API']];
   const osBox = $('#hqOS'), osIn = $('#hqQ').q;
   let osItems = [], osSel = -1, osT = null, osSeq = 0;
   const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -615,9 +615,9 @@ export async function hq(v, { goTab, msg }) {
     const q = norm(osIn.value.trim()); clearTimeout(osT); const my = ++osSeq;
     if (q.length < 2) { osClose(); return; }
     const local = [
-      ...AGENTS.filter((a) => norm(`${a.name} ${a.last} ${a.role}`).includes(q)).slice(0, 4).map((a) => ({ kind: 'Agent', title: `${a.name} · ${a.role}`, sub: 'Chat, Lösungen, Dokumente', agent: a.id })),
+      ...AGENTS.filter((a) => norm(`${a.name} ${a.last} ${a.role}`).includes(q)).slice(0, 4).map((a) => ({ kind: 'Agent', title: `${a.name} · ${a.role}`, sub: 'Chat, solutions, documents', agent: a.id })),
       ...APPS.filter((a) => norm(a[1]).includes(q)).slice(0, 4).map((a) => ({ kind: 'App', title: a[1], tab: a[0], sg: a[2] })),
-      ...(/^(entsch|offen|freig)/.test(q) ? [{ kind: 'Start', title: 'Entscheidungen', dec: true }] : []),
+      ...(/^(deci|open|appr|entsch|offen|freig)/.test(q) ? [{ kind: 'Start', title: 'Decisions', dec: true }] : []),
     ];
     osItems = local; osSel = -1; osPaint();
     osT = setTimeout(async () => {
@@ -633,20 +633,20 @@ export async function hq(v, { goTab, msg }) {
     else if (e.key === 'Enter' && osSel >= 0) { e.preventDefault(); osGo(osItems[osSel]); }
   });
   osIn.addEventListener('blur', () => setTimeout(osClose, 150));
-  // Tastenkürzel wie im Betriebssystem: Strg/⌘ + K springt in die Leiste.
+  // Keyboard shortcut like an OS: Ctrl/⌘ + K jumps to the bar.
   if (!window.__hqKey) { window.__hqKey = true; document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { const i = document.querySelector('#hqQ input'); if (i) { e.preventDefault(); i.focus(); i.select(); } } }); }
-  // Zentrale Frage an LeaseRun Intelligence: wird automatisch an den passenden Agenten gegeben.
+  // Central question to LeaseRun Intelligence: routed automatically to the right agent.
   $('#hqQ').onsubmit = async (e) => {
     e.preventDefault(); const q = e.target.q.value.trim(); if (!q) return; osClose(); clearTimeout(osT); osSeq++;
-    const box = $('#hqQA'), b = e.target.querySelector('button'); box.hidden = false; box.innerHTML = '<p class="hq-msg">Einen Moment …</p>'; b.disabled = true;
+    const box = $('#hqQA'), b = e.target.querySelector('button'); box.hidden = false; box.innerHTML = '<p class="hq-msg">One moment …</p>'; b.disabled = true;
     const r = await api('/api/admin/hq', { method: 'POST', body: JSON.stringify({ agent: 'zentrale', command: q }) });
     b.disabled = false; if (r.ok && r.data.ai) refreshAi();
     const acts = r.ok ? (r.data.actions || []).filter((x) => x.tab) : [];
-    box.innerHTML = `<p class="hq-msg">${rich(r.ok ? r.data.reply : r.data?.error || 'Das hat nicht geklappt.')}</p>${acts.length ? `<div class="hq-sh-a">${acts.map((x, i) => `<button type="button" class="hq-btn" data-qa="${i}">${esc(x.label)}</button>`).join('')}</div>` : ''}`;
+    box.innerHTML = `<p class="hq-msg">${rich(r.ok ? r.data.reply : r.data?.error || "That didn't work.")}</p>${acts.length ? `<div class="hq-sh-a">${acts.map((x, i) => `<button type="button" class="hq-btn" data-qa="${i}">${esc(x.label)}</button>`).join('')}</div>` : ''}`;
     box.querySelectorAll('[data-qa]').forEach((el) => el.onclick = () => goTab(acts[+el.dataset.qa].tab, acts[+el.dataset.qa].sg));
   };
-  // Sofort da: Die Wache (Server, rund um die Uhr) hält den Stand aktuell – beim Öffnen wird nur gelesen, nicht gearbeitet.
-  // Nur wenn die Wache länger als 15 Minuten nicht lief (z. B. noch nicht eingerichtet), arbeitet der Browser einmal selbst.
+  // Instant: the watch (server, around the clock) keeps the state current – opening only reads, it doesn't work.
+  // Only if the watch hasn't run for more than 15 minutes (e.g. not set up yet) does the browser work once itself.
   const STALE_MS = 15 * 60_000;
   const lastAt = () => Math.max(0, ...Object.values(shift).map((x) => new Date(x.at).getTime() || 0));
   const pull = () => api('/api/admin/hq').then((r) => {
@@ -661,41 +661,41 @@ export async function hq(v, { goTab, msg }) {
   pull().then(() => { if (v.isConnected && Date.now() - lastAt() > STALE_MS) work(); });
   if (v.__hqTimer) clearInterval(v.__hqTimer);
   const feedT = setInterval(() => { if (!v.isConnected || my !== seq) { clearInterval(feedT); return; } feedIx++; paintFeed(); paintAsof(); }, 6000);
-  // Jede Minute nur den Stand lesen (kostet nichts); selbst arbeiten nur, wenn die Wache ausfällt.
-  // Lagebild (Systeme, Hinweise, Verlauf) alle 2 Minuten, nur bei sichtbarer Seite; nach einem Fehler eine Runde Pause.
+  // Read the state every minute (costs nothing); work itself only if the watch fails.
+  // Status (systems, alerts, activity) every 2 minutes, only while visible; after an error skip one round.
   let tick = 0, ovSkip = false;
   const timer = v.__hqTimer = setInterval(() => {
     if (!v.isConnected || my !== seq) { clearInterval(timer); return; } if (document.hidden) return;
     pull().then(() => { if (!busy.size && Date.now() - lastAt() > STALE_MS) work(); });
     if (++tick % 2 === 0) { if (ovSkip) ovSkip = false; else loadOverview().then(() => { ovSkip = ovFail; }); }
   }, 60_000);
-  // Zurück auf die Seite nach längerer Pause: sofort frisch laden statt alte Werte als „Live“ zu zeigen.
+  // Back on the page after a longer pause: reload right away instead of showing old values as "Live".
   const onVis = () => { if (!v.isConnected || my !== seq) { document.removeEventListener('visibilitychange', onVis); return; } if (!document.hidden && Date.now() - ovAt > 120_000) { pull(); loadOverview(); } };
   document.addEventListener('visibilitychange', onVis);
 
   $('#hqRef').onclick = () => hq(v, { goTab, msg });
 
-  // Umsatz heute: je Bereich getrennt abgefragt und getrennt beschriftet (keine gemischte Summe).
+  // Revenue today: queried and labeled separately per area (no mixed total).
   const rev = (scope) => api('/api/admin/finance?zeitraum=heute&von=&bis=', { headers: { 'x-admin-scope': scope } });
   Promise.all([rev('b2c'), rev('b2b')]).then(([c, b]) => {
     if (my !== seq) return;
-    const chip = (l, r, f, sg) => `<button type="button" class="hq-chip" data-go="cockpit" data-sg="${sg}"><small>${l}</small><strong>${r.ok ? eur(f(r.data)) : '–'}</strong>${r.ok ? `<span>${f === gross ? `${r.data.revenue?.count ?? 0} Zahlungen` : `${r.data.revenue?.count ?? 0} Rechnungen`}</span>` : `<span>${esc(r.data?.error || 'nicht verfügbar')}</span>`}</button>`;
+    const chip = (l, r, f, sg) => `<button type="button" class="hq-chip" data-go="cockpit" data-sg="${sg}"><small>${l}</small><strong>${r.ok ? eur(f(r.data)) : '–'}</strong>${r.ok ? `<span>${f === gross ? `${r.data.revenue?.count ?? 0} payments` : `${r.data.revenue?.count ?? 0} invoices`}</span>` : `<span>${esc(r.data?.error || 'not available')}</span>`}</button>`;
     const gross = (d) => d.revenue?.gross ?? null, net = (d) => d.revenue?.net ?? null;
-    $('#hqRev').innerHTML = chip('Umsatz heute · Privat (brutto)', c, gross, 'b2c') + chip('Umsatz heute · Unternehmen (netto)', b, net, 'b2b');
+    $('#hqRev').innerHTML = chip('Revenue today · consumers (gross)', c, gross, 'b2c') + chip('Revenue today · businesses (net)', b, net, 'b2b');
     $('#hqRev').querySelectorAll('[data-go]').forEach((x) => x.onclick = () => goTab(x.dataset.go, x.dataset.sg));
   });
 
-  // Lagebild, Kennzahlen, Entscheidungen, Systeme und Aktivität – wird nach jedem „Erledigen“ sofort neu geladen.
+  // Status, metrics, decisions, systems and activity – reloaded right after every "Do it".
   const loadOverview = async () => {
   const r = await api('/api/admin/app/overview');
   if (my !== seq || !v.isConnected) return;
   if (!r.ok) {
-    // Alte Daten bleiben stehen, sind aber als „möglicherweise nicht aktuell“ markiert; ohne Daten: „nicht verfügbar“ – nie „stabil“.
+    // Old data stays, marked as "may be out of date"; without data: "not available" – never "stable".
     ovFail = true; paintStatus();
     if (!ov) {
-      const err = `<p class="hq-empty">Systemstatus konnte momentan nicht geladen werden. <button type="button" class="hq-btn" data-retry>Erneut versuchen</button></p>`;
+      const err = `<p class="hq-empty">System status couldn't be loaded right now. <button type="button" class="hq-btn" data-retry>Try again</button></p>`;
       ['#hqSys', '#hqAct'].forEach((s) => { $(s).innerHTML = err; });
-      $('#hqKpi').innerHTML = ''; $('#hqSysSum').textContent = 'nicht verfügbar';
+      $('#hqKpi').innerHTML = ''; $('#hqSysSum').textContent = 'not available';
       v.querySelectorAll('[data-retry]').forEach((b) => b.onclick = () => { b.disabled = true; loadOverview(); });
     }
     return;
@@ -708,19 +708,19 @@ export async function hq(v, { goTab, msg }) {
 
   $('#hqKpi').innerHTML = (d.metrics || []).map((m) => {
     const g = goT(m.target);
-    const inner = `<small>${esc(m.label)}</small><strong>${Number(m.value).toLocaleString('de-DE')}</strong>`;
+    const inner = `<small>${esc(m.label)}</small><strong>${Number(m.value).toLocaleString('en-US')}</strong>`;
     return g ? `<button type="button" class="hq-kpi t-${esc(m.tone)}" data-go="${g[0]}" data-sg="${g[1] || 'system'}">${inner}<i>${ic(I_GO, 14)}</i></button>` : `<div class="hq-kpi t-${esc(m.tone)}">${inner}</div>`;
-  }).join('') || '<p class="hq-empty">Keine Kennzahlen für Ihre Rolle.</p>';
+  }).join('') || '<p class="hq-empty">No metrics for your role.</p>';
 
   alerts = (d.alerts || []).filter((x) => x.attention && !IN_CHECK.has(x.id)); paintDec();
 
-  { const sy = d.systems || [], bad = sy.filter((x) => x.state !== 'ok').length; $('#hqSysSum').textContent = sy.length ? (bad ? `${bad} von ${sy.length} mit Hinweis` : `alle ${sy.length} in Ordnung`) : 'keine Daten'; if (bad) $('#hqSys').closest('details').open = true; }
-  $('#hqSys').innerHTML = (d.systems || []).length ? `<ul class="hq-sys">${d.systems.map((s) => { const [cls, lab] = SYS_L[s.state] || SYS_L.off; return `<li><span class="hq-st ${cls}">${lab}</span><strong>${esc(s.label)}</strong><span>${esc(s.info)}${s.ms != null ? ` · ${s.ms} ms` : ''}</span></li>`; }).join('')}</ul>${d.deploy ? `<p class="hq-sub">Umgebung ${esc(d.deploy.env)}${d.deploy.commit ? ` · Version ${esc(String(d.deploy.commit).slice(0, 7))}` : ''}${d.deploy.region ? ` · ${esc(d.deploy.region)}` : ''}</p>` : ''}` : '<p class="hq-empty">Keine Systemdaten für Ihre Rolle.</p>';
+  { const sy = d.systems || [], bad = sy.filter((x) => x.state !== 'ok').length; $('#hqSysSum').textContent = sy.length ? (bad ? `${bad} of ${sy.length} with a note` : `all ${sy.length} OK`) : 'no data'; if (bad) $('#hqSys').closest('details').open = true; }
+  $('#hqSys').innerHTML = (d.systems || []).length ? `<ul class="hq-sys">${d.systems.map((s) => { const [cls, lab] = SYS_L[s.state] || SYS_L.off; return `<li><span class="hq-st ${cls}">${lab}</span><strong>${esc(s.label)}</strong><span>${esc(s.info)}${s.ms != null ? ` · ${s.ms} ms` : ''}</span></li>`; }).join('')}</ul>${d.deploy ? `<p class="hq-sub">Environment ${esc(d.deploy.env)}${d.deploy.commit ? ` · Version ${esc(String(d.deploy.commit).slice(0, 7))}` : ''}${d.deploy.region ? ` · ${esc(d.deploy.region)}` : ''}</p>` : ''}` : '<p class="hq-empty">No system data for your role.</p>';
 
-  $('#hqAct').innerHTML = (d.activity || []).length ? `<ul class="hq-act">${d.activity.slice(0, 12).map((a) => { const g = goT(a.target); return `<li>${g ? `<button type="button" data-go="${g[0]}" data-sg="${g[1] || 'system'}">` : '<div>'}<strong>${esc(a.title)}</strong>${a.detail ? `<span>${esc(a.detail)}</span>` : ''}<time datetime="${esc(a.at)}" title="${esc(dtt(a.at))}">${esc(ago(a.at))}</time>${g ? '</button>' : '</div>'}</li>`; }).join('')}</ul>` : '<p class="hq-empty">Noch keine Aktivität.</p>';
+  $('#hqAct').innerHTML = (d.activity || []).length ? `<ul class="hq-act">${d.activity.slice(0, 12).map((a) => { const g = goT(a.target); return `<li>${g ? `<button type="button" data-go="${g[0]}" data-sg="${g[1] || 'system'}">` : '<div>'}<strong>${esc(a.title)}</strong>${a.detail ? `<span>${esc(a.detail)}</span>` : ''}<time datetime="${esc(a.at)}" title="${esc(dtt(a.at))}">${esc(ago(a.at))}</time>${g ? '</button>' : '</div>'}</li>`; }).join('')}</ul>` : '<p class="hq-empty">No activity yet.</p>';
 
-  { const n = (d.activity || []).length, last = d.activity?.[0]?.at; $('#hqActSum').textContent = n ? `${n} Ereignisse · zuletzt ${ago(last)}` : 'noch nichts'; }
-  // Jede Kachel öffnet sofort den passenden Bereich; „Fehler / Warnungen“ springt zu „Jetzt wichtig“ in dieser Ansicht.
+  { const n = (d.activity || []).length, last = d.activity?.[0]?.at; $('#hqActSum').textContent = n ? `${n} events · latest ${ago(last)}` : 'nothing yet'; }
+  // Every tile opens the matching area right away; "Errors / warnings" jumps to "Now important" in this view.
   v.querySelectorAll('#hqKpi [data-go], #hqAct [data-go]').forEach((b) => b.onclick = () => (b.dataset.go === 'jetzt' ? $('#hqDec').closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' }) : goTab(b.dataset.go, b.dataset.sg)));
   };
   await loadOverview();

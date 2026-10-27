@@ -1,4 +1,4 @@
-// Audit-Ereignisse der API (Hash-Kette in der Datenbank, Tabelle nur anhängbar).
+// API audit events (hash chain in the database, append-only table).
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export type AuditAction =

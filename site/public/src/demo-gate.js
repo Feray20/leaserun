@@ -6,7 +6,7 @@
   window.__iaGate = true;
   const P = location.pathname.replace(/\/+$/, '') || '/';
   const CALC = /^\/calculators\/[a-z-]+$/.test(P) && P !== '/calculators/closing-costs';
-  const WISSEN = (P === '/learn' || /^\/learn\/[a-z0-9-]+$/.test(P)) && !/^\/learn\/(glossar|glossary|erwerbsstatus|employment-types|warum-investieren|why-invest)$/.test(P);
+  const WISSEN = (P === '/learn' || /^\/learn\/[a-z0-9-]+$/.test(P)) && !/^\/learn\/(glossar|glossary|erwerbsstatus|employment-types|warum-investieren|why-invest|rental-example)$/.test(P);
   const MUSTER = P === '/sample-loan-package';
   if (!CALC && !WISSEN && !MUSTER) return;
   const root = document.documentElement;

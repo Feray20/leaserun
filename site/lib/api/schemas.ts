@@ -1,19 +1,23 @@
-// Eingabeschemata der API (streng: unbekannte Felder werden abgelehnt).
+// API input schemas (strict: unknown fields are rejected).
 import { z } from 'zod';
 import { SCOPES } from '@/lib/api/entitlements';
 
 const money = (max = 100_000_000) => z.number().finite().min(0).max(max);
 const str = (max: number) => z.string().trim().min(1).max(max);
-export const STATES = ['baden-wuerttemberg', 'bayern', 'berlin', 'brandenburg', 'bremen', 'hamburg', 'hessen', 'mecklenburg-vorpommern', 'niedersachsen',
-  'nordrhein-westfalen', 'rheinland-pfalz', 'saarland', 'sachsen', 'sachsen-anhalt', 'schleswig-holstein', 'thueringen'] as const;
+// US states and DC as USPS two-letter codes.
+export const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN',
+  'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'] as const;
+// civil_servant = government employee (federal, state or local); kept as identifier for compatibility.
 export const EMPLOYMENT = ['employed', 'civil_servant', 'self_employed', 'retired', 'other'] as const;
-export const PROPERTY_TYPES = ['apartment', 'single_family_house', 'two_family_house', 'multi_family_house', 'land', 'other'] as const;
+// apartment = condo unit; two_family_house = duplex; multi_family_house = 3–4 units or 5+ (commercial).
+export const PROPERTY_TYPES = ['apartment', 'townhouse', 'single_family_house', 'two_family_house', 'multi_family_house', 'land', 'other'] as const;
 
 const Applicant = z.object({
   first_name: str(80).optional(),
   last_name: str(80).optional(),
   employment_type: z.enum(EMPLOYMENT).optional(),
   employed_since: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  monthly_gross_income: money(1_000_000).optional(),
   monthly_net_income: money(1_000_000).optional(),
 }).strict();
 
@@ -23,7 +27,7 @@ export const CaseInput = z.object({
     first_name: str(80).optional(),
     last_name: str(80).optional(),
     email: z.string().trim().email().max(200).optional(),
-    phone: z.string().trim().regex(/^[+0-9 ()/-]{5,30}$/).optional(),
+    phone: z.string().trim().regex(/^[+0-9 ()./-]{5,30}$/).optional(),
   }).strict().optional(),
   applicants: z.array(Applicant).max(4).optional(),
   property: z.object({
@@ -31,38 +35,45 @@ export const CaseInput = z.object({
     usage: z.enum(['owner_occupied', 'rented', 'mixed']).optional(),
     address: z.object({
       street: str(160).optional(),
-      postal_code: z.string().regex(/^\d{5}$/).optional(),
+      postal_code: z.string().regex(/^\d{5}(-\d{4})?$/).optional(),
       city: str(80).optional(),
-      state: z.enum(STATES).optional(),
+      state: z.preprocess((v) => (typeof v === 'string' ? v.trim().toUpperCase() : v), z.enum(STATES)).optional(),
     }).strict().optional(),
     purchase_price: money().optional(),
     land_value: money().optional(),
     renovation_cost: money().optional(),
-    living_area: z.number().finite().min(0).max(100_000).optional(),
+    closing_costs: money().optional(),               // estimated buyer closing costs (from the Loan Estimate), USD
+    annual_property_tax: money(10_000_000).optional(),
+    annual_insurance: money(10_000_000).optional(),  // homeowners / landlord insurance premium per year
+    monthly_hoa: money(1_000_000).optional(),
+    living_area: z.number().finite().min(0).max(1_000_000).optional(),   // square feet
     year_built: z.number().int().min(1500).max(2100).optional(),
-    monthly_cold_rent: money(10_000_000).optional(),
+    monthly_cold_rent: money(10_000_000).optional(),  // gross monthly rent (rental properties)
   }).strict().optional(),
   household: z.object({
-    monthly_net_income: money(1_000_000).optional(),
-    monthly_expenses: money(1_000_000).optional(),
+    monthly_gross_income: money(1_000_000).optional(), // before taxes – basis for DTI
+    monthly_net_income: money(1_000_000).optional(),   // take-home pay
+    monthly_debt_payments: money(1_000_000).optional(), // minimum payments on credit cards, auto, student and other loans
+    monthly_expenses: money(1_000_000).optional(),     // living expenses (for the budget check)
     adults: z.number().int().min(1).max(10).optional(),
     dependants: z.number().int().min(0).max(20).optional(),
   }).strict().optional(),
   equity: z.object({
-    amount: money().optional(),
-    available_amount: money().optional(),
+    amount: money().optional(),           // down payment plus closing funds brought to closing
+    available_amount: money().optional(), // total verified liquid assets (for cash to close and reserves)
   }).strict().optional(),
   loan: z.object({
     requested_amount: money().optional(),
-    term_years: z.number().int().min(1).max(50).optional(),
-    repayment_rate: z.number().finite().min(0).max(20).optional(),   // anfängliche Tilgung in % p. a.
-    interest_rate: z.number().finite().min(0).max(20).optional(),    // Sollzins in % p. a. (Annahme, falls bekannt)
+    term_years: z.number().int().min(1).max(50).optional(),          // amortization term, default 30
+    repayment_rate: z.number().finite().min(0).max(20).optional(),   // deprecated (German-style initial repayment); ignored, use term_years
+    interest_rate: z.number().finite().min(0).max(20).optional(),    // note rate in % per year (assumption if known)
+    loan_program: z.enum(['conventional', 'fha', 'va', 'usda', 'jumbo', 'dscr', 'other']).optional(),
   }).strict().optional(),
   metadata: z.record(z.string().max(40), z.union([z.string().max(200), z.number().finite(), z.boolean()])).refine((m) => Object.keys(m).length <= 20, 'max 20 keys').optional(),
 }).strict();
 export type CaseData = z.infer<typeof CaseInput>;
 
-// PATCH: gleiche Felder, alles optional; null entfernt einen Wert.
+// PATCH: same fields, all optional; null removes a value.
 export function mergeCase(base: CaseData, patch: Record<string, unknown>): unknown {
   const merge = (a: unknown, b: unknown): unknown => {
     if (b === null) return undefined;

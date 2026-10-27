@@ -1,5 +1,5 @@
-// Zentrale, serverseitige Tarif- und Freigabelogik der API. Nur hier wird entschieden, was ein Mandant darf.
-// Grundlage: wirksamer Tarif (effectiveTier), Freischaltung im Web-Admin (api_tenant_policies) und Modul-Overrides.
+// Central server-side plan and access logic of the API. Only here is it decided what a tenant may do.
+// Basis: effective plan (effectiveTier), enablement in the Web-Admin (api_tenant_policies) and module overrides.
 import { effectiveTier, type B2BAccount, type Tier } from '@/lib/b2b/core';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
@@ -32,7 +32,7 @@ export const SCOPE_FEATURE: Record<Scope, Feature> = {
   'api_keys:read': 'api.access', 'api_keys:write': 'api.access',
 };
 
-// Tarifmatrix (siehe preise.json „REST-API v1“): Basic ohne API, Pro Standard-API, Enterprise vollständig.
+// Plan matrix (see preise.json "REST API v1"): Basic without API, Pro standard API, Enterprise full.
 const PLAN: Record<Tier, { features: Feature[]; rateLimit: number; maxDocumentBytes: number }> = {
   BASIC: { features: [], rateLimit: 0, maxDocumentBytes: 0 },
   PRO: { features: ['api.access', 'api.validation', 'api.documents', 'api.reports', 'api.playground', 'api.sandbox'], rateLimit: 60, maxDocumentBytes: 4 * 1024 * 1024 },
@@ -64,13 +64,13 @@ export type TenantApiPolicy = {
   reason: 'OK' | 'PLAN' | 'NOT_ENABLED' | 'LOCKED';
 };
 
-// Reine Berechnung (testbar): Konto + Admin-Richtlinie → wirksame API-Richtlinie.
+// Pure calculation (testable): account + admin policy → effective API policy.
 export function computePolicy(account: Pick<B2BAccount, 'id' | 'status' | 'plan_tier' | 'plan_until' | 'has_whitelabel'>, row: PolicyRow | null): TenantApiPolicy {
   const plan = effectiveTier(account as B2BAccount);
   const base = plan ? PLAN[plan] : PLAN.BASIC;
   const planIncludes = base.features.includes('api.access');
   const features = new Set<Feature>(base.features);
-  // Admin-Overrides können Webhooks/White-Label nur innerhalb eines API-Tarifs ergänzen oder sperren.
+  // Admin overrides can only add or block webhooks/white label within an API plan.
   if (planIncludes && row?.webhooks_allowed === true) features.add('api.webhooks');
   if (row?.webhooks_allowed === false) features.delete('api.webhooks');
   if (planIncludes && (row?.white_label_allowed === true || account.has_whitelabel)) features.add('api.white_label');

@@ -1,4 +1,4 @@
-// Einheitliches Fehlermodell (RFC 9457 „Problem Details“) mit maschinenlesbarem Code.
+// Uniform error model (RFC 9457 "Problem Details") with machine-readable code.
 
 export const ERROR_CODES = {
   BAD_REQUEST: { status: 400, title: 'Bad request' },
@@ -61,7 +61,7 @@ export function problem(code: ErrorCode, requestId: string, detail?: string, err
   };
 }
 
-// Zod-Fehler → Feldliste (ohne Eingabewerte, damit keine Daten in Fehlermeldungen landen).
+// Zod errors → field list (without input values, so no data ends up in error messages).
 export function zodErrors(issues: { path: (string | number)[]; code: string; message: string }[]): FieldError[] {
   return issues.slice(0, 50).map((i) => ({ field: i.path.join('.') || '(body)', code: i.code, message: i.message }));
 }

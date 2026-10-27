@@ -1,5 +1,5 @@
-// API-Schlüssel: Format, Erzeugung, Hash (HMAC-SHA-256 mit Pfeffer) und Statusprüfung.
-// Format: <test|live>_<8 Zeichen Präfix>_<43 Zeichen Geheimnis>. Gespeichert werden nur Präfix und Hash.
+// API keys: format, generation, hash (HMAC-SHA-256 with pepper) and status check.
+// Format: <test|live>_<8-character prefix>_<43-character secret>. Only prefix and hash are stored.
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { keyPepper } from '@/lib/api/config';
 
@@ -39,7 +39,7 @@ export function bearer(req: Request): string | null {
 
 export const sameHash = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
-// Anzeige: nur Präfix, nie das Geheimnis.
+// Display: prefix only, never the secret.
 export const maskKey = (prefix: string) => `${prefix}_********`;
 
 export type KeyRow = {

@@ -2,15 +2,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { isSensitiveMail } from '@/lib/mail/sent-log';
 
-test('Mails mit Zugangsdaten oder persönlichen Links werden nur als Vermerk abgelegt', () => {
-  assert.ok(isSensitiveMail('Passwort zurücksetzen – LeaseRun', ''));
-  assert.ok(isSensitiveMail('Ihr Anmeldelink – LeaseRun', ''));
-  assert.ok(isSensitiveMail('Ihr Konto ist eingerichtet', 'Benutzername: x\nStartpasswort: abc'));
-  assert.ok(isSensitiveMail('Bitte bestätigen: Neuigkeiten von LeaseRun', ''));
+test('Emails with credentials or personal links are stored only as a note', () => {
+  assert.ok(isSensitiveMail('Reset your password – LeaseRun', ''));
+  assert.ok(isSensitiveMail('Your LeaseRun sign-in link', ''));
+  assert.ok(isSensitiveMail('Your account is ready', 'Username: x\nTemporary password: abc'));
+  assert.ok(isSensitiveMail('Please confirm: updates from LeaseRun', ''));
+  assert.ok(isSensitiveMail('Your verification code – LeaseRun', ''));
 });
 
-test('Normale Systemmails werden vollständig abgelegt', () => {
-  assert.ok(!isSensitiveMail('Ihre Rechnung von LeaseRun', 'Anbei Ihre Rechnung.'));
-  assert.ok(!isSensitiveMail('Termin bestätigt: 28. Oktober, 10:00 Uhr', 'Ihr Teams-Link folgt.'));
-  assert.ok(!isSensitiveMail('Monatspaket Oktober', 'Belege im Anhang.'));
+test('Regular system emails are stored in full', () => {
+  assert.ok(!isSensitiveMail('Your LeaseRun receipt', 'Attached is your receipt.'));
+  assert.ok(!isSensitiveMail('Meeting booked: Oct 28, 10:00 AM', 'Your Teams link follows.'));
+  assert.ok(!isSensitiveMail('Monthly statement October', 'Statement attached.'));
 });

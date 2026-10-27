@@ -1,4 +1,4 @@
-// AES-256-GCM für Geheimnisse, die LeaseRun selbst wieder benötigt (Webhook-Signaturschlüssel).
+// AES-256-GCM for secrets LeaseRun needs to read back (webhook signing keys).
 import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes } from 'node:crypto';
 import { encryptionKey } from '@/lib/api/config';
 
@@ -28,7 +28,7 @@ export function signWebhook(secret: string, timestamp: string, rawBody: string):
 
 export const sha256Hex = (data: string | Buffer | Uint8Array) => createHash('sha256').update(data).digest('hex');
 
-// Prüfsumme über den kanonisierten Anfragekörper (Idempotenz).
+// Checksum over the canonicalized request body (idempotency).
 export function canonicalHash(method: string, route: string, body: unknown): string {
   const canon = (v: unknown): unknown => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v as object).sort().map((k) => [k, canon((v as Record<string, unknown>)[k])])) : v);
   return sha256Hex(`${method} ${route} ${JSON.stringify(canon(body ?? null))}`);

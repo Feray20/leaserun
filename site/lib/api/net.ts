@@ -1,4 +1,4 @@
-// Netzwerk-Hilfen: IP-Allowlist (IPv4/IPv6 mit CIDR) und SSRF-Schutz für Webhook-Ziele.
+// Network helpers: IP allowlist (IPv4/IPv6 with CIDR) and SSRF protection for webhook targets.
 import { isIP } from 'node:net';
 
 function v4ToInt(ip: string): number {
@@ -23,7 +23,7 @@ function v6ToBigInt(ip: string): bigint | null {
   return v;
 }
 
-// IPv4-gemappte IPv6-Adresse → IPv4-Text, sonst unverändert.
+// IPv4-mapped IPv6 address → IPv4 text, otherwise unchanged.
 export function normalizeIp(ip: string): string {
   const s = ip.trim().replace(/^\[|\]$/g, '');
   if (isIP(s) === 6) {
@@ -62,12 +62,12 @@ export function ipAllowed(ip: string | null, allow: string[]): boolean {
 }
 
 export function clientIp(req: Request): string | null {
-  // Vercel setzt x-forwarded-for; der erste Eintrag ist der Client (vom Edge-Netz überschrieben, nicht vom Client fälschbar).
+  // Vercel sets x-forwarded-for; the first entry is the client (overwritten by the edge network, cannot be forged by the client).
   return req.headers.get('x-real-ip')?.trim() || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null;
 }
 
-// Nicht öffentliche Bereiche (RFC 1918, Loopback, Link-Local inkl. Cloud-Metadaten 169.254.169.254, CGNAT, Multicast,
-// Dokumentations- und Benchmark-Netze, IPv6 ULA/Link-Local/NAT64-Präfix).
+// Non-public ranges (RFC 1918, loopback, link-local incl. cloud metadata 169.254.169.254, CGNAT, multicast,
+// documentation and benchmark ranges, IPv6 ULA/link-local/NAT64 prefix).
 const BLOCKED = [
   '0.0.0.0/8', '10.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8', '169.254.0.0/16', '172.16.0.0/12', '192.0.0.0/24', '192.0.2.0/24',
   '192.88.99.0/24', '192.168.0.0/16', '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24', '224.0.0.0/4', '240.0.0.0/4', '255.255.255.255/32',
@@ -82,13 +82,13 @@ export function isPublicIp(ip: string): boolean {
 const BLOCKED_HOSTS = /(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|metadata\.google\.internal)$/i;
 export function checkWebhookUrl(raw: string): { ok: true; url: URL } | { ok: false; reason: string } {
   let u: URL;
-  try { u = new URL(raw); } catch { return { ok: false, reason: 'Ungültige URL.' }; }
+  try { u = new URL(raw); } catch { return { ok: false, reason: 'Invalid URL.' }; }
   if (u.protocol !== 'https:') return { ok: false, reason: 'Nur https-Adressen sind erlaubt.' };
-  if (u.username || u.password) return { ok: false, reason: 'Zugangsdaten in der URL sind nicht erlaubt.' };
-  if (u.port && u.port !== '443') return { ok: false, reason: 'Nur Port 443 ist erlaubt.' };
+  if (u.username || u.password) return { ok: false, reason: 'Credentials in the URL are not allowed.' };
+  if (u.port && u.port !== '443') return { ok: false, reason: 'Only port 443 is allowed.' };
   const host = u.hostname.replace(/^\[|\]$/g, '').toLowerCase();
-  if (!host || BLOCKED_HOSTS.test(host) || /(^|\.)leaserun\.de$/i.test(host) || host.endsWith('.vercel.internal')) return { ok: false, reason: 'Interne Adressen sind nicht erlaubt.' };
-  if (isIP(host) && !isPublicIp(host)) return { ok: false, reason: 'Interne Adressen sind nicht erlaubt.' };
-  if (!isIP(host) && !host.includes('.')) return { ok: false, reason: 'Bitte einen vollständigen Domainnamen angeben.' };
+  if (!host || BLOCKED_HOSTS.test(host) || /(^|\.)leaserun\.(com|de)$/i.test(host) || host.endsWith('.vercel.internal')) return { ok: false, reason: 'Internal addresses are not allowed.' };
+  if (isIP(host) && !isPublicIp(host)) return { ok: false, reason: 'Internal addresses are not allowed.' };
+  if (!isIP(host) && !host.includes('.')) return { ok: false, reason: 'Please enter a fully qualified domain name.' };
   return { ok: true, url: u };
 }

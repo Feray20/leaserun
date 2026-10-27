@@ -1,9 +1,9 @@
-// Newsletter-Anmeldebox „Kauf-Checkliste als PDF + monatliches Zins-Update“ auf Startseite, Wissen/Ratgeber,
-// /checklist, /deadlines, /learning-path und /mustermappe. Wird von menu.js nachgeladen.
-// Double-Opt-in über /api/newsletter (box: true): eingetragen erst nach Klick auf den Bestätigungslink,
-// die Checkliste kommt danach per E-Mail. Pflicht-Häkchen, nicht vorausgewählt. Kein Cookie, keine lokale Speicherung.
-// Zählung: Ereignis „newsletter_signup“ im Besucher-Tracking (Seite = path).
-const PAGES = /^\/($|wissen(\/|$)|ratgeber(\/|$)|checkliste$|fristen$|lernpfad$|mustermappe$)/;
+// Newsletter signup box "Home-buying checklist PDF + monthly mortgage rate update" on the home page, /software, Learn/Guides,
+// /checklist, /deadlines, /learning-path and /sample-loan-package. Loaded by menu.js.
+// Double opt-in via /api/newsletter (box: true): subscribed only after clicking the confirmation link, the checklist then
+// comes by email. Required checkbox, never pre-checked. No cookie, no local storage.
+// Counting: event "newsletter_signup" in visitor analytics (only after consent; page = path).
+const PAGES = /^\/($|software$|learn(\/|$)|guides(\/|$)|checklist$|deadlines$|learning-path$|sample-loan-package$)/;
 const PDF = '/api/newsletter/checkliste';
 const here = () => location.pathname.replace(/\/+$/, '') || '/';
 
@@ -24,12 +24,12 @@ function style() {
 }
 
 const HTML = (n) => `<div class="container"><form class="nlb" novalidate aria-labelledby="nlbH${n}">
-<h2 id="nlbH${n}">Kauf-Checkliste als PDF + monatliches Zins-Update</h2>
-<p>Alle Unterlagen, die Banken typischerweise sehen wollen – zum Abhaken. Dazu einmal im Monat die Zinsentwicklung kurz erklärt.</p>
+<h2 id="nlbH${n}">Home-buying checklist PDF + monthly mortgage rate update</h2>
+<p>Every document lenders typically ask for – ready to check off. Plus a short monthly explainer on where mortgage rates are heading.</p>
 <div class="nlb-row"><label class="nlb-hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
-<label for="nlbE${n}" class="nlb-sr">E-Mail-Adresse</label><input id="nlbE${n}" name="email" type="email" required maxlength="200" autocomplete="email" inputmode="email" placeholder="Ihre E-Mail-Adresse">
-<button class="btn btn-dark" type="submit">Checkliste anfordern</button></div>
-<label class="nlb-ok"><input type="checkbox" name="consent" required> <span>Ich möchte den LeaseRun-Newsletter erhalten. Abmeldung jederzeit über den Link in jeder E-Mail. Mehr in den <a href="/privacy">Datenschutzhinweisen</a>.</span></label>
+<label for="nlbE${n}" class="nlb-sr">Email address</label><input id="nlbE${n}" name="email" type="email" required maxlength="200" autocomplete="email" inputmode="email" placeholder="Your email address">
+<button class="btn btn-dark" type="submit">Get the checklist</button></div>
+<label class="nlb-ok"><input type="checkbox" name="consent" required> <span>I want to receive the LeaseRun newsletter. Unsubscribe any time via the link in every email. Learn more in our <a href="/privacy">Privacy Policy</a>.</span></label>
 <p class="nlb-msg" role="status" aria-live="polite"></p></form></div>`;
 
 function bind(form) {
@@ -41,40 +41,40 @@ function bind(form) {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = form.email.value.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { say('Bitte eine gültige E-Mail-Adresse eingeben.', true); form.email.focus(); return; }
-    // Ohne Häkchen keine Eintragung (der Server prüft das zusätzlich).
-    if (!form.consent.checked) { say('Bitte das Häkchen setzen, damit wir Ihnen die Checkliste und den Newsletter schicken dürfen.', true); form.consent.focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { say('Please enter a valid email address.', true); form.email.focus(); return; }
+    // No signup without the checkbox (the server checks this too).
+    if (!form.consent.checked) { say('Please check the box so we may send you the checklist and the newsletter.', true); form.consent.focus(); return; }
     const btn = form.querySelector('button[type=submit]');
-    btn.disabled = true; say('Wird gesendet …');
+    btn.disabled = true; say('Sending …');
     try {
       const r = await fetch('/api/newsletter', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, segment: 'b2c', box: true, source: here().slice(0, 56), consent: true, website: form.website.value, ts }) });
       const d = await r.json().catch(() => ({}));
-      if (!r.ok) { say(d.error || 'Das hat nicht geklappt. Bitte später erneut versuchen.', true); btn.disabled = false; return; }
-      if (d.already) { msg.innerHTML = `Sie sind bereits angemeldet. Hier ist Ihre <a href="${PDF}" target="_blank" rel="noopener">Kauf-Checkliste als PDF</a>.`; msg.classList.remove('err'); return; }
-      say('Fast geschafft: Bitte bestätigen Sie die Anmeldung über den Link in der E-Mail, die wir Ihnen gerade geschickt haben (auch im Spam-Ordner nachsehen). Danach erhalten Sie die Checkliste.');
+      if (!r.ok) { say(d.error || "That didn't work. Please try again later.", true); btn.disabled = false; return; }
+      if (d.already) { msg.innerHTML = `You're already subscribed. Here is your <a href="${PDF}" target="_blank" rel="noopener">home-buying checklist PDF</a>.`; msg.classList.remove('err'); return; }
+      say('Almost done: please confirm your subscription with the link in the email we just sent you (check your spam folder too). You will get the checklist right after.');
       form.email.value = ''; form.consent.checked = false;
-      try { window.iaTrack?.('newsletter_signup'); } catch { /* Messung darf nie stören */ }
-    } catch { say('Keine Verbindung. Bitte später erneut versuchen.', true); btn.disabled = false; }
+      try { window.iaTrack?.('newsletter_signup'); } catch { /* analytics must never interfere */ }
+    } catch { say('No connection. Please try again later.', true); btn.disabled = false; }
   });
 }
 
-// Einbaustelle je Seite: Startseite unter dem ersten Abschnitt, Beispiele unter den Muster-PDFs, sonst am Ende des Inhalts.
+// Placement per page.
 function place(main) {
   const sec = document.createElement('section');
   sec.className = 'nlb-wrap'; sec.setAttribute('data-noklapp', ''); sec.innerHTML = HTML(1);
-  // Immer ganz unten, direkt über der Fußzeile (Wunsch Feray, 27.10.2026) – auf allen Seiten, auch Startseite.
+  // Always at the very bottom, right above the footer (owner's wish, Oct 27, 2026) – on every page, home page included.
   main.appendChild(sec);
   return sec.querySelector('form');
 }
 
-// Rückmeldung nach Klick auf den Bestätigungs- bzw. Abmeldelink (?newsletter=…).
+// Feedback after clicking the confirmation or unsubscribe link (?newsletter=…).
 function banner() {
   const k = new URLSearchParams(location.search).get('newsletter');
-  const t = { bestaetigt: `Danke – Ihre Anmeldung ist bestätigt. Hier ist Ihre <a href="${PDF}" target="_blank" rel="noopener">Kauf-Checkliste als PDF</a> (der Link kommt auch per E-Mail).`, abgemeldet: 'Sie sind abgemeldet und erhalten keine Newsletter mehr.', ungueltig: 'Dieser Link ist ungültig oder abgelaufen.' }[k];
+  const t = { bestaetigt: `Thanks – your subscription is confirmed. Here is your <a href="${PDF}" target="_blank" rel="noopener">home-buying checklist PDF</a> (the link is also on its way by email).`, abgemeldet: "You're unsubscribed and won't receive the newsletter anymore.", ungueltig: 'This link is invalid or has expired.' }[k];
   if (!t || document.querySelector('.nlb-banner')) return;
   const m = document.createElement('div');
   m.className = 'nlb-banner'; m.setAttribute('role', 'status');
-  m.innerHTML = `<button type="button" aria-label="Hinweis schließen">×</button>${t}`;
+  m.innerHTML = `<button type="button" aria-label="Close notice">×</button>${t}`;
   m.querySelector('button').onclick = () => m.remove();
   document.body.appendChild(m);
   if (k !== 'bestaetigt') setTimeout(() => m.remove(), 8000);
@@ -86,7 +86,7 @@ function mount() {
   if (!main) return;
   style();
   banner();
-  // Vorgerendert vorhanden (Prerender übernimmt den Seiteninhalt) → nur verbinden, nicht doppelt einfügen.
+  // Already prerendered (prerender captures the page content) → only bind, don't insert twice.
   bind(main.querySelector('form.nlb') || place(main));
 }
 

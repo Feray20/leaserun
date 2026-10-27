@@ -1,28 +1,28 @@
-// Definierte Testdaten für Sandbox, Playground und End-to-End-Test. Fiktiv, eindeutig als TEST markiert.
+// Defined test data for sandbox, playground and end-to-end test. Fictitious, clearly marked as TEST.
 import type { CaseData } from '@/lib/api/schemas';
 
 export const TEST_CASE: CaseData = {
   external_reference: 'TEST-0001',
-  customer: { first_name: 'Test', last_name: 'Person (TEST)', email: 'test.person@example.com', phone: '+49 000 0000000' },
-  applicants: [{ first_name: 'Test', last_name: 'Person (TEST)', employment_type: 'employed', employed_since: '2018-04-01', monthly_net_income: 6000 }],
+  customer: { first_name: 'Test', last_name: 'Person (TEST)', email: 'test.person@example.com', phone: '+1 555 010 0000' },
+  applicants: [{ first_name: 'Test', last_name: 'Person (TEST)', employment_type: 'employed', employed_since: '2018-04-01', monthly_gross_income: 10000, monthly_net_income: 7400 }],
   property: {
     property_type: 'apartment', usage: 'owner_occupied',
-    address: { street: 'Teststraße 1 (TEST)', postal_code: '64354', city: 'Reinheim', state: 'hessen' },
-    purchase_price: 450000, land_value: 90000, renovation_cost: 0, living_area: 92, year_built: 2004,
+    address: { street: '100 Test St Unit 1 (TEST)', postal_code: '78701', city: 'Austin', state: 'TX' },
+    purchase_price: 450000, land_value: 90000, renovation_cost: 0, closing_costs: 13500, annual_property_tax: 8100, annual_insurance: 1800, monthly_hoa: 250, living_area: 990, year_built: 2004,
   },
-  household: { monthly_net_income: 6000, monthly_expenses: 2200, adults: 1, dependants: 0 },
+  household: { monthly_gross_income: 10000, monthly_net_income: 7400, monthly_debt_payments: 450, monthly_expenses: 2200, adults: 1, dependants: 0 },
   equity: { amount: 100000, available_amount: 100000 },
-  loan: { requested_amount: 350000, term_years: 30, repayment_rate: 2, interest_rate: 3.8 },
+  loan: { requested_amount: 350000, term_years: 30, interest_rate: 6.5, loan_program: 'conventional' },
   metadata: { source: 'leaserun-sandbox', test: true },
 };
 
-// Minimales, gültiges PDF (eine leere Seite) als Testunterlage – Dateisignatur %PDF- ist echt.
-export function testPdf(label = 'TEST-UNTERLAGE'): Buffer {
-  const text = `BT /F1 18 Tf 72 720 Td (${label.replace(/[()\\]/g, '')} - LeaseRun Sandbox, keine Echtdaten) Tj ET`;
+// Minimal valid PDF (one page) as a test document – the %PDF- file signature is real.
+export function testPdf(label = 'TEST-DOCUMENT'): Buffer {
+  const text = `BT /F1 18 Tf 72 720 Td (${label.replace(/[()\\]/g, '')} - LeaseRun Sandbox, no real data) Tj ET`;
   const objs = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
     `<< /Length ${text.length} >>\nstream\n${text}\nendstream`,
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
   ];

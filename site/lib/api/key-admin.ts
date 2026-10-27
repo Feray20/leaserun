@@ -1,4 +1,4 @@
-// Schlüsselverwaltung (gemeinsam für /api/v1/api-keys und den Web-Admin).
+// Key management (shared by /api/v1/api-keys and the Web-Admin).
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { ApiError } from '@/lib/api/errors';
 import { apiAudit } from '@/lib/api/audit';
@@ -39,7 +39,7 @@ export async function loadKey(tenantId: string, id: string): Promise<KeyRow> {
   return data as KeyRow;
 }
 
-// Rotation: neuer Schlüssel mit gleichen Eigenschaften, alter Schlüssel wird sofort widerrufen.
+// Rotation: new key with the same properties, the old key is revoked immediately.
 export async function rotateKey(o: { tenantId: string; id: string; actor: string; policy: TenantApiPolicy; requestId?: string | null }) {
   const old = await loadKey(o.tenantId, o.id);
   if (keyState(old) === 'revoked') throw new ApiError('CONFLICT', 'A revoked key cannot be rotated.');

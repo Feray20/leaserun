@@ -1,5 +1,5 @@
-// Täglicher Wartungslauf der API (über /api/cron/cleanup) – zusätzlich werden Webhook-Wiederholungen bei jeder
-// API-Anfrage des Mandanten und Berichte direkt nach der Anlage abgearbeitet.
+// Daily API maintenance run (via /api/cron/cleanup) – in addition, webhook retries are processed on every
+// API request of the tenant and reports right after they are created.
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { processDue } from '@/lib/api/webhooks';
 import { processReportQueue } from '@/lib/api/service';

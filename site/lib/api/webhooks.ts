@@ -1,5 +1,5 @@
-// Webhooks der API: Ereignisse erzeugen, signiert zustellen, mit Backoff wiederholen, Verlauf speichern.
-// SSRF-Schutz: nur https/443, öffentliche Ziele; die IP wird beim Verbindungsaufbau geprüft (DNS-Rebinding-fest).
+// API webhooks: create events, deliver signed, retry with backoff, store history.
+// SSRF protection: https/443 only, public targets; the IP is checked when connecting (DNS rebinding safe).
 import { request as httpsRequest } from 'node:https';
 import { lookup as dnsLookup } from 'node:dns';
 import type { LookupAddress } from 'node:dns';
@@ -11,13 +11,13 @@ import { computePolicy, type PolicyRow } from '@/lib/api/entitlements';
 import type { WebhookEvent } from '@/lib/api/schemas';
 import type { B2BAccount } from '@/lib/b2b/core';
 
-export const BACKOFF_SECONDS = [60, 300, 1800, 7200, 43200]; // 1 min, 5 min, 30 min, 2 h, 12 h → max. 6 Versuche
+export const BACKOFF_SECONDS = [60, 300, 1800, 7200, 43200]; // 1 min, 5 min, 30 min, 2 h, 12 h → max. 6 attempts
 export const MAX_ATTEMPTS = BACKOFF_SECONDS.length + 1;
 const TIMEOUT_MS = 8000;
 
 type Delivery = { id: string; tenant_id: string; environment: string; endpoint_id: string; event: string; payload: Record<string, unknown>; status: string; attempts: number; is_test: boolean; created_at: string };
 
-// Pinned Lookup: jede aufgelöste Adresse muss öffentlich sein, sonst bricht die Verbindung ab.
+// Pinned lookup: every resolved address must be public, otherwise the connection is aborted.
 function safeLookup(hostname: string, options: object, cb: (err: NodeJS.ErrnoException | null, address: string | LookupAddress[], family?: number) => void) {
   dnsLookup(hostname, { all: true }, (err, addresses) => {
     if (err) return cb(err, '', 0);
@@ -46,14 +46,14 @@ export function postSigned(url: string, headers: Record<string, string>, body: s
       res.on('end', () => resolve({ status: res.statusCode || 0, excerpt: maskExcerpt(Buffer.concat(chunks).toString('utf8').slice(0, 500)), ms: Date.now() - started }));
     });
     req.on('timeout', () => req.destroy(new Error('timeout')));
-    req.on('error', (e) => resolve({ status: 0, excerpt: '', ms: Date.now() - started, error: (e as NodeJS.ErrnoException).code === 'EBLOCKED' ? 'Ziel löst auf eine interne Adresse auf.' : e.message.slice(0, 200) }));
+    req.on('error', (e) => resolve({ status: 0, excerpt: '', ms: Date.now() - started, error: (e as NodeJS.ErrnoException).code === 'EBLOCKED' ? 'Target resolves to an internal address.' : e.message.slice(0, 200) }));
     req.end(body);
   });
 }
 
-// Antworttexte der Empfänger kürzen und offensichtliche personenbezogene Daten maskieren.
+// Shorten receiver response bodies and mask obvious personal data (email, SSN, IBAN, phone and account numbers).
 export function maskExcerpt(s: string): string {
-  return s.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '***@***').replace(/\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){3,7}\b/g, '****IBAN****').replace(/\+?\d[\d\s/-]{7,}\d/g, '***').replace(/[\r\n\t]+/g, ' ').trim();
+  return s.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '***@***').replace(/\b\d{3}-\d{2}-\d{4}\b/g, '***-**-****').replace(/\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]{4}){3,7}\b/g, '****IBAN****').replace(/\+?\(?\d[\d\s/().-]{7,}\d/g, '***').replace(/[\r\n\t]+/g, ' ').trim();
 }
 
 async function webhooksAllowed(tenantId: string): Promise<boolean> {
@@ -84,18 +84,18 @@ export async function emit(tenantId: string, env: string, event: WebhookEvent, d
 
 export async function deliver(d: Delivery, opts: { manual?: boolean } = {}): Promise<{ ok: boolean; status: number; error?: string }> {
   const db = supabaseAdmin();
-  // Gleichzeitige Zustellung derselben Lieferung verhindern (optimistische Sperre über attempts).
+  // Prevent concurrent delivery of the same delivery (optimistic lock via attempts).
   const { data: locked } = await db.from('api_webhook_deliveries').update({ attempts: d.attempts + 1, next_attempt_at: new Date(Date.now() + 120_000).toISOString() })
     .eq('id', d.id).eq('attempts', d.attempts).in('status', opts.manual ? ['pending', 'retrying', 'failed'] : ['pending', 'retrying']).select('id').maybeSingle();
-  if (!locked) return { ok: false, status: 0, error: 'Zustellung läuft bereits.' };
+  if (!locked) return { ok: false, status: 0, error: 'Delivery already in progress.' };
   const attempt = d.attempts + 1;
   const { data: ep } = await db.from('api_webhook_endpoints').select('*').eq('id', d.endpoint_id).maybeSingle();
   let res: { status: number; excerpt: string; ms: number; error?: string };
-  if (!ep || !ep.enabled) res = { status: 0, excerpt: '', ms: 0, error: 'Endpunkt deaktiviert oder gelöscht.' };
+  if (!ep || !ep.enabled) res = { status: 0, excerpt: '', ms: 0, error: 'Endpoint disabled or deleted.' };
   else {
     let secret = '';
     try { secret = decryptSecret(ep.secret_enc); } catch { secret = ''; }
-    if (!secret) res = { status: 0, excerpt: '', ms: 0, error: 'Signaturschlüssel nicht lesbar (API_ENCRYPTION_KEY).' };
+    if (!secret) res = { status: 0, excerpt: '', ms: 0, error: 'Signing key not readable (API_ENCRYPTION_KEY).' };
     else {
       const ts = String(Math.floor(Date.now() / 1000));
       const body = JSON.stringify({ id: d.id, object: 'event', type: d.event, created_at: d.created_at, environment: d.environment, test: d.is_test, attempt, data: d.payload });

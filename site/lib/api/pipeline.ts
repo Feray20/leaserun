@@ -1,6 +1,6 @@
-// Gemeinsame Anfrage-Pipeline aller /api/v1-Endpunkte. Reihenfolge (fest):
-// Request-ID → Authentifizierung → Schlüssel-Lookup → Schlüsselstatus → Mandant → Entitlement → Scope → IP-Allowlist
-// → Rate-Limit → Anfragekörper → Idempotenz → Handler → Audit (im Handler) → Antwort + Anfrageprotokoll.
+// Shared request pipeline of all /api/v1 endpoints. Order (fixed):
+// request ID → authentication → key lookup → key status → tenant → entitlement → scope → IP allowlist
+// → rate limit → request body → idempotency → handler → audit (in handler) → response + request log.
 import { randomBytes } from 'node:crypto';
 import { after, NextResponse } from 'next/server';
 import { supabaseAdmin, anonymizedIpHash, adminConfigured } from '@/lib/supabase/admin';
@@ -35,7 +35,7 @@ export type ApiResult = { status: number; body?: unknown; headers?: Record<strin
 
 export const newRequestId = () => 'req_' + randomBytes(12).toString('base64url');
 
-// Hintergrundarbeit nach der Antwort (Vercel: läuft innerhalb der Funktionslaufzeit weiter).
+// Background work after the response (Vercel: keeps running within the function lifetime).
 export function background(task: () => Promise<unknown>): void {
   const run = () => task().catch((e) => console.error('api_background', e instanceof Error ? e.message : e));
   try { after(run); } catch { void run(); }
@@ -87,19 +87,19 @@ export function apiRoute(opts: RouteOpts, handler: (ctx: ApiCtx) => Promise<ApiR
         if (!allowRequest(`apibad:${ipHash ?? 'x'}`, 20, 60_000)) return fail('RATE_LIMIT_EXCEEDED', 'Too many invalid API keys from this source.', { headers: { 'Retry-After': '60' } });
         return fail('INVALID_API_KEY', undefined, { headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } });
       }
-      // 2) Schlüssel-Lookup (Hash, eindeutiger Index)
+      // 2) Key lookup (hash, unique index)
       const db = supabaseAdmin();
       const { data: k, error: kErr } = await db.from('api_keys').select('*').eq('key_hash', hashKey(secret, pepper)).maybeSingle();
       if (kErr) return fail('SERVICE_UNAVAILABLE', 'Key store unavailable.');
       if (!k || k.key_prefix !== parsed.prefix) {
-        // Schutz gegen Durchprobieren: viele ungültige Schlüssel von derselben Quelle → vorübergehend 429.
+        // Brute-force protection: many invalid keys from the same source → temporary 429.
         if (!allowRequest(`apibad:${ipHash ?? 'x'}`, 20, 60_000)) return fail('RATE_LIMIT_EXCEEDED', 'Too many invalid API keys from this source.', { headers: { 'Retry-After': '60' } });
         return fail('INVALID_API_KEY', undefined, { headers: { 'WWW-Authenticate': 'Bearer error="invalid_token"' } });
       }
       key = k as KeyRow;
       env = key.environment;
       tenantId = key.tenant_id;
-      // 3) Schlüsselstatus
+      // 3) Key status
       const st = keyState(key);
       if (st === 'revoked') return fail('API_KEY_REVOKED');
       if (st === 'expired') return fail('API_KEY_EXPIRED');
@@ -116,7 +116,7 @@ export function apiRoute(opts: RouteOpts, handler: (ctx: ApiCtx) => Promise<ApiR
       if (policy.reason === 'NOT_ENABLED') return fail('API_NOT_ENABLED', 'API access has not been enabled for this account yet.');
       if (env === 'live' && !policy.live_enabled) return fail('LIVE_NOT_ENABLED', 'Live keys are not enabled for this account yet. Use a test key.');
       if (!policy.allowed_scopes.includes(opts.scope)) return fail('PLAN_NOT_ENTITLED', `Your plan does not include ${opts.scope}.`);
-      // 6) Scope des Schlüssels
+      // 6) Key scope
       if (!key.scopes.includes(opts.scope)) return fail('INSUFFICIENT_SCOPE', `This endpoint requires the scope ${opts.scope}.`);
       // 7) IP-Allowlist
       const ip = clientIp(req);
@@ -124,7 +124,7 @@ export function apiRoute(opts: RouteOpts, handler: (ctx: ApiCtx) => Promise<ApiR
       // 8) Rate-Limit
       rate = await checkRate(key.tenant_id, env, policy.rate_limit, policy.burst_limit);
       if (!rate.ok) return fail('RATE_LIMIT_EXCEEDED', `Limit: ${policy.rate_limit} requests per minute (burst ${policy.burst_limit} per 10 s).`, { headers: { 'Retry-After': String(Math.max(1, rate.reset - Math.floor(Date.now() / 1000))) } });
-      // 9) Anfragekörper
+      // 9) Request body
       const max = opts.maxBody ?? 256 * 1024;
       const len = Number(req.headers.get('content-length') || 0);
       if (len > max) return fail('PAYLOAD_TOO_LARGE', `Maximum body size is ${max} bytes.`);
@@ -153,7 +153,7 @@ export function apiRoute(opts: RouteOpts, handler: (ctx: ApiCtx) => Promise<ApiR
         }
         idem = { tenantId: key.tenant_id, env, key: idemKey };
       }
-      // Zuletzt-genutzt höchstens einmal pro Minute schreiben.
+      // Write last-used at most once per minute.
       if (!key.last_used_at || Date.now() - new Date(key.last_used_at).getTime() > 60_000) {
         const kid = key.id;
         background(async () => { await db.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', kid); });
@@ -170,7 +170,7 @@ export function apiRoute(opts: RouteOpts, handler: (ctx: ApiCtx) => Promise<ApiR
       for (const [h, v] of Object.entries({ ...baseHeaders(requestId, rate), ...deprecationHeaders(opts.route) })) res.headers.set(h, v);
       if (idem && !(result instanceof Response)) await finishIdempotency(idem, result.status, result.body ?? null);
       logRequest({ requestId, tenantId, key, env, method: req.method, route: opts.route, status: res.status, started, bytes: Number(res.headers.get('content-length') || 0) || undefined, ipHash });
-      // Fällige Webhook-Zustellungen dieses Mandanten mitnehmen (Wiederholungen mit Backoff).
+      // Process due webhook deliveries of this tenant (retries with backoff).
       const tid = key.tenant_id;
       background(async () => { const m = await import('@/lib/api/webhooks'); await m.processDue({ tenantId: tid, limit: 3 }); });
       return res;
@@ -182,7 +182,7 @@ export function apiRoute(opts: RouteOpts, handler: (ctx: ApiCtx) => Promise<ApiR
   };
 }
 
-// Unbekannte Methode auf bekanntem Pfad.
+// Unknown method on a known path.
 export function methodNotAllowed(allowed: string[]) {
   return async () => {
     const rid = newRequestId();

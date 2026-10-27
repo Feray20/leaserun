@@ -1,4 +1,4 @@
-// Fachlogik der API (Fälle, Vorprüfung, Unterlagen, Berichte). Jede Abfrage ist auf Mandant und Umgebung begrenzt.
+// API business logic (cases, pre-check, documents, reports). Every query is limited to tenant and environment.
 import { createElement } from 'react';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { ApiError } from '@/lib/api/errors';
@@ -45,7 +45,7 @@ export async function updateCase(s: Scope, c: CaseRow, next: CaseData): Promise<
   return row as CaseRow;
 }
 
-// Löschen: Datensatz samt Unterlagen, Prüfläufen und Berichten endgültig entfernen (Datensparsamkeit, Art. 17 DSGVO).
+// Delete: permanently remove the record with documents, validation runs and reports (data minimization, consumer deletion requests).
 export async function deleteCase(s: Scope, c: CaseRow): Promise<void> {
   const [{ data: docs }, { data: reps }] = await Promise.all([
     db().from('api_documents').select('storage_path').eq('case_id', c.id).eq('tenant_id', s.tenantId),
@@ -62,7 +62,7 @@ async function docInfos(s: Scope, caseId: string): Promise<DocInfo[]> {
   return (data ?? []) as DocInfo[];
 }
 
-// Vorprüfung ausführen (synchron, typ. < 200 ms) und Ereignisse auslösen.
+// Run the pre-check (synchronous, typically < 200 ms) and trigger events.
 export async function runValidation(s: Scope, c: CaseRow): Promise<ValidationRow> {
   const started = Date.now();
   const { data: run, error } = await db().from('api_validation_runs').insert({ tenant_id: s.tenantId, environment: s.env, case_id: c.id, status: 'processing', engine_version: API_ENGINE_VERSION }).select('*').single();
@@ -94,15 +94,15 @@ export async function getValidation(s: Scope, caseId: string, id: string): Promi
   return data as ValidationRow;
 }
 
-// ---------- Unterlagen ----------
+// ---------- Documents ----------
 const EXT: Record<string, string[]> = { 'application/pdf': ['pdf'], 'image/jpeg': ['jpg', 'jpeg'], 'image/png': ['png'], 'image/tiff': ['tif', 'tiff'] };
-const LABEL: Partial<Record<DocumentType, string>> = { identity: 'Ausweisdokument', income_proof: 'Einkommensnachweis', equity_proof: 'Eigenkapitalnachweis', expose: 'Exposé', land_register: 'Grundbuchauszug', floor_plan: 'Grundriss', energy_certificate: 'Energieausweis', self_disclosure: 'Selbstauskunft', purchase_contract_draft: 'Kaufvertragsentwurf' };
+const LABEL: Partial<Record<DocumentType, string>> = { identity: 'Photo ID', income_proof: 'Pay stubs / income documents', employment_contract: 'Offer letter / verification of employment', tax_assessment: 'Tax returns and W-2s / 1099s', annual_financials: 'Business tax returns', bwa: 'Year-to-date profit and loss statement', equity_proof: 'Asset statements (down payment source)', bank_statement: 'Bank statements', existing_loans: 'Statements of existing debts', expose: 'Listing / property description', land_register: 'Preliminary title report', cadastral_map: 'Plat map / survey', floor_plan: 'Floor plan', living_area_calculation: 'Square footage (appraisal or measurement)', energy_certificate: 'Energy report / HERS rating', declaration_of_division: 'HOA CC&Rs and bylaws', owners_meeting_minutes: 'HOA meeting minutes', service_charge_statement: 'HOA dues statement and budget', rental_agreement: 'Lease agreement / rent roll', purchase_contract_draft: 'Purchase agreement', building_insurance: 'Homeowners insurance quote', self_disclosure: 'Loan application / personal financial statement' };
 
 async function malwareScan(bytes: Buffer): Promise<'not_configured' | 'clean' | 'infected' | 'error'> {
-  // Statische Virenprüfung immer; externer Scanner zusätzlich, wenn MALWARE_SCAN_URL eingetragen ist.
+  // Static malware check always; an external scanner in addition when MALWARE_SCAN_URL is set.
   const r = await scanUpload(bytes);
   if (r.clean) return 'clean';
-  return /nicht möglich/.test(r.threat) ? 'error' : 'infected';
+  return /nicht möglich|not possible|unavailable/i.test(r.threat) ? 'error' : 'infected';
 }
 
 export async function uploadDocument(s: Scope, c: CaseRow, form: FormData, maxBytes: number): Promise<DocumentRow> {
@@ -115,11 +115,11 @@ export async function uploadDocument(s: Scope, c: CaseRow, form: FormData, maxBy
   if (file.size > maxBytes) throw new ApiError('PAYLOAD_TOO_LARGE', `Maximum document size is ${maxBytes} bytes.`);
   const bytes = Buffer.from(await file.arrayBuffer());
   if (!bytes.length) throw new ApiError('VALIDATION_ERROR', 'The file is empty.', { errors: [{ field: 'file', code: 'empty', message: 'empty file' }] });
-  const name = (file.name || 'dokument').replace(/[\\/\u0000-\u001f]/g, '_').slice(0, 200);
+  const name = (file.name || 'document').replace(/[\\/\u0000-\u001f]/g, '_').slice(0, 200);
   const ext = (name.split('.').pop() || '').toLowerCase();
   const declared = (file.type || '').toLowerCase();
   const detected = detectMime(bytes);
-  // Inhalt (Magic Bytes), Dateiendung und angegebener MIME-Typ müssen zusammenpassen.
+  // Content (magic bytes), file extension and declared MIME type must match.
   if (!detected) throw new ApiError('UNSUPPORTED_MEDIA_TYPE', 'Only PDF, JPEG, PNG and TIFF files are accepted (content signature check).');
   if (!EXT[detected.mime].includes(ext)) throw new ApiError('VALIDATION_ERROR', 'File extension does not match the file content.', { errors: [{ field: 'file', code: 'extension_mismatch', message: `expected .${EXT[detected.mime].join(' / .')}` }] });
   if (declared && declared !== 'application/octet-stream' && declared !== detected.mime && !(declared === 'image/jpg' && detected.mime === 'image/jpeg')) throw new ApiError('VALIDATION_ERROR', 'Declared MIME type does not match the file content.', { errors: [{ field: 'file', code: 'mime_mismatch', message: `content is ${detected.mime}` }] });
@@ -134,9 +134,9 @@ export async function uploadDocument(s: Scope, c: CaseRow, form: FormData, maxBy
   }).select('*').single();
   if (error || !row) { await db().storage.from(API_BUCKET).remove([path]); throw new ApiError('SERVICE_UNAVAILABLE', 'Document could not be stored.'); }
   await apiAudit({ tenantId: s.tenantId, environment: s.env, actor: s.actor, action: 'document.uploaded', resourceType: 'document', resourceId: id, requestId: s.requestId, meta: { case_id: c.id, type, size: bytes.length, sha256: sha } });
-  // Prüfkette: Virenscan (falls angebunden) → Klassifizierung nach angegebenem Typ → formale Prüfung.
+  // Check chain: malware scan (if connected) → classification by declared type → formal check.
   const scan = await malwareScan(bytes);
-  // Kontrolle nach dem Speichern: gespeicherte Datei erneut laden und Prüfsumme vergleichen.
+  // Check after storing: load the stored file again and compare the checksum.
   const back = await db().storage.from(API_BUCKET).download(path);
   const intact = !back.error && back.data ? sha256Hex(Buffer.from(await back.data.arrayBuffer())) === sha : false;
   const rejected = scan === 'infected' || !intact;
@@ -185,7 +185,7 @@ export async function getReport(s: Scope, caseId: string, id: string): Promise<R
   return data as ReportRow;
 }
 
-const eur = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? `${v.toLocaleString('de-DE', { maximumFractionDigits: 0 })} €` : '–');
+const eur = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '–');
 
 export async function processReport(reportId: string): Promise<void> {
   const { data: claimed } = await db().from('api_reports').update({ status: 'processing', started_at: new Date().toISOString() }).eq('id', reportId).eq('status', 'queued').select('*').maybeSingle();
@@ -201,25 +201,25 @@ export async function processReport(reportId: string): Promise<void> {
     const f = res.figures ?? {};
     const { data: acc } = await db().from('lr_b2b_accounts').select('company_name, brand_color').eq('id', r.tenant_id).maybeSingle();
     const d = c.data;
-    const READY: Record<string, string> = { ready: 'Bankreif', needs_attention: 'Nacharbeit nötig', not_ready: 'Nicht bankreif' };
-    const SEV: Record<string, string> = { error: 'Fehler', warning: 'Hinweis', info: 'OK' };
+    const READY: Record<string, string> = { ready: 'Lender-ready', needs_attention: 'Needs attention', not_ready: 'Not lender-ready' };
+    const SEV: Record<string, string> = { error: 'Issue', warning: 'Note', info: 'OK' };
     const { ReportDocument } = await import('@/lib/pdf/report');
     const { renderToBuffer } = await import('@react-pdf/renderer');
     const input = {
-      title: `Fallanalyse${c.external_reference ? ` ${c.external_reference}` : ''}`,
-      subtitle: [d.property?.address?.city, d.property?.property_type, `Vorprüfung vom ${new Date(v.evaluated_at || v.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}`].filter(Boolean).join(' · '),
-      chips: [['Kaufpreis', eur(f.purchase_price)], ['Gesamtkosten', eur(f.total_cost)], ['Darlehen', eur(f.loan)], ['Monatsrate', eur(f.monthly_rate)],
-        ['Vollständigkeit', `${v.completeness_score ?? 0} %`], ['Bank-Readiness', READY[res.bank_readiness || ''] || '–'], ['Eigenkapital', eur(f.equity)], ['Nebenkosten', eur(f.ancillary_costs)]] as [string, string][],
+      title: `Case Analysis${c.external_reference ? ` ${c.external_reference}` : ''}`,
+      subtitle: [d.property?.address?.city, d.property?.property_type, `Pre-check of ${new Date(v.evaluated_at || v.created_at).toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric' })}`].filter(Boolean).join(' · '),
+      chips: [['Purchase price', eur(f.purchase_price)], ['Total cost', eur(f.total_cost)], ['Loan amount', eur(f.loan)], ['Monthly PITIA', eur(f.monthly_pitia ?? f.monthly_rate)],
+        ['Completeness', `${v.completeness_score ?? 0}%`], ['Lender readiness', READY[res.bank_readiness || ''] || '–'], ['Down payment', eur(f.equity)], ['Closing costs', eur(f.ancillary_costs)]] as [string, string][],
       sections: [
-        { title: 'Prüfpunkte', rows: (res.checks ?? []).filter((x) => x.severity !== 'info').slice(0, 14).map((x) => [x.message.slice(0, 110), SEV[x.severity] || x.severity] as [string, string]) },
-        { title: 'Erfüllt', rows: (res.checks ?? []).filter((x) => x.severity === 'info').slice(0, 14).map((x) => [x.message.slice(0, 110), 'OK'] as [string, string]) },
-        ...(res.missing_documents?.length ? [{ title: 'Fehlende Unterlagen', rows: res.missing_documents.slice(0, 14).map((m) => [m, 'fehlt'] as [string, string]) }] : []),
+        { title: 'Checks', rows: (res.checks ?? []).filter((x) => x.severity !== 'info').slice(0, 14).map((x) => [x.message.slice(0, 110), SEV[x.severity] || x.severity] as [string, string]) },
+        { title: 'Passed', rows: (res.checks ?? []).filter((x) => x.severity === 'info').slice(0, 14).map((x) => [x.message.slice(0, 110), 'OK'] as [string, string]) },
+        ...(res.missing_documents?.length ? [{ title: 'Missing documents', rows: res.missing_documents.slice(0, 14).map((m) => [LABEL[m as DocumentType] || m, 'missing'] as [string, string]) }] : []),
       ].filter((x) => x.rows.length),
-      hints: [res.disclaimer || 'Vorprüfung – keine Kreditzusage.', 'Erstellt über die LeaseRun API v1 aus den übermittelten Angaben; Unterlagen formal (Dateityp, Signatur, Prüfsumme) geprüft, nicht inhaltlich.'],
-      note: 'Strukturierte Fallanalyse zur Vorbereitung. Die Kreditentscheidung liegt beim jeweiligen Kreditinstitut.',
+      hints: [res.disclaimer || 'Pre-check – not a loan approval.', 'Created through the LeaseRun API v1 from the submitted data; documents checked formally (file type, signature, checksum), not for content.'],
+      note: 'Structured case analysis for preparation. The credit decision is made by the lender. LeaseRun does not originate or broker loans.',
     };
     const partner = r.branding === 'white_label' && acc ? { name: acc.company_name as string, color: (acc.brand_color as string | null) ?? null, whitelabel: true } : null;
-    const el = createElement(ReportDocument, { r: input, reportId: r.id.slice(0, 8), createdAt: new Date().toISOString(), partner, reportType: 'Fallanalyse · Vorprüfung', watermark: r.environment === 'test' ? 'TEST – SANDBOX – KEINE ECHTDATEN' : undefined, clean: r.environment !== 'test' }) as unknown as Parameters<typeof renderToBuffer>[0];
+    const el = createElement(ReportDocument, { r: input, reportId: r.id.slice(0, 8), createdAt: new Date().toISOString(), partner, reportType: 'Case Analysis · Pre-check', watermark: r.environment === 'test' ? 'TEST – SANDBOX – NO REAL DATA' : undefined, clean: r.environment !== 'test' }) as unknown as Parameters<typeof renderToBuffer>[0];
     const pdf = await renderToBuffer(el);
     const path = `${r.tenant_id}/${r.environment}/${r.case_id}/reports/${r.id}.pdf`;
     const up = await db().storage.from(API_BUCKET).upload(path, pdf, { contentType: 'application/pdf', upsert: true });
@@ -237,7 +237,7 @@ export async function processReport(reportId: string): Promise<void> {
   }
 }
 
-// Hängengebliebene Berichte (z. B. Funktionsabbruch) erneut einreihen und abarbeiten.
+// Re-queue and process stuck reports (e.g. after a function timeout).
 export async function processReportQueue(limit = 5): Promise<number> {
   const stale = new Date(Date.now() - 5 * 60_000).toISOString();
   await db().from('api_reports').update({ status: 'queued' }).eq('status', 'processing').lt('started_at', stale);
