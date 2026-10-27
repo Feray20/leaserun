@@ -1,16 +1,19 @@
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-// B2B-Katalog: Branchen, Pakete, Preise, Leistungen und Software-Tools – im Web-Admin änderbar (lr_settings 'b2b_catalog').
-// Jedes Unternehmenskonto hat genau eine Branche (bei der Kontoanfrage festgelegt, Wechsel nur über den Support)
-// plus optional dazugebuchte Zusatzbranchen. Pakete und Tools richten sich nach der Branche.
+// Business catalog: industries, plans, prices, features and software tools – editable in the Web-Admin (lr_settings 'b2b_catalog').
+// Every business account has exactly one industry (set when the account is requested; changes only via support)
+// plus optional add-on industries. Plans and tools depend on the industry.
+// Internal keys stay unchanged (stored in the database): bank = lenders, banks & credit unions; vermittler = mortgage
+// brokers & loan officers; makler = real estate agents & brokerages; finanzberater = CPAs & financial advisors;
+// allgemein = property managers, investor groups and other firms.
 export type Branche = 'bank' | 'vermittler' | 'makler' | 'finanzberater' | 'allgemein';
 export type Tier = 'BASIC' | 'PRO' | 'ENTERPRISE';
 export const BRANCHEN: Branche[] = ['bank', 'vermittler', 'makler', 'finanzberater', 'allgemein'];
 export const TOOL_IDS = ['haushalt', 'unterlagen', 'angebote', 'protokoll', 'vfe', 'provision', 'inserat', 'ertrag'] as const;
 export type ToolId = (typeof TOOL_IDS)[number];
 export const TOOL_LABEL: Record<ToolId, string> = {
-  haushalt: 'Haushaltsrechnung', unterlagen: 'Unterlagen-Anforderung', angebote: 'Bankangebote vergleichen', protokoll: 'Beratungsprotokoll (§ 511 BGB)',
-  vfe: 'Vorfälligkeit & Anschluss', provision: 'Provisionsrechner (§§ 656c/d BGB)', inserat: 'Inserats-Pflichtangaben (§ 87 GEG)', ertrag: 'Ertragswert-Schnellcheck',
+  haushalt: 'Borrower DTI & max loan', unterlagen: 'Document request list', angebote: 'Compare Loan Estimates', protokoll: 'Client meeting record (TRID checklist)',
+  vfe: 'Refinance break-even & ARM reset', provision: 'Commission split calculator (post-NAR settlement)', inserat: 'Listing ad compliance check (Fair Housing)', ertrag: 'Income approach (cap rate) check',
 };
 
 export type Plan = { key: 'basic' | 'pro'; tier: Exclude<Tier, 'ENTERPRISE'>; name: string; monthCents: number; yearCents: number; seats: number; active: boolean; tools: ToolId[]; features: string[] };
@@ -20,34 +23,38 @@ export type BrancheCfg = {
 };
 export type Catalog = { version: number; addon: { active: boolean; monthCents: number; yearCents: number; text: string }; branchen: Record<Branche, BrancheCfg> };
 
-const BASE_PRO = ['Bis zu 3 Berater-Zugänge', 'Kreditmappen und Präsentationen unbegrenzt – mit Ihrem Logo, Ihren Farben und Ihrer Schrift', 'Eigene Partnerseite mit Terminlink', 'REST-API v1 für Ihr CRM (Frühzugang auf Anfrage)'];
-const BASE_BASIC = ['1 Berater-Zugang', 'Unbegrenzt: Schnell-Checks, Kunden-Einladungen und Anfragen', '20 Kreditmappen und 3 Kunden-Präsentationen (PDF) pro Monat', 'Pipeline mit CSV-Export, Website-Widget, Exposé-QR-Codes'];
-const toolLine = (t: ToolId[]) => `Software-Tools: ${t.map((x) => TOOL_LABEL[x].replace(/ \(.*\)$/, '')).join(', ')}`;
+// Prices in US cents. Business Basic $79/month (max 25 active clients), Pro $149/month, Enterprise custom.
+// Annual billing = 10 monthly payments (2 months free).
+export const BASIC_CENTS = 7900;
+export const PRO_CENTS = 14900;
+const BASE_PRO = ['Up to 3 team seats', 'Unlimited active clients', 'Unlimited lender packages and presentations – with your logo, colors and font', 'Your own partner page with booking link', 'REST API v1 for your CRM (early access on request)'];
+const BASE_BASIC = ['1 seat', 'Up to 25 active clients', 'Unlimited: quick checks, client invitations and leads', '20 lender packages and 3 client presentations (PDF) per month', 'Pipeline with CSV export, website widget, listing QR codes'];
+const toolLine = (t: ToolId[]) => `Software tools: ${t.map((x) => TOOL_LABEL[x].replace(/ \(.*\)$/, '')).join(', ')}`;
 function plans(prefix: string, basic: [number, ToolId[]], pro: [number, ToolId[]], extraPro: string[] = []): Plan[] {
   return [
     { key: 'basic', tier: 'BASIC', name: `${prefix} Basic`, monthCents: basic[0], yearCents: basic[0] * 10, seats: 1, active: true, tools: basic[1], features: [...BASE_BASIC, toolLine(basic[1])] },
-    { key: 'pro', tier: 'PRO', name: `${prefix} Pro`, monthCents: pro[0], yearCents: pro[0] * 10, seats: 3, active: true, tools: pro[1], features: ['Alles aus Basic, plus:', ...BASE_PRO, toolLine(pro[1]), ...extraPro] },
+    { key: 'pro', tier: 'PRO', name: `${prefix} Pro`, monthCents: pro[0], yearCents: pro[0] * 10, seats: 3, active: true, tools: pro[1], features: ['Everything in Basic, plus:', ...BASE_PRO, toolLine(pro[1]), ...extraPro] },
   ];
 }
 const FIN_B: ToolId[] = ['haushalt', 'unterlagen', 'ertrag'];
 const FIN_P: ToolId[] = ['haushalt', 'unterlagen', 'ertrag', 'angebote', 'protokoll', 'vfe'];
-const ENT = (tools: ToolId[], name = 'Enterprise'): BrancheCfg['enterprise'] => ({ active: true, name, price: 'ab 349 € netto pro Monat', tools, features: ['Ab 10 Berater-Zugängen, erweiterbar', 'White-Label: Unterlagen komplett im Erscheinungsbild Ihres Hauses', 'Volle REST-API v1 mit Webhooks', 'Teamverwaltung mit Berater-Zuordnung', 'Kauf auf Rechnung, Angebot nach Größe'] });
+const ENT = (tools: ToolId[], name = 'Enterprise'): BrancheCfg['enterprise'] => ({ active: true, name, price: 'Custom pricing', tools, features: ['10+ team seats, expandable', 'White label: documents fully in your company\'s branding', 'Full REST API v1 with webhooks', 'Team management with client assignment', 'Pay by invoice (ACH or check), quote based on team size'] });
 
 export const DEFAULT_CATALOG: Catalog = {
   version: 1,
-  addon: { active: true, monthCents: 2900, yearCents: 29000, text: 'Weitere Branche dazubuchen: zusätzliche Tools und Beratungskompass der Branche' },
+  addon: { active: true, monthCents: 2900, yearCents: 29000, text: 'Add another industry: extra tools and that industry\'s advisor playbook' },
   branchen: {
-    makler: { label: 'Immobilienmakler', short: 'Makler', desc: 'Makler nach § 34c GewO – Verkauf und Vermietung', selfService: true,
-      plans: plans('Makler', [2900, ['provision', 'inserat', 'ertrag', 'unterlagen']], [6900, ['provision', 'inserat', 'ertrag', 'unterlagen', 'haushalt']], ['Interessenten vorqualifizieren: Haushaltsrechnung für Kaufinteressenten']),
-      enterprise: ENT(['provision', 'inserat', 'ertrag', 'unterlagen', 'haushalt'], 'Makler Enterprise') },
-    vermittler: { label: 'Finanzierungsvermittler', short: 'Vermittler', desc: 'Immobiliardarlehensvermittler nach § 34i GewO', selfService: true,
-      plans: plans('Vermittler', [4900, FIN_B], [11900, FIN_P], ['Bestandskunden-Radar: Zinsbindungsenden Ihrer Kunden']), enterprise: ENT(FIN_P, 'Vermittler Enterprise') },
-    finanzberater: { label: 'Finanz- & Vermögensberater', short: 'Finanzberater', desc: 'Berater nach § 34d/f/h GewO mit Immobilien als Anlageklasse', selfService: true,
-      plans: plans('Finanzberater', [4900, FIN_B], [11900, FIN_P], ['Bestandskunden-Radar: Zinsbindungsenden Ihrer Mandanten']), enterprise: ENT(FIN_P, 'Finanzberater Enterprise') },
-    allgemein: { label: 'Sonstiges Unternehmen', short: 'Allgemein', desc: 'Kanzlei, Hausverwaltung, Bauträger oder anderes', selfService: true,
-      plans: plans('Business', [3900, FIN_B], [9900, ['haushalt', 'unterlagen', 'ertrag', 'angebote', 'vfe']]), enterprise: ENT(['haushalt', 'unterlagen', 'ertrag', 'angebote', 'vfe', 'protokoll']) },
-    bank: { label: 'Bank & Sparkasse', short: 'Bank', desc: 'Baufinanzierungsberater in Filiale oder Immobilienzentrum', selfService: false,
-      plans: plans('Bank', [0, FIN_B], [0, FIN_P]).map((p) => ({ ...p, active: false })), enterprise: { ...ENT(FIN_P, 'Bank & Filiale Enterprise'), features: ['Ab 10 Berater-Zugängen, erweiterbar', 'Einreichungen von Vermittlern empfangen', 'White-Label: Unterlagen komplett im Erscheinungsbild Ihres Hauses', 'Volle REST-API v1 mit Webhooks, Mandanten- und Berater-Routing', 'Kauf auf Rechnung, Angebot nach Filialgröße'] } },
+    makler: { label: 'Real estate agents & brokerages', short: 'Agents', desc: 'Licensed real estate agents, brokers and brokerages – buyer and listing side', selfService: true,
+      plans: plans('Agent', [BASIC_CENTS, ['provision', 'inserat', 'ertrag', 'unterlagen']], [PRO_CENTS, ['provision', 'inserat', 'ertrag', 'unterlagen', 'haushalt']], ['Pre-qualify buyers: DTI and max loan for interested buyers']),
+      enterprise: ENT(['provision', 'inserat', 'ertrag', 'unterlagen', 'haushalt'], 'Brokerage Enterprise') },
+    vermittler: { label: 'Mortgage brokers & loan officers', short: 'Loan officers', desc: 'NMLS-licensed mortgage brokers and loan officers', selfService: true,
+      plans: plans('Loan Officer', [BASIC_CENTS, FIN_B], [PRO_CENTS, FIN_P], ['Client radar: ARM resets and refinance opportunities of your clients']), enterprise: ENT(FIN_P, 'Mortgage Enterprise') },
+    finanzberater: { label: 'CPAs & financial advisors', short: 'Advisors', desc: 'CPAs, tax preparers and financial advisors with real estate clients', selfService: true,
+      plans: plans('Advisor', [BASIC_CENTS, FIN_B], [PRO_CENTS, FIN_P], ['Client radar: ARM resets and refinance opportunities of your clients']), enterprise: ENT(FIN_P, 'Advisor Enterprise') },
+    allgemein: { label: 'Property managers & investor groups', short: 'Other', desc: 'Property management companies, investor groups, real estate attorneys, builders and other firms', selfService: true,
+      plans: plans('Business', [BASIC_CENTS, FIN_B], [PRO_CENTS, ['haushalt', 'unterlagen', 'ertrag', 'angebote', 'vfe']]), enterprise: ENT(['haushalt', 'unterlagen', 'ertrag', 'angebote', 'vfe', 'protokoll']) },
+    bank: { label: 'Lenders, banks & credit unions', short: 'Lenders', desc: 'Mortgage lenders, community banks and credit unions – branch or central lending team', selfService: false,
+      plans: plans('Lender', [0, FIN_B], [0, FIN_P]).map((p) => ({ ...p, active: false })), enterprise: { ...ENT(FIN_P, 'Lender Enterprise'), features: ['10+ team seats, expandable', 'Receive submissions from mortgage brokers', 'White label: documents fully in your institution\'s branding', 'Full REST API v1 with webhooks, client and loan officer routing', 'Pay by invoice (ACH), quote based on branch count'] } },
   },
 };
 
@@ -89,7 +96,7 @@ export const accountBranches = (a: { branche?: string | null; extra_branches?: s
   return [main, ...((a.extra_branches || []).filter((x) => (BRANCHEN as string[]).includes(x) && x !== main) as Branche[])];
 };
 
-// Freigeschaltete Tools: Vereinigung aller gebuchten Branchen für den gebuchten Tarif.
+// Unlocked tools: union of all purchased industries for the purchased plan.
 export function toolsFor(cat: Catalog, branches: Branche[], tier: Tier | null): { unlocked: ToolId[]; visible: ToolId[] } {
   const unlocked = new Set<ToolId>(), visible = new Set<ToolId>();
   for (const b of branches) {

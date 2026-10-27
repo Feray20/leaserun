@@ -7,13 +7,13 @@ const PAGES = /^\/($|wissen(\/|$)|ratgeber(\/|$)|checkliste$|fristen$|lernpfad$|
 const PDF = '/api/newsletter/checkliste';
 const here = () => location.pathname.replace(/\/+$/, '') || '/';
 
-const CSS = `.nlb-wrap{padding:28px 0}.nlb{max-width:720px;margin:0 auto;padding:22px 20px;border:1px solid var(--ia-line,#e2e8f0);border-radius:var(--ia-radius,18px);background:var(--ia-soft,#f8fafc)}
-.nlb h2{margin:0 0 6px;font-size:1.25rem;line-height:1.3}.nlb>p{margin:0 0 14px;color:var(--ia-muted,#64748b)}
+const CSS = `.nlb-wrap{padding:28px 0}.nlb{max-width:720px;margin:0 auto;padding:22px 20px;border:1px solid var(--lr-line,#e2e8f0);border-radius:var(--lr-radius,18px);background:var(--lr-soft,#f8fafc)}
+.nlb h2{margin:0 0 6px;font-size:1.25rem;line-height:1.3}.nlb>p{margin:0 0 14px;color:var(--lr-muted,#64748b)}
 .nlb-row{display:flex;flex-direction:column;gap:10px}.nlb-row input[type=email]{width:100%;min-height:48px;padding:10px 14px;font-size:16px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;color:inherit;box-sizing:border-box}
 .nlb-row .btn{width:100%;min-height:48px;font-size:16px;justify-content:center}
 .nlb-ok{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;font-size:.95rem;line-height:1.45;cursor:pointer}.nlb-ok input{flex:none;width:22px;height:22px;margin:1px 0 0}
 .nlb-msg{margin:10px 0 0;font-size:.95rem;min-height:1em}.nlb-msg.err{color:#b91c1c}.nlb-hp,.nlb-sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}.nlb-in{padding:8px 0 24px}
-.nlb input:focus-visible,.nlb .btn:focus-visible{outline:3px solid var(--ia-link,#0369a1);outline-offset:2px}
+.nlb input:focus-visible,.nlb .btn:focus-visible{outline:3px solid var(--lr-link,#0369a1);outline-offset:2px}
 @media (min-width:640px){.nlb{padding:26px 28px}.nlb-row{flex-direction:row}.nlb-row input[type=email]{flex:1}.nlb-row .btn{width:auto;flex:none}}
 .nlb-banner{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;max-width:560px;margin:0 auto;padding:14px 16px;border-radius:14px;background:#0F2C59;color:#fff;box-shadow:0 12px 40px rgba(15,23,42,.25);font-size:16px}
 .nlb-banner a{color:#fff;font-weight:700}.nlb-banner button{float:right;margin:-4px -6px 0 8px;min-width:44px;min-height:44px;border:0;background:none;color:#fff;font-size:22px;cursor:pointer}`;

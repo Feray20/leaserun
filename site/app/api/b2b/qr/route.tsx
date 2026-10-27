@@ -14,7 +14,7 @@ const n = (v: string | null, max: number) => {
   return Number.isFinite(x) && x > 0 && x <= max ? String(Math.round(x)) : '';
 };
 
-// Exposé-/Schaufenster-QR: öffnet die Partnerseite mit vorbefüllten Objektdaten.
+// Listing / window-display QR: opens the partner page with prefilled property data.
 export async function GET(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-qr', limit: 30 });
   if (ctx instanceof Response) return ctx;

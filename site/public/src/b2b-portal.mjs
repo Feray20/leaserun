@@ -72,7 +72,7 @@ function shell() {
       <nav>${navGroups((v) => !MAIN.some(([m]) => m === v))}<a href="mailto:support@leaserun.com">E-Mail an den Support</a><span class="pt-grp">Konto</span><button type="button" class="pt-logout" id="ptLogoutS">Abmelden</button></nav></div></div>
   </div>`;
   // Fußzeile wie im Privatbereich: in der Inhaltsspalte neben der Seitenleiste (Original unter der Seite wird per CSS ausgeblendet).
-  { const lf = document.querySelector('body > footer.ia-legal-b2b'), pm = root.querySelector('.pt-main'); if (lf && pm && !pm.querySelector('.ia-legal')) { const c = lf.cloneNode(true); c.classList.add('lr-legal-in-main'); pm.appendChild(c); } }
+  { const lf = document.querySelector('body > footer.lr-legal-b2b'), pm = root.querySelector('.pt-main'); if (lf && pm && !pm.querySelector('.lr-legal')) { const c = lf.cloneNode(true); c.classList.add('lr-legal-in-main'); pm.appendChild(c); } }
   root.querySelectorAll('#ptLogout,#ptLogoutM,#ptLogoutS').forEach((b) => { b.onclick = async () => { try { (await import('./b2b-tools.mjs?v=892f3666')).clearAll(); } catch { /* weiter */ } logout(); }; });
   const brb = $('#ptBr'); if (brb) brb.onclick = () => chooseBranche();
   const sheet = $('#ptSheet'), more = $('#ptMore');
@@ -132,7 +132,7 @@ function tileView() {
   box.querySelector(':scope>.pt-tiles')?.remove();
   box.querySelectorAll(':scope>.pt-card.tl-off').forEach((c) => c.classList.remove('tl-off'));
   if (TILE_SKIP.has(view)) return;
-  let cards = [...box.querySelectorAll(':scope>.pt-card:not(.pt-tiles)')].filter((c) => c.querySelector('h2') && c.querySelector('input,select,textarea,button:not(.ia-kl-btn),table,form,a.btn'));
+  let cards = [...box.querySelectorAll(':scope>.pt-card:not(.pt-tiles)')].filter((c) => c.querySelector('h2') && c.querySelector('input,select,textarea,button:not(.lr-kl-btn),table,form,a.btn'));
   if (view === 'fall') cards = cards.slice(1);
   if (cards.length < 2) return;
   cards.forEach((c, i) => { if (!c.dataset.tile) c.dataset.tile = view + '-' + i + '-' + (c.querySelector('h2').textContent || '').trim().slice(0, 30); });

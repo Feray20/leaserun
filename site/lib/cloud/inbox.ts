@@ -3,53 +3,59 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { drive } from '@/lib/booking/graph';
 import { staticScan } from '@/lib/security/filescan';
 
-// Dateiempfang („Senden“-Links): Absender sehen nur „Anhang hinzufügen“, die Dateien landen direkt in Ferays OneDrive
-// (Ordner „LeaseRun Eingang/<Name des Links>“). Die Datei läuft vom Browser des Absenders direkt zu Microsoft – nicht über
-// unseren Server –, daher sind auch Dateien mit mehreren GB möglich. Heruntergeladen wird im Web-Admin.
-export type Style = 'leaserun' | 'feray';
-// mode „in“: Absender lädt hoch (Feray lädt herunter). mode „out“: Feray lädt im Web-Admin hoch, der Empfänger lädt herunter.
+// File exchange ("Send" links): senders only see "Add files"; the files go straight into the owner's connected OneDrive
+// (folder "LeaseRun Inbox/<link name>"). The file travels from the sender's browser directly to Microsoft – not through
+// our server – so files of several GB are possible. Downloading happens in the Web-Admin.
+// LeaseRun has a single, LeaseRun-branded file exchange (no personal variant).
+export type Style = 'leaserun';
+// mode "in": the sender uploads (the owner downloads). mode "out": the owner uploads in the Web-Admin, the recipient downloads.
 export type Mode = 'in' | 'out';
 export type SendLink = { id: string; label: string; style: Style; mode?: Mode; at: string; active: boolean; until: string | null };
 export type InboxFile = { id: string; name: string; size: number; at: string; link: string; cat: string | null; virus: string | null };
 
-// Kategorien je Auftritt: der Absender wählt, worum es geht – die Datei landet im passenden Unterordner.
+// Categories: the sender picks what the files are – they land in the matching subfolder.
 export const CATS: Record<Style, string[]> = {
-  leaserun: ['Exposé', 'Grundbuch', 'Finanzierung', 'Vertrag', 'Rechnung', 'Fotos', 'Sonstiges'],
-  feray: ['Lohn & Gehalt', 'Steuer', 'Vertrag', 'Rechnung', 'Bescheinigung', 'Bank', 'Sonstiges'],
+  leaserun: ['ID', 'Pay stubs', 'W-2', '1099', 'Tax returns', 'Bank statements', 'Purchase agreement', 'Leases', 'Insurance', 'LLC documents', 'Appraisal', 'Inspection report', 'HOA documents', 'Title documents', 'Other'],
 };
-export const catOk = (l: SendLink, c: unknown): string | null => (typeof c === 'string' && CATS[l.style].includes(c) ? c : null);
+export const catOk = (l: SendLink, c: unknown): string | null => (typeof c === 'string' && (CATS[l.style] || CATS.leaserun).includes(c) ? c : null);
 
-// Virenschutz, Stufe 1: ausführbare Programme, Skripte und Makro-Dokumente werden gar nicht angenommen.
-// Stufe 2: Microsoft Defender prüft jede Datei in OneDrive; ein Fund sperrt den Download.
+// Malware protection, level 1: executables, scripts and macro documents are not accepted at all.
+// Level 2: Microsoft Defender scans every file in OneDrive; a detection blocks the download.
 const BLOCK = /\.(exe|com|scr|pif|bat|cmd|msi|msp|msc|ps1|psm1|vbs|vbe|js|jse|wsf|wsh|hta|cpl|jar|lnk|reg|dll|sys|gadget|application|appref-ms|scf|inf|docm|xlsm|pptm|dotm|xltm|iso|img|vhd|vhdx)$/i;
 export const blockedType = (name: string) => BLOCK.test(String(name || '').trim());
 
 const KEY = 'cloud_send_links';
-export const ROOT = 'LeaseRun Eingang';
-export const ROOT_OUT = 'LeaseRun Ausgang';
-export const MAX_BYTES = 20 * 1024 ** 3; // 20 GB je Datei
-const cleanName = (s: string) => String(s || '').normalize('NFC').replace(/[\\/:*?"<>|#%\u0000-\u001f]/g, '_').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, 180) || 'datei';
+export const ROOT = 'LeaseRun Inbox';
+export const ROOT_OUT = 'LeaseRun Outbox';
+export const MAX_BYTES = 20 * 1024 ** 3; // 20 GB per file
+const cleanName = (s: string) => String(s || '').normalize('NFC').replace(/[\\/:*?"<>|#%\u0000-\u001f]/g, '_').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, 180) || 'file';
 export const folderOf = (l: SendLink) => cleanName(`${l.label} (${l.id.slice(0, 6)})`);
 export const pathOf = (l: SendLink) => `${l.mode === 'out' ? ROOT_OUT : ROOT}/${folderOf(l)}`;
 const enc = (p: string) => p.split('/').map(encodeURIComponent).join('/');
 
-export async function loadLinks(): Promise<SendLink[]> {
+// Raw list as stored (kept intact when saving – nothing is dropped from the stored data).
+async function loadAll(): Promise<(Omit<SendLink, 'style'> & { style: string })[]> {
   const { data } = await supabaseAdmin().from('lr_settings').select('value').eq('key', KEY).maybeSingle();
-  return Array.isArray(data?.value) ? (data!.value as SendLink[]) : [];
+  return Array.isArray(data?.value) ? (data!.value as (Omit<SendLink, 'style'> & { style: string })[]) : [];
 }
-const saveLinks = (v: SendLink[]) => supabaseAdmin().from('lr_settings').upsert({ key: KEY, value: v });
+// Only LeaseRun-branded links are used; any other stored style is ignored (not served, not listed).
+export async function loadLinks(): Promise<SendLink[]> {
+  return (await loadAll()).filter((l) => l.style === 'leaserun') as SendLink[];
+}
+const saveLinks = (v: unknown[]) => supabaseAdmin().from('lr_settings').upsert({ key: KEY, value: v });
 
 export async function createLink(label: string, style: Style, days: number | null, mode: Mode = 'in'): Promise<SendLink> {
-  const l: SendLink = { id: randomBytes(12).toString('base64url'), label: String(label || 'Dateien').trim().slice(0, 60) || 'Dateien', style: style === 'feray' ? 'feray' : 'leaserun', mode: mode === 'out' ? 'out' : 'in', at: new Date().toISOString(), active: true, until: days ? new Date(Date.now() + days * 864e5).toISOString() : null };
-  await saveLinks([l, ...(await loadLinks())].slice(0, 200));
+  void style;
+  const l: SendLink = { id: randomBytes(12).toString('base64url'), label: String(label || 'Files').trim().slice(0, 60) || 'Files', style: 'leaserun', mode: mode === 'out' ? 'out' : 'in', at: new Date().toISOString(), active: true, until: days ? new Date(Date.now() + days * 864e5).toISOString() : null };
+  await saveLinks([l, ...(await loadAll())].slice(0, 200));
   return l;
 }
 export async function updateLink(id: string, patch: Partial<Pick<SendLink, 'active' | 'label'>>): Promise<void> {
-  const all = await loadLinks();
-  await saveLinks(all.map((l) => (l.id === id ? { ...l, ...patch, label: (patch.label ?? l.label).slice(0, 60) } : l)));
+  const all = await loadAll();
+  await saveLinks(all.map((l) => (l.id === id && l.style === 'leaserun' ? { ...l, ...patch, label: (patch.label ?? l.label).slice(0, 60) } : l)));
 }
-// Link entfernen löscht nur den Link – die Dateien bleiben in OneDrive (nichts wird gelöscht).
-export async function removeLink(id: string): Promise<void> { await saveLinks((await loadLinks()).filter((l) => l.id !== id)); }
+// Removing a link only removes the link – the files stay in OneDrive (nothing is deleted).
+export async function removeLink(id: string): Promise<void> { await saveLinks((await loadAll()).filter((l) => !(l.id === id && l.style === 'leaserun'))); }
 
 export async function linkFor(id: string): Promise<SendLink | null> {
   if (!/^[A-Za-z0-9_-]{16,40}$/.test(id)) return null;
@@ -58,12 +64,12 @@ export async function linkFor(id: string): Promise<SendLink | null> {
   return l;
 }
 
-// Hochladesitzung bei Microsoft: liefert eine vorab berechtigte Adresse, an die der Browser die Datei in Teilen schickt.
+// Upload session at Microsoft: returns a pre-authorized address the browser sends the file to in chunks.
 export async function uploadSession(l: SendLink, name: string, size: number, cat: string | null = null): Promise<string> {
-  if (blockedType(name)) throw new TypeError('Dieser Dateityp ist aus Sicherheitsgründen nicht erlaubt.');
+  if (blockedType(name)) throw new TypeError('This file type isn’t allowed for security reasons.');
   const path = `${pathOf(l)}${cat ? `/${cleanName(cat)}` : ''}/${cleanName(name)}`;
   const j = await drive<{ uploadUrl?: string }>(`/root:/${enc(path)}:/createUploadSession`, { method: 'POST', body: JSON.stringify({ item: { '@microsoft.graph.conflictBehavior': 'rename' }, deferCommit: false }) });
-  if (!j.uploadUrl) throw new Error('Microsoft hat keine Hochladeadresse geliefert.');
+  if (!j.uploadUrl) throw new Error('Microsoft didn’t return an upload address.');
   void size;
   return j.uploadUrl;
 }
@@ -75,26 +81,26 @@ export async function listFiles(links: SendLink[]): Promise<InboxFile[]> {
   await Promise.all(links.map(async (l) => {
     try {
       const j = await drive<{ value?: Item[] }>(`/root:/${enc(pathOf(l))}:/children?${SEL}`);
-      const push = (f: Item, cat: string | null) => { if (f.file) out.push({ id: f.id, name: f.name, size: Number(f.size || 0), at: f.createdDateTime || '', link: l.id, cat, virus: f.malware ? f.malware.description || 'Schadsoftware erkannt' : null }); };
+      const push = (f: Item, cat: string | null) => { if (f.file) out.push({ id: f.id, name: f.name, size: Number(f.size || 0), at: f.createdDateTime || '', link: l.id, cat, virus: f.malware ? f.malware.description || 'Malware detected' : null }); };
       const subs: Item[] = [];
       for (const f of j.value || []) { if (f.folder) subs.push(f); else push(f, null); }
-      // Unterordner = Kategorie (eine Ebene)
+      // Subfolder = category (one level)
       await Promise.all(subs.map(async (d) => { const k = await drive<{ value?: Item[] }>(`/items/${encodeURIComponent(d.id)}/children?${SEL}`); for (const f of k.value || []) push(f, d.name); }));
     } catch (e) { if ((e as { status?: number }).status !== 404) throw e; }
   }));
   return out.sort((a, b) => b.at.localeCompare(a.at));
 }
 
-// Kurzlebige, vorab berechtigte Download-Adresse von Microsoft (läuft nicht über unseren Server).
-// Ohne Link (Web-Admin): jede Datei aus Eingang/Ausgang. Mit Link (Empfänger): nur Dateien genau aus dessen Ordner.
+// Short-lived, pre-authorized download address from Microsoft (doesn't go through our server).
+// Without a link (Web-Admin): any file from Inbox/Outbox. With a link (recipient): only files from exactly that folder.
 export async function downloadUrl(itemId: string, only?: SendLink): Promise<string> {
-  if (!/^[A-Za-z0-9!_.-]{6,80}$/.test(itemId)) throw new Error('Ungültige Datei.');
+  if (!/^[A-Za-z0-9!_.-]{6,80}$/.test(itemId)) throw new Error('Invalid file.');
   const j = await drive<{ '@microsoft.graph.downloadUrl'?: string; parentReference?: { path?: string }; malware?: { description?: string } }>(`/items/${encodeURIComponent(itemId)}`);
-  if (j.malware) throw new Error('Virus gefunden – Download gesperrt.');
+  if (j.malware) throw new Error('Malware found – download blocked.');
   const parent = decodeURIComponent(j.parentReference?.path || '');
   const ok = only ? parent.endsWith(`/${pathOf(only)}`) : parent.includes(`/${ROOT}/`) || parent.includes(`/${ROOT_OUT}/`);
-  if (!ok) throw new Error('Datei nicht freigegeben.');
-  if (!j['@microsoft.graph.downloadUrl']) throw new Error('Download-Adresse nicht verfügbar.');
+  if (!ok) throw new Error('File not shared.');
+  if (!j['@microsoft.graph.downloadUrl']) throw new Error('Download address not available.');
   return j['@microsoft.graph.downloadUrl'];
 }
 
@@ -102,8 +108,8 @@ export async function webFolderUrl(): Promise<string | null> {
   try { return (await drive<{ webUrl?: string }>(`/root:/${enc(ROOT)}`)).webUrl || null; } catch { return null; }
 }
 
-// Nach dem Hochladen: neue Dateien des Links (letzte 30 Min.) zusätzlich selbst prüfen (Programme, Makros, Skripte,
-// PDF-Funktionen, ZIP-Inhalte). Fund → Datei wird sofort gelöscht (OneDrive-Papierkorb). Große Dateien prüft Defender.
+// After uploading: also scan the link's new files (last 30 min) ourselves (executables, macros, scripts,
+// PDF actions, ZIP contents). A hit → the file is deleted immediately (OneDrive recycle bin). Defender checks large files.
 export async function scanRecent(l: SendLink): Promise<{ checked: number; removed: string[] }> {
   const since = Date.now() - 30 * 60_000, removed: string[] = [];
   let checked = 0, budget = 200 * 1024 * 1024;

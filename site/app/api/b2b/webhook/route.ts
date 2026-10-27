@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const ctx = await requireMember(req, { owner: true, bucket: 'b2b-wh', limit: 10 });
   if (ctx instanceof Response) return ctx;
-  if (!ctx.account.webhook_url) return json({ error: 'Bitte zuerst eine Webhook-Adresse speichern.' }, 400);
+  if (!ctx.account.webhook_url) return json({ error: 'Please save a webhook URL first.' }, 400);
   const r = await sendWebhook(ctx.account, 'ping', { message: 'Testereignis von LeaseRun', account: ctx.account.customer_number });
   return json(r, r.ok ? 200 : 502);
 }

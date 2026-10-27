@@ -1,3 +1,6 @@
+// Core analysis (US): NOI, DSCR, ICR, LTV, cap rate and a lender-readiness score. Field names are kept for API compatibility
+// (monthlyNetRent = monthly rent, lendingValue = appraised value, buildingShare = depreciable building share).
+// threshold15/exceeds15Percent: flag when first-3-year repair spending exceeds 15% of the building basis (LeaseRun review trigger, not a tax rule).
 import { z } from 'zod';
 
 export const AnalysisInputSchema = z.object({
@@ -21,8 +24,8 @@ export function analyze(input:AnalysisInput){
  const components={dscr:ratioScore(dscr,1.25,1),icr:ratioScore(icr,2,1),ltv:ltvScore(ltvPurchase),documentation:i.evidenceComplete?i.documentationScore:Math.min(84,i.documentationScore),legal:i.legalRiskScore,technical:i.technicalRiskScore,liquidity:liquidityScore(i.liquidityReserve,debtService)};
  const score=Math.round(components.dscr*.25+components.icr*.1+components.ltv*.15+components.documentation*.15+components.legal*.15+components.technical*.1+components.liquidity*.1);
  const vetoes:Array<{level:'HARD_VETO'|'CONDITIONAL_VETO'|'WARNING';code:string;title:string;impact:number|null;recommendation:string}>=[];
- if(!i.evidenceComplete)vetoes.push({level:'CONDITIONAL_VETO',code:'EVIDENCE_GATE',title:'Kritische Berechnung nicht vollständig belegt',impact:null,recommendation:'Primärquellen ergänzen und Evidence-Referenzen prüfen.'});
- if(dscr!==null&&dscr<1)vetoes.push({level:'CONDITIONAL_VETO',code:'DSCR_BELOW_1',title:'Kapitaldienst nicht durch CFADS gedeckt',impact:cfads-debtService,recommendation:'Finanzierung, Miete und Liquiditätsreserve prüfen.'});
- if(exceeds15)vetoes.push({level:'CONDITIONAL_VETO',code:'ESTG_6_1_1A_REVIEW',title:'15-%-Prüfung nach § 6 Abs. 1 Nr. 1a EStG erforderlich',impact:i.firstThreeYearNetMaintenance-threshold15,recommendation:'Gebäudeanteil und Netto-Instandhaltungsaufwendungen anhand der Belege prüfen.'});
+ if(!i.evidenceComplete)vetoes.push({level:'CONDITIONAL_VETO',code:'EVIDENCE_GATE',title:'Key figures are not fully documented',impact:null,recommendation:'Add source documents (lease, tax bill, insurance quote, HOA statement) and check the evidence references.'});
+ if(dscr!==null&&dscr<1)vetoes.push({level:'CONDITIONAL_VETO',code:'DSCR_BELOW_1',title:'Debt service not covered by cash flow (DSCR below 1.00)',impact:cfads-debtService,recommendation:'Review the down payment, rate, rent and cash reserves. Most DSCR lenders need 1.00–1.25 or more.'});
+ if(exceeds15)vetoes.push({level:'CONDITIONAL_VETO',code:'REPAIR_VS_IMPROVEMENT_REVIEW',title:'Large early repair spending: review repairs vs. capital improvements',impact:i.firstThreeYearNetMaintenance-threshold15,recommendation:'Work done in the first years may have to be capitalized and depreciated (IRS tangible property rules) instead of deducted. Review invoices with your CPA.'});
  return {metrics:{annualRent,noi,cfads,debtService,dscr,icr,ltvPurchase,ltvLending,capRate,cashflowAfterDebt:cfads-debtService},score,scoreComponents:components,vetoes,taxCheck:{threshold15,firstThreeYearNetMaintenance:i.firstThreeYearNetMaintenance,exceeds15Percent:exceeds15}};
 }

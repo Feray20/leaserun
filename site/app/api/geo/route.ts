@@ -1,25 +1,24 @@
 import { NextResponse } from 'next/server';
+import { STATES } from '@/lib/address';
 
-// Ungefährer Standort für Rechner (nur Komfort, kein SEO): Vercel leitet aus der IP-Adresse der Anfrage Land, Region
-// und Stadt ab und reicht sie als Kopfzeilen weiter. Hier wird daraus nur das Bundesland (für die Grunderwerbsteuer)
-// und der Ortsname zur Anzeige gemacht. Nichts wird gespeichert oder protokolliert, kein fremder Dienst wird angefragt.
-// Ohne Angaben (Ausland, VPN, lokale Entwicklung) liefert die Schnittstelle null – die Rechner funktionieren unverändert.
+// Approximate location for calculators (convenience only, no SEO): Vercel derives country, region and city from the
+// request's IP address and passes them as headers. Here we only turn that into the US state slug (for closing costs and
+// transfer tax, same keys as GREST/STATES in calc.mjs, e.g. 'new-york') and the city name for display. Nothing is stored or
+// logged and no third-party service is called. Without data (outside the US, VPN, local dev) the API returns null and the
+// calculators work as before.
 export const dynamic = 'force-dynamic';
 
-const REGION: Record<string, string> = {
-  BW: 'baden-wuerttemberg', BY: 'bayern', BE: 'berlin', BB: 'brandenburg', HB: 'bremen', HH: 'hamburg', HE: 'hessen',
-  MV: 'mecklenburg-vorpommern', NI: 'niedersachsen', NW: 'nordrhein-westfalen', RP: 'rheinland-pfalz', SL: 'saarland',
-  SN: 'sachsen', ST: 'sachsen-anhalt', SH: 'schleswig-holstein', TH: 'thueringen',
-};
+const slug = (name: string) => name.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
 
 export function GET(req: Request) {
   const h = req.headers;
   const country = (h.get('x-vercel-ip-country') || '').toUpperCase();
-  const code = (h.get('x-vercel-ip-country-region') || '').toUpperCase().replace(/^DE-/, '');
+  const code = (h.get('x-vercel-ip-country-region') || '').toUpperCase().replace(/^US-/, '');
   let city: string | null = null;
   try { city = decodeURIComponent(h.get('x-vercel-ip-city') || '') || null; } catch { city = null; }
-  // Nur Buchstaben, Leerzeichen, Bindestriche und Punkte; begrenzte Länge – die Anzeige erfolgt zusätzlich als Text.
+  // Letters, spaces, hyphens, apostrophes and periods only; limited length – the page also renders it as text.
   if (city && !/^[\p{L} .'-]{2,60}$/u.test(city)) city = null;
-  const land = country === 'DE' ? REGION[code] || null : null;
-  return NextResponse.json({ land, city: land ? city : null }, { headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex' } });
+  const name = country === 'US' && /^[A-Z]{2}$/.test(code) && !['PR', 'GU', 'VI'].includes(code) ? STATES[code] : undefined;
+  const land = name ? slug(name) : null;
+  return NextResponse.json({ land, state: land ? code : null, city: land ? city : null }, { headers: { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex' } });
 }

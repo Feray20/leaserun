@@ -17,7 +17,7 @@ function sniff(b: Buffer): 'image/png' | 'image/jpeg' | null {
   return null;
 }
 
-// Öffentlich: Logo eines Partners mit Co-Branding-Berechtigung (für Partnerseite und Widget).
+// Public: logo of a partner with co-branding rights (for the partner page and widget).
 export async function GET(req: Request) {
   const slug = new URL(req.url).searchParams.get('slug') ?? '';
   if (!/^[a-z0-9-]{3,40}$/.test(slug) || !adminConfigured()) return new NextResponse(null, { status: 404 });
@@ -33,17 +33,17 @@ export async function GET(req: Request) {
   return new NextResponse(new Uint8Array(buf), { headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=3600', 'X-Content-Type-Options': 'nosniff' } });
 }
 
-// Logo hochladen (PNG oder JPEG, max. 1 MB). Rohdaten im Body.
+// Upload a logo (PNG or JPEG, max. 1 MB). Raw bytes in the body.
 export async function POST(req: Request) {
   const ctx = await requireMember(req, { owner: true, bucket: 'b2b-logo', limit: 10 });
   if (ctx instanceof Response) return ctx;
   const len = Number(req.headers.get('content-length') || 0);
-  if (len > MAX) return json({ error: 'Das Logo ist größer als 1 MB.' }, 413);
+  if (len > MAX) return json({ error: 'The logo is larger than 1 MB.' }, 413);
   const buf = Buffer.from(await req.arrayBuffer());
-  if (buf.length === 0) return json({ error: 'Die Datei ist leer.' }, 400);
-  if (buf.length > MAX) return json({ error: 'Das Logo ist größer als 1 MB.' }, 413);
+  if (buf.length === 0) return json({ error: 'The file is empty.' }, 400);
+  if (buf.length > MAX) return json({ error: 'The logo is larger than 1 MB.' }, 413);
   const type = sniff(buf);
-  if (!type) return json({ error: 'Bitte PNG oder JPEG hochladen.' }, 415);
+  if (!type) return json({ error: 'Please upload a PNG or JPEG file.' }, 415);
   const scan = staticScan(buf);
   if (!scan.clean) return json({ error: threatMessage(scan) }, 422);
   const db = supabaseAdmin();

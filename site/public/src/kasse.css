@@ -11,30 +11,30 @@ a { text-decoration: none; color: inherit; }
 .btn-dark { background: rgb(15, 23, 42); color: rgb(255, 255, 255); border-color: rgb(15, 23, 42); }
 small { display: block; color: rgb(120, 133, 135); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
 @media print{.site-header, .footer, .btn, .mobile-menu, .mobile-nav { display: none !important; }}
-:root { --ia-ink: #0F172A; --ia-muted: #64748b; --ia-line: #e2e8f0; --ia-soft: #f8fafc; --ia-accent: #1E293B; --ia-accent-soft: #DCFCE7; --ia-radius: 18px; }
+:root { --lr-ink: #0F172A; --lr-muted: #64748b; --lr-line: #e2e8f0; --lr-soft: #f8fafc; --lr-accent: #1E293B; --lr-accent-soft: #DCFCE7; --lr-radius: 18px; }
 @media print{.site-header, .footer, .route-search, .filterbar, .btn, .mobile-nav { display: none !important; }}
 .btn, .text-btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; line-height: 1.2; text-align: center; }
 .btn { white-space: nowrap; }
 @media (max-width: 620px){.brand { font-size: 18px; }}
-:root { --ia-navy: #0F172A; --ia-slate: #1E293B; --ia-text: #334155; --ia-muted: #64748B; --ia-bg: #F8FAFC; --ia-surface: #FFFFFF; --ia-line: #E2E8F0; --ia-hair: #CBD5E1; --ia-ok: #166534; --ia-ok-bg: #DCFCE7; --ia-warn: #854D0E; --ia-warn-bg: #FEF9C3; --ia-bad: #991B1B; --ia-bad-bg: #FEE2E2; --ia-none: #64748B; --ia-none-bg: #F1F5F9; --ink: var(--ia-navy); --muted: var(--ia-muted); --line: var(--ia-line); --soft: var(--ia-bg); --brand: var(--ia-slate); --brand2: var(--ia-text); --accent: var(--ia-line); --shadow: 0 1px 2px rgba(15,23,42,.06); }
-html, body { font-family: "Helvetica Neue", Helvetica, Arial, "DIN Next", "Segoe UI", sans-serif; color: var(--ia-text); background: var(--ia-surface); }
-h1, h2, h3, h4, strong { color: var(--ia-navy); }
+:root { --lr-navy: #0F172A; --lr-slate: #1E293B; --lr-text: #334155; --lr-muted: #64748B; --lr-bg: #F8FAFC; --lr-surface: #FFFFFF; --lr-line: #E2E8F0; --lr-hair: #CBD5E1; --lr-ok: #166534; --lr-ok-bg: #DCFCE7; --lr-warn: #854D0E; --lr-warn-bg: #FEF9C3; --lr-bad: #991B1B; --lr-bad-bg: #FEE2E2; --lr-none: #64748B; --lr-none-bg: #F1F5F9; --ink: var(--lr-navy); --muted: var(--lr-muted); --line: var(--lr-line); --soft: var(--lr-bg); --brand: var(--lr-slate); --brand2: var(--lr-text); --accent: var(--lr-line); --shadow: 0 1px 2px rgba(15,23,42,.06); }
+html, body { font-family: "Helvetica Neue", Helvetica, Arial, "DIN Next", "Segoe UI", sans-serif; color: var(--lr-text); background: var(--lr-surface); }
+h1, h2, h3, h4, strong { color: var(--lr-navy); }
 h1, h2, h3 { letter-spacing: -0.01em; }
 .btn { border-radius: 6px; box-shadow: none !important; transform: none !important; }
-.btn-dark, .btn-primary { background: var(--ia-navy); border-color: var(--ia-navy); color: rgb(255, 255, 255); }
-.btn-dark:hover, .btn-primary:hover { background: var(--ia-slate); }
-.brand > span:last-child > span { color: var(--ia-muted); }
+.btn-dark, .btn-primary { background: var(--lr-navy); border-color: var(--lr-navy); color: rgb(255, 255, 255); }
+.btn-dark:hover, .btn-primary:hover { background: var(--lr-slate); }
+.brand > span:last-child > span { color: var(--lr-muted); }
 strong, b, .metric-grid, .route-prices strong, .compare-result { font-variant-numeric: tabular-nums; }
-:root { --ia-logo-ink: #1B2F66; --ia-logo-blue: #2B86C5; }
-.brand { gap: 10px; color: var(--ia-logo-ink); }
+:root { --lr-logo-ink: #1B2F66; --lr-logo-blue: #2B86C5; }
+.brand { gap: 10px; color: var(--lr-logo-ink); }
 .brand-logo { display: block; flex: 0 0 auto; width: 38px; height: 32px; }
-.brand > span:last-child { color: var(--ia-logo-ink); }
-.brand > span:last-child > span { color: var(--ia-logo-blue); }
+.brand > span:last-child { color: var(--lr-logo-ink); }
+.brand > span:last-child > span { color: var(--lr-logo-blue); }
 @media (max-width: 900px){.brand-logo { width: 32px; height: 27px; }}
 .footer-grid a, .result-box a, .dr-foot a, footer a { display: inline-block; min-height: 24px; padding: 3px 0px; line-height: 18px; }
-:root { --ia-navy: #0F2C59; --ia-slate: #1E3A8A; --ia-logo-ink: #0F2C59; --ia-logo-blue: #0284C7; --ia-link: #0369A1; --ink: var(--ia-navy); --brand: var(--ia-navy); }
-.btn-dark, .btn-primary { background: var(--ia-navy) !important; border-color: var(--ia-navy) !important; }
-.btn-dark:hover, .btn-primary:hover { background: var(--ia-slate) !important; }
+:root { --lr-navy: #0F2C59; --lr-slate: #1E3A8A; --lr-logo-ink: #0F2C59; --lr-logo-blue: #0284C7; --lr-link: #0369A1; --ink: var(--lr-navy); --brand: var(--lr-navy); }
+.btn-dark, .btn-primary { background: var(--lr-navy) !important; border-color: var(--lr-navy) !important; }
+.btn-dark:hover, .btn-primary:hover { background: var(--lr-slate) !important; }
 .brand > span:last-child > span, .route-header .brand > span:last-child > span { background: linear-gradient(90deg, rgb(2, 132, 199), rgb(56, 189, 248)) text; color: transparent; }
 main:focus { outline: none; }
 @media print{body { font-size: 10.5pt; color: rgb(0, 0, 0); background: rgb(255, 255, 255); }}
@@ -84,14 +84,14 @@ h1, h2, h3, .route-hero h1, .hero h1 { hyphens: none; word-break: normal; overfl
 @media (max-width: 760px){body:not(.is-app):not(.is-portal) { font-family: "IA Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizelegibility; }}
 @media (max-width: 760px){body:not(.is-app):not(.is-portal) :is(h1, h2) { font-family: "IA Inter Display", "IA Inter", -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 800; }}
 .btn, a.btn, button.btn, .hs-go, a.hs-go, .btn-pay, .km-go { border-radius: 999px !important; }
-:root { --ia-grad: linear-gradient(135deg,#0F2C59 0%,#0B4A85 55%,#0284C7 100%); --ia-grad-hover: linear-gradient(135deg,#123566 0%,#0E5596 55%,#0B95D8 100%); --ia-grad-sky: linear-gradient(135deg,#0369A1 0%,#0284C7 50%,#38BDF8 100%); --ia-grad-sky-hover: linear-gradient(135deg,#0474B0 0%,#0A92D6 50%,#56C8FA 100%); --ia-grad-deep: radial-gradient(120% 120% at 100% 0%,rgba(56,189,248,.30) 0%,rgba(56,189,248,0) 55%),linear-gradient(140deg,#0F2C59 0%,#0B3B73 50%,#0369A1 100%); }
-.btn-dark, .btn-primary, .nav-actions .btn-ghost, .cw-fab, .save-obj, .qz-next, .cw-send, .area-login .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light), .auth-card .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light) { background-size: 100% 100%; background-image: var(--ia-grad) !important; border-color: transparent !important; color: rgb(255, 255, 255) !important; }
-.btn-dark:hover, .btn-primary:hover, .nav-actions .btn-ghost:hover, .cw-fab:hover, .save-obj:hover, .qz-next:hover, .cw-send:hover { background-image: var(--ia-grad-hover) !important; }
+:root { --lr-grad: linear-gradient(135deg,#0F2C59 0%,#0B4A85 55%,#0284C7 100%); --lr-grad-hover: linear-gradient(135deg,#123566 0%,#0E5596 55%,#0B95D8 100%); --lr-grad-sky: linear-gradient(135deg,#0369A1 0%,#0284C7 50%,#38BDF8 100%); --lr-grad-sky-hover: linear-gradient(135deg,#0474B0 0%,#0A92D6 50%,#56C8FA 100%); --lr-grad-deep: radial-gradient(120% 120% at 100% 0%,rgba(56,189,248,.30) 0%,rgba(56,189,248,0) 55%),linear-gradient(140deg,#0F2C59 0%,#0B3B73 50%,#0369A1 100%); }
+.btn-dark, .btn-primary, .nav-actions .btn-ghost, .cw-fab, .save-obj, .qz-next, .cw-send, .area-login .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light), .auth-card .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light) { background-size: 100% 100%; background-image: var(--lr-grad) !important; border-color: transparent !important; color: rgb(255, 255, 255) !important; }
+.btn-dark:hover, .btn-primary:hover, .nav-actions .btn-ghost:hover, .cw-fab:hover, .save-obj:hover, .qz-next:hover, .cw-send:hover { background-image: var(--lr-grad-hover) !important; }
 @media print{html, body { print-color-adjust: exact; background: rgb(255, 255, 255) !important; color: rgb(15, 23, 42) !important; }}
 @media print{.site-header, .mobile-nav, .bottom-nav, footer, .cw-fab, .cw-panel, .skip-link, .toast, .btn, .lp-sticky, .crumbs, .share-row { display: none !important; }}
 @media print{* { box-shadow: none !important; text-shadow: none !important; animation: auto ease 0s 1 normal none running none !important; transition: none !important; }}
 @media print{.btn-dark, .btn-primary, .hs-go { background-image: none !important; }}
-.btn-dark, .btn-primary, .nav-actions .btn-ghost, .cw-fab, .save-obj, .qz-next, .cw-send, .area-login .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light), .auth-card .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light), .btn-dark:hover, .btn-primary:hover, .nav-actions .btn-ghost:hover, .cw-fab:hover, .save-obj:hover, .qz-next:hover, .cw-send:hover, .hs-go, .lp-nav-btn, .bx-nav-cta, .hs-go:hover, .lp-nav-btn:hover, .bx-nav-cta:hover, .offer-rec, .lp-badge, .cr-step-n, .home-num, .steps li.on, .tool-tabs a[aria-current="page"], .mobile-nav a[href="/auth/login"], .bill-table tr:has(> th), .report tr:has(> th), .status-table tr:has(> th), .home-hero, .cr-hero, .bx-secu, .bx-after, .bx-cmp-c.on, aside.roi, .lp-kpi-dark, footer.ia-legal, .qz-chips button[aria-pressed="true"], .lp-use button[aria-checked="true"], [data-sim][aria-selected="true"] b, .bx-inv-steps li > b, .bx-flow li, .level-row span, .pt-side, .bw-mind-core, .ns-title, .wa-tabs button[aria-selected="true"], .wa-subtabs button[aria-selected="true"], .wa-actions button.wa-primary, body[data-ad-seg="b2b"] .wa-seg-chip, body[data-ad-seg="b2b"] .wa-segctl button[aria-pressed="true"], .fn-period button[aria-pressed="true"], .pc-chips button[aria-pressed="true"], .co-sub a[aria-current="page"], .wa-steps li::before, .bw-steps li::before, .pipe-cols li::before, .bw-no, .su-num, .pt-toast, .bw-table th, body[data-ad-seg="b2c"] .wa-segctl button[aria-pressed="true"], .sim-steps button[aria-selected="true"] b, .wa-bar-f, .bw-toc a b, .faq-topics button[aria-selected="true"] { background-origin: border-box !important; background-repeat: no-repeat !important; background-clip: border-box !important; }
+.btn-dark, .btn-primary, .nav-actions .btn-ghost, .cw-fab, .save-obj, .qz-next, .cw-send, .area-login .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light), .auth-card .btn:not(.btn-outline):not(.btn-ghost):not(.btn-light), .btn-dark:hover, .btn-primary:hover, .nav-actions .btn-ghost:hover, .cw-fab:hover, .save-obj:hover, .qz-next:hover, .cw-send:hover, .hs-go, .lp-nav-btn, .bx-nav-cta, .hs-go:hover, .lp-nav-btn:hover, .bx-nav-cta:hover, .offer-rec, .lp-badge, .cr-step-n, .home-num, .steps li.on, .tool-tabs a[aria-current="page"], .mobile-nav a[href="/auth/login"], .bill-table tr:has(> th), .report tr:has(> th), .status-table tr:has(> th), .home-hero, .cr-hero, .bx-secu, .bx-after, .bx-cmp-c.on, aside.roi, .lp-kpi-dark, footer.lr-legal, .qz-chips button[aria-pressed="true"], .lp-use button[aria-checked="true"], [data-sim][aria-selected="true"] b, .bx-inv-steps li > b, .bx-flow li, .level-row span, .pt-side, .bw-mind-core, .ns-title, .wa-tabs button[aria-selected="true"], .wa-subtabs button[aria-selected="true"], .wa-actions button.wa-primary, body[data-ad-seg="b2b"] .wa-seg-chip, body[data-ad-seg="b2b"] .wa-segctl button[aria-pressed="true"], .fn-period button[aria-pressed="true"], .pc-chips button[aria-pressed="true"], .co-sub a[aria-current="page"], .wa-steps li::before, .bw-steps li::before, .pipe-cols li::before, .bw-no, .su-num, .pt-toast, .bw-table th, body[data-ad-seg="b2c"] .wa-segctl button[aria-pressed="true"], .sim-steps button[aria-selected="true"] b, .wa-bar-f, .bw-toc a b, .faq-topics button[aria-selected="true"] { background-origin: border-box !important; background-repeat: no-repeat !important; background-clip: border-box !important; }
 .bx-flow.off li:is(:nth-child(2), :nth-child(3), :nth-child(6)), .lp-flow.off li:nth-child(4) { background: rgb(255, 251, 235); border-color: rgb(252, 211, 77); color: rgb(146, 64, 14); }
 .bx-flow.off li:is(:nth-child(2), :nth-child(3), :nth-child(6))::before, .lp-flow.off li:nth-child(4)::before { content: "!"; background: rgb(245, 158, 11); color: rgb(255, 255, 255); }
 .bx-flow.off li:is(:nth-child(4), :nth-child(5), :nth-child(7)), .lp-flow.off li:nth-child(3) { background: rgb(254, 242, 242); border-color: rgb(252, 165, 165); color: rgb(153, 27, 27); }
@@ -158,5 +158,5 @@ h1, h2, h3, .route-hero h1, .hero h1 { hyphens: none; word-break: normal; overfl
   .ks-sum h1{font-size:20px;margin-bottom:10px}
 }
 @media (prefers-reduced-motion:no-preference){.ks-card{animation:ks-in .35s ease-out both}.ks-pay{animation-delay:.06s}@keyframes ks-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}
-@media (hover:none) and (pointer:coarse){.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.cr-sticky,.ks-head,.k-top,.app-top,.ia-work{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.ks-head{background-color:rgba(255,255,255,.985)}}
+@media (hover:none) and (pointer:coarse){.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.cr-sticky,.ks-head,.k-top,.app-top,.lr-work{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.ks-head{background-color:rgba(255,255,255,.985)}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

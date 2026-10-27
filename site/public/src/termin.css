@@ -1,4 +1,4 @@
-/* Termin-Portal (/book) */
+/* Booking portal (/book) */
 .tm-wrap{max-width:1040px;margin:0 auto}
 .tm-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
 @media (max-width:860px){.tm-grid{grid-template-columns:minmax(0,1fr)}}
@@ -52,15 +52,15 @@
 .tm-cancel label{display:block;font-size:14px;margin-bottom:10px}
 .tm-ok{display:inline-grid;place-items:center;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#22C55E,#15803D);color:#fff;margin-bottom:6px;animation:tmPop .45s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes tmPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-/* Warte-Animation (Logo mit Ring) */
-.ia-ld{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:100px 16px 32px;min-height:180px;color:#64748B;font-size:14px;text-align:center;margin:0}
-.ia-ld::before,.ia-ld::after{content:"";position:absolute;left:50%;top:28px;width:56px;height:56px;margin-left:-28px}
-.ia-ld::before{border-radius:50%;background:conic-gradient(from 0deg,rgba(2,132,199,0) 0deg,#38BDF8 120deg,#0284C7 220deg,#0F2C59 300deg,rgba(15,44,89,0) 360deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:iaSpin 1s linear infinite}
-.ia-ld::after{background:url("/logo-icon.svg") center/30px auto no-repeat;animation:iaPulse 1.6s ease-in-out infinite}
+/* Loading animation (logo with ring) */
+.lr-ld{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:100px 16px 32px;min-height:180px;color:#64748B;font-size:14px;text-align:center;margin:0}
+.lr-ld::before,.lr-ld::after{content:"";position:absolute;left:50%;top:28px;width:56px;height:56px;margin-left:-28px}
+.lr-ld::before{border-radius:50%;background:conic-gradient(from 0deg,rgba(2,132,199,0) 0deg,#38BDF8 120deg,#0284C7 220deg,#0F2C59 300deg,rgba(15,44,89,0) 360deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:iaSpin 1s linear infinite}
+.lr-ld::after{background:url("/logo-icon.svg") center/30px auto no-repeat;animation:iaPulse 1.6s ease-in-out infinite}
 @keyframes iaSpin{to{transform:rotate(360deg)}}
 @keyframes iaPulse{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1)}}
-@media (prefers-reduced-motion:reduce){.ia-ld::before{animation-duration:2.4s}.ia-ld::after,.tm-ok{animation:none}}
-/* Anliegen (mehrere wählbar) und E-Mail-Bestätigung */
+@media (prefers-reduced-motion:reduce){.lr-ld::before{animation-duration:2.4s}.lr-ld::after,.tm-ok{animation:none}}
+/* Request types (multiple allowed) and email verification */
 .tm-why{border:0;margin:0;padding:0;min-width:0}
 .tm-why legend{font-weight:600;font-size:14px;color:#0F172A;margin-bottom:8px;padding:0}
 .tm-why legend small,.tm-opt{font-weight:400;color:#64748B}
@@ -73,3 +73,9 @@
 .tm-verify{border:1px solid #BAE6FD;background:#F0F9FF;border-radius:12px;padding:12px 14px}
 .tm-verify input{letter-spacing:.3em;font-size:18px;font-weight:600;max-width:200px}
 .tm-hint{margin:6px 0 0;font-size:13px;color:#475569}
+/* Time zone picker (visitor's US time zone) */
+.tm-tz{display:flex!important;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;font-weight:600;color:#334155;margin:0 0 14px}
+.tm-tz select{min-height:44px;padding:8px 12px;border:1.5px solid #E2E8F0;border-radius:12px;font:inherit;font-weight:500;background:#fff;color:#1E293B;max-width:100%}
+.tm-tz select:focus{outline:none;border-color:#0284C7;box-shadow:0 0 0 3px rgba(2,132,199,.15)}
+.tm-chip span small{font-weight:400;opacity:.8}
+.tm-slots+.tm-hint{margin-top:12px}

@@ -6,20 +6,20 @@ import { loadInvoicePdf, type InvoiceRow } from '@/lib/b2b/invoice';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Rechnungen des eigenen Unternehmens (nur Kontoinhaber). Auch bei gesperrtem Konto abrufbar.
+// Invoices of the own business (account owner only). Available even when the account is locked.
 export async function GET(req: Request) {
   const ctx = await requireMember(req, { owner: true, allowLocked: true, bucket: 'b2b-inv' });
   if (ctx instanceof Response) return ctx;
   const id = new URL(req.url).searchParams.get('id');
   const db = supabaseAdmin();
   if (id) {
-    if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Ungültige Anfrage.' }, 400);
+    if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Invalid request.' }, 400);
     const { data } = await db.from('lr_invoices').select('*').eq('id', id).eq('account_id', ctx.account.id).maybeSingle();
-    if (!data) return json({ error: 'Rechnung nicht gefunden.' }, 404);
+    if (!data) return json({ error: 'Invoice not found.' }, 404);
     const r = data as InvoiceRow;
     if (r.stripe_pdf_url) return NextResponse.redirect(r.stripe_pdf_url, 302);
     const f = await loadInvoicePdf(r);
-    if (!f) return json({ error: 'PDF nicht verfügbar.' }, 404);
+    if (!f) return json({ error: 'PDF not available.' }, 404);
     return new NextResponse(new Uint8Array(f.pdf), {
       headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="${String(r.issue_date || "").slice(0, 10)}_${r.invoice_number}.pdf"`, 'X-Integrity': f.intact ? 'ok' : 'mismatch', 'Cache-Control': 'no-store' },
     });

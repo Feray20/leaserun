@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-// Postfach: Verläufe (Threads), Kontakt-Zuordnung, Vorschauzeile.
+// Mailbox: threads, contact matching, preview line.
 export const normSubject = (s: string) => String(s || '').replace(/^\s*((re|aw|antw|wg|fw|fwd|wtr)\s*(\[\d+\])?\s*:\s*)+/i, '').trim().toLowerCase();
 export const snippetOf = (text: string) => String(text || '').replace(/\s+/g, ' ').trim().slice(0, 220);
 const ids = (s: string | null | undefined) => (String(s || '').match(/<[^<>\s]+>/g) || []).slice(-30);
 
-// Verlauf finden: zuerst über In-Reply-To/References, sonst gleicher Betreff mit gleicher Gegenstelle (90 Tage).
-// Nur eindeutig gültige Adressen in Datenbankfilter übernehmen (Schutz vor eingeschleuster Filtersyntax im Absender).
+// Find the thread: first via In-Reply-To/References, otherwise same subject with the same counterpart (90 days).
+// Only clearly valid addresses go into database filters (protection against injected filter syntax in the sender).
+// Reply/forward prefixes cover English and German (re, fw, fwd, aw, wg …).
 const SAFE_EMAIL = /^[a-z0-9._+-]{1,64}@[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
 export const safeEmail = (e: string | null | undefined) => { const x = String(e || '').trim().toLowerCase(); return SAFE_EMAIL.test(x) && x.length <= 200 ? x : ''; };
 

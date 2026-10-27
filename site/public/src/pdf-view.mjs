@@ -4,7 +4,7 @@ const PDFJS = '/vendor/pdfjs-4.10.38/';
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Ihr Dokument', note = '', onClose } = {}) {
-  document.querySelector('.ia-pdfv')?.remove();
+  document.querySelector('.lr-pdfv')?.remove();
   const url = URL.createObjectURL(blob);
   const el = document.createElement('div');
   el.className = 'lr-pdfv';
@@ -27,14 +27,14 @@ export async function showPdf(blob, { filename = 'LeaseRun.pdf', title = 'Ihr Do
   const close = () => { if (done) return; if (history.state && history.state.iaPdfv) history.back(); else finish(); };
   const key = (e) => { if (e.key === 'Escape') close(); };
   document.addEventListener('keydown', key);
-  el.querySelector('.ia-pdfv-x').onclick = close;
+  el.querySelector('.lr-pdfv-x').onclick = close;
   el.querySelector('[data-close]').onclick = close;
   el.querySelector('[data-share]')?.addEventListener('click', async () => {
     try { await navigator.share({ files: [new File([blob], filename, { type: 'application/pdf' })], title }); } catch { /* abgebrochen */ }
   });
-  el.querySelector('.ia-pdfv-x').focus();
+  el.querySelector('.lr-pdfv-x').focus();
 
-  const box = el.querySelector('.ia-pdfv-pages');
+  const box = el.querySelector('.lr-pdfv-pages');
   try {
     const pdfjs = await import(PDFJS + 'pdf.mjs');
     pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.mjs';

@@ -1,5 +1,5 @@
 /* Startseite (B2C): Sektionen nach der Landingpage-Spezifikation. Präfix lp-, damit nichts mit bestehenden
-   Komponenten kollidiert. Farben aus der bestehenden Marke: Navy #0F2C59, Blau #0284C7/#0369A1, Ampel aus --ia-ok/-warn/-bad. */
+   Komponenten kollidiert. Farben aus der bestehenden Marke: Navy #0F2C59, Blau #0284C7/#0369A1, Ampel aus --lr-ok/-warn/-bad. */
 .lp-strip,.lp-problem,.lp-ba,.lp-demo,.lp-how,.lp-docs,.lp-wissen,.lp-trust,.lp-preise,.lp-faq{padding:80px 0}
 .lp-strip{padding:56px 0;background:#fff;border-bottom:1px solid #E2E8F0}
 .lp-problem,.lp-how,.lp-preise{background:#fff}
@@ -128,7 +128,7 @@
 .lp-steps b{display:block;font-size:36px;line-height:1;color:#0284C7;letter-spacing:-.02em}
 .lp-steps h3{margin:10px 0 6px;font-size:19px;color:#0F2C59}
 .lp-steps p{margin:0;color:#475569;font-size:15px}
-.home-3 h3{font-size:22px;margin:10px 0 6px;color:var(--ia-navy,#0F2C59)}
+.home-3 h3{font-size:22px;margin:10px 0 6px;color:var(--lr-navy,#0F2C59)}
 
 /* Unterlagen */
 .lp-docflow{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
@@ -207,9 +207,9 @@
 /* Mobiler Sticky-CTA (nicht für Kunden mit App-Leiste) */
 .lp-sticky{display:none}
 @media(max-width:760px){
-  html:not(.ia-paid) .lp-sticky:not([hidden]){display:block;position:fixed;left:0;right:0;bottom:0;z-index:55;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid #E2E8F0}
+  html:not(.lr-paid) .lp-sticky:not([hidden]){display:block;position:fixed;left:0;right:0;bottom:0;z-index:55;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid #E2E8F0}
   .lp-sticky .hs-go{width:100%;background:#0284C7;color:#fff;min-height:52px;box-shadow:none}
-  html:not(.ia-paid) body.lp-sticky-on{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  html:not(.lr-paid) body.lp-sticky-on{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 }
 
 /* Dezente Einblendung (nur ohne reduzierte Bewegung, per Skript aktiviert) */
@@ -269,7 +269,7 @@
 /* Handy-Menü: runde Kanten wie alle Knöpfe (Menü/Schließen-Knopf, hervorgehobener Eintrag, Konto-Knöpfe) */
 .mobile-menu{border-radius:999px!important;padding-left:14px;padding-right:16px}
 .mobile-nav .lp-mnav-cta{border-radius:999px!important;margin:10px 0 6px;padding-left:22px!important;padding-right:18px!important;border-bottom:0!important;background:#0284C7!important}
-.mobile-nav a[href="/app/dashboard"],html:not(.ia-user) .mobile-nav a[href="/auth/login"]{border-radius:999px!important}
+.mobile-nav a[href="/app/dashboard"],html:not(.lr-user) .mobile-nav a[href="/auth/login"]{border-radius:999px!important}
 
 /* Gründer-Block (Startseite, /business) */
 .lp-founder{padding-top:40px;padding-bottom:40px}

@@ -20,21 +20,25 @@ import { newWebhookSecret, safeTarget } from '@/lib/b2b/webhook';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const REGISTER_RE = /^D-[A-Z0-9]{1,4}(-[A-Z0-9]{1,8}){1,6}$/i; // Vermittlerregister (DIHK), z. B. D-W-123-ABCD-12
-const VATID_RE = /^DE[0-9]{9}$/;
-const STNR_RE = /^[0-9][0-9 /]{8,18}[0-9]$/;
+// NMLS ID (1–10 digits) or a state license number (letters, digits, dashes); EIN optional (12-3456789).
+const NMLS_RE = /^[0-9]{1,10}$/;
+const LICENSE_RE = /^[A-Z0-9][A-Z0-9 .\-/]{2,30}$/i;
+const EIN_RE = /^[0-9]{2}-?[0-9]{7}$/;
+const STATE_RE = /^[A-Z]{2}$/;
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
 
 const RegisterSchema = z.object({
   companyName: z.string().transform(clean).pipe(z.string().min(2).max(160)),
   legalForm: z.string().transform(clean).pipe(z.string().min(1).max(60)),
+  incorporationState: z.string().transform((s) => s.trim().toUpperCase()).optional().default(''),
+  state: z.string().transform((s) => s.trim().toUpperCase()).optional().default(''),
   institutionType: z.enum(['BANK', 'BROKER', 'REALTOR', 'ADVISOR', 'OTHER']),
   registerNumber: z.string().transform(clean).optional().default(''),
-  taxId: z.string().transform((s) => s.replace(/\s+/g, '').toUpperCase()).optional().default(''),
+  taxId: z.string().transform((s) => s.replace(/\s+/g, '')).optional().default(''),
   advisorName: z.string().transform(clean).pipe(z.string().min(2).max(120)),
   phone: z.string().transform(clean).pipe(z.string().max(40)).optional().default(''),
   street: z.string().transform(clean).pipe(z.string().min(3).max(160)),
-  postalCode: z.string().regex(/^[0-9]{5}$/),
+  postalCode: z.string().regex(/^[0-9]{5}(-[0-9]{4})?$/),
   city: z.string().transform(clean).pipe(z.string().min(2).max(80)),
   unternehmer: z.literal(true),
   avv: z.literal(true),
@@ -49,10 +53,11 @@ const PatchSchema = z.object({
   advisorName: z.string().transform(clean).pipe(z.string().min(2).max(120)).optional(),
   phone: z.string().transform(clean).pipe(z.string().max(40)).optional(),
   street: z.string().transform(clean).pipe(z.string().min(3).max(160)).optional(),
-  postalCode: z.string().regex(/^[0-9]{5}$/).optional(),
+  postalCode: z.string().regex(/^[0-9]{5}(-[0-9]{4})?$/).optional(),
   city: z.string().transform(clean).pipe(z.string().min(2).max(80)).optional(),
+  state: z.string().transform((s) => s.trim().toUpperCase()).optional(),
   addressConfirmed: z.unknown().optional(),
-  bookingUrl: z.union([z.literal(''), z.string().url().max(300).refine((u) => u.startsWith('https://'), 'https erforderlich')]).optional(),
+  bookingUrl: z.union([z.literal(''), z.string().url().max(300).refine((u) => u.startsWith('https://'), 'https required')]).optional(),
   brandColor: z.union([z.literal(''), z.string().regex(/^#[0-9A-Fa-f]{6}$/)]).optional(),
   slug: z.string().regex(/^[a-z0-9-]{3,40}$/).optional(),
   allowedDomains: z.array(z.string().regex(/^(\*\.)?([a-z0-9-]+\.)+[a-z]{2,}$/i).max(100)).max(10).optional(),
@@ -76,7 +81,7 @@ function view(a: B2BAccount, role: string) {
   const tier = effectiveTier(a);
   const ov = moduleOverrides(a);
   const base = tier ? { ...TIER_LIMITS[tier] } : null;
-  // Web-Admin-Freischaltung „White-Label-Export“ geht dem Tarif vor.
+  // A Web-Admin override for "White-label export" takes precedence over the plan.
   if (base && ov.whitelabel) { base.cobranding = ov.whitelabel === 'on'; base.whitelabel = ov.whitelabel === 'on'; }
   const def: Record<ModuleKey, boolean> = { schnellrechner: true, kreditmappe: true, stresstest: true, crm: true, whitelabel: Boolean(a.has_whitelabel || (tier && TIER_LIMITS[tier].cobranding)) };
   const modules = Object.fromEntries(MODULE_KEYS.map((k) => [k, ov[k] ? ov[k] === 'on' : def[k]])) as Record<ModuleKey, boolean>;
@@ -100,14 +105,14 @@ function view(a: B2BAccount, role: string) {
   };
 }
 
-// Branche gehört zum Unternehmenskonto (bei der Anfrage festgelegt, Wechsel nur über den Support);
-// Zusatzbranchen werden dazugebucht. Daraus ergeben sich Pakete und freigeschaltete Software-Tools.
+// The industry belongs to the business account (set with the request, changed only via support);
+// add-on industries can be purchased. Plans and unlocked software tools follow from them.
 
 export async function GET(req: Request) {
-  if (!adminConfigured()) return json({ error: 'Nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return json({ error: 'Not configured.' }, 503);
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
-  if (!allowRequest(`b2b-get:${user.id}`, 60, 60_000)) return json({ error: 'Zu viele Anfragen.' }, 429);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
+  if (!allowRequest(`b2b-get:${user.id}`, 60, 60_000)) return json({ error: 'Too many requests.' }, 429);
   const m = await membershipFor(user.id);
   if (!m) return json({ account: null, avvVersion: AVV_VERSION });
   const db = supabaseAdmin();
@@ -116,7 +121,7 @@ export async function GET(req: Request) {
     dossiersThisMonth(m.account.id),
     db.from('lr_b2b_leads').select('id', { count: 'exact', head: true }).eq('account_id', m.account.id).eq('status', 'neu'),
   ]);
-  // Erstanmeldung: Startpasswort ändern; Inhaber bestätigt § 14 BGB und schließt den AVV ab.
+  // First sign-in: change the initial password; the owner confirms business use and accepts the DPA.
   let mustChange = false;
   try {
     const meta = (await db.auth.admin.getUserById(user.id)).data?.user?.user_metadata || {};
@@ -132,40 +137,42 @@ export async function GET(req: Request) {
   return json({ ...view(m.account, m.role), usage: { seats: seats ?? 1, dossiersThisMonth: used, leadsNew: leadsNew ?? 0 }, avvVersion: AVV_VERSION, branche, branches, tools, offer, onboarding: { mustChange, consentsMissing } });
 }
 
-// Registrierung eines Unternehmenskontos (nur Unternehmer nach § 14 BGB, mit AVV nach Art. 28 DSGVO).
+// Registration of a business account (businesses only, with the Data Processing Addendum).
 export async function POST(req: Request) {
-  // Zugänge vergibt LeaseRun im Web-Admin nach einer Anfrage – keine Selbstregistrierung mehr.
-  if (process.env.B2B_SELF_SIGNUP !== 'true') return json({ error: 'Unternehmenskonten vergibt LeaseRun nach einer Anfrage: https://leaserun.com/business#anfrage' }, 403);
-  if (!adminConfigured()) return json({ error: 'Nicht konfiguriert.' }, 503);
+  // LeaseRun issues logins in the Web-Admin after a request – no self-registration.
+  if (process.env.B2B_SELF_SIGNUP !== 'true') return json({ error: 'LeaseRun sets up business accounts on request: https://leaserun.com/business#anfrage' }, 403);
+  if (!adminConfigured()) return json({ error: 'Not configured.' }, 503);
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
-  if (!allowRequest(`b2b-register:${user.id}`, 5, 60_000)) return json({ error: 'Zu viele Anfragen.' }, 429);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
+  if (!allowRequest(`b2b-register:${user.id}`, 5, 60_000)) return json({ error: 'Too many requests.' }, 429);
   const parsed = RegisterSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     const f = parsed.error.issues[0]?.path[0];
     const msg: Record<string, string> = {
-      unternehmer: 'Bitte bestätigen, dass Sie als Unternehmer handeln (§ 14 BGB).',
-      avv: 'Bitte dem Auftragsverarbeitungsvertrag zustimmen.',
-      richtig: 'Bitte versichern, dass die Angaben vollständig und richtig sind.',
-      agb: 'Bitte die Nutzungsbedingungen und Datenschutzhinweise bestätigen.',
-      postalCode: 'Bitte eine fünfstellige Postleitzahl angeben.',
-      street: 'Bitte Straße und Hausnummer angeben.',
+      unternehmer: 'Please confirm that you are acting on behalf of a business.',
+      avv: 'Please accept the Data Processing Addendum.',
+      richtig: 'Please confirm that the information is complete and accurate.',
+      agb: 'Please confirm the Business Terms of Service and the Privacy Policy.',
+      postalCode: 'Please enter a 5-digit ZIP code.',
+      street: 'Please enter the street address with number.',
     };
-    return json({ error: msg[String(f)] ?? `Bitte die Angabe „${String(f ?? 'Formular')}“ prüfen.` }, 400);
+    return json({ error: msg[String(f)] ?? `Please check the field "${String(f ?? 'form')}".` }, 400);
   }
   const b = parsed.data;
-  { const err = await addressError({ postalCode: b.postalCode, city: b.city, street: b.street }, confirmedFlag(b.addressConfirmed)); if (err) return json({ error: err }, 400); }
-  const reg = b.registerNumber.toUpperCase();
-  if (!reg && !b.taxId) return json({ error: 'Bitte Vermittler-Registernummer oder Steuernummer/USt-IdNr. angeben.' }, 400);
-  if (reg && !REGISTER_RE.test(reg)) return json({ error: 'Registernummer im Format D-XXXX-XXXX-XX angeben (Vermittlerregister).' }, 400);
-  if (b.taxId && !(VATID_RE.test(b.taxId) || STNR_RE.test(b.taxId))) return json({ error: 'USt-IdNr. (DE + 9 Ziffern) oder Steuernummer prüfen.' }, 400);
-  if ((b.institutionType === 'BROKER' || b.institutionType === 'REALTOR') && !reg && !b.taxId) return json({ error: 'Registernummer angeben.' }, 400);
+  if (b.state && !STATE_RE.test(b.state)) return json({ error: 'Please choose a US state.' }, 400);
+  if (b.incorporationState && !STATE_RE.test(b.incorporationState)) return json({ error: 'Please choose the state of incorporation.' }, 400);
+  { const err = await addressError({ postalCode: b.postalCode, city: b.city, street: b.street, state: b.state || undefined }, confirmedFlag(b.addressConfirmed)); if (err) return json({ error: err }, 400); }
+  const reg = b.registerNumber.toUpperCase().replace(/^NMLS\s*#?\s*/, '');
+  if (reg && !(NMLS_RE.test(reg) || LICENSE_RE.test(reg))) return json({ error: 'Please enter your NMLS ID (digits only) or your state license number.' }, 400);
+  if (b.taxId && !EIN_RE.test(b.taxId)) return json({ error: 'Please check the EIN (format 12-3456789) or leave it empty.' }, 400);
+  if ((b.institutionType === 'BROKER' || b.institutionType === 'REALTOR') && !reg) return json({ error: b.institutionType === 'BROKER' ? 'Please enter your NMLS ID.' : 'Please enter your real estate license number.' }, 400);
+  const legalForm = b.incorporationState ? `${b.legalForm} (${b.incorporationState})` : b.legalForm;
 
-  if (await membershipFor(user.id)) return json({ error: 'Dieses Konto gehört bereits zu einem Unternehmen.' }, 409);
+  if (await membershipFor(user.id)) return json({ error: 'This login already belongs to a business account.' }, 409);
   const db = supabaseAdmin();
 
-  // Freie Partner-URL aus dem Firmennamen ableiten.
-  const base = slugify(b.companyName).replace(/-(gmbh|ug|ag|kg|ohg|gbr|e-k|mbh)$/g, '').slice(0, 34) || 'partner';
+  // Derive a free partner URL from the company name.
+  const base = slugify(b.companyName).replace(/-(llc|inc|corp|co|ltd|lp|llp|pllc|pc|pa)$/g, '').slice(0, 34) || 'partner';
   let slug = base.length >= 3 ? base : `${base}-partner`;
   for (let i = 2; i < 50; i++) {
     const { data } = await db.from('lr_b2b_accounts').select('id').eq('slug', slug).maybeSingle();
@@ -176,35 +183,35 @@ export async function POST(req: Request) {
   let referral = b.referral.replace(/[^a-z0-9-]/gi, '').slice(0, 40) || null;
   if (b.partnerCode) {
     const { data: code } = await db.from('lr_b2b_partner_codes').select('*').eq('code', b.partnerCode).maybeSingle();
-    if (!code || !code.active || (code.max_redemptions != null && code.redeemed >= code.max_redemptions)) return json({ error: 'Partnercode ist nicht gültig.' }, 400);
+    if (!code || !code.active || (code.max_redemptions != null && code.redeemed >= code.max_redemptions)) return json({ error: 'This partner code is not valid.' }, 400);
     await db.from('lr_b2b_partner_codes').update({ redeemed: code.redeemed + 1 }).eq('code', code.code).eq('redeemed', code.redeemed);
     referral = `code:${code.code}`.slice(0, 40);
   }
 
   const now = new Date().toISOString();
   const ins = await db.from('lr_b2b_accounts').insert({
-    owner_id: user.id, company_name: b.companyName, legal_form: b.legalForm, institution_type: b.institutionType, branche: brancheFromType(b.institutionType),
+    owner_id: user.id, company_name: b.companyName, legal_form: legalForm, institution_type: b.institutionType, branche: brancheFromType(b.institutionType),
     register_number: reg || null, tax_id: b.taxId || null, advisor_name: b.advisorName, email: user.email, phone: b.phone || null,
     street: b.street, postal_code: b.postalCode, city: b.city, status: 'active', unternehmer_confirmed_at: now,
     avv_accepted_at: now, avv_version: AVV_VERSION, avv_evidence: avvEvidence(req, { userId: user.id, email: user.email, name: b.advisorName }), referral, slug, widget_key: newWidgetKey(),
   }).select('*').single();
   if (ins.error || !ins.data) {
     console.error('b2b_register_error', ins.error?.message);
-    return json({ error: 'Registrierung fehlgeschlagen.' }, 500);
+    return json({ error: 'Registration failed.' }, 500);
   }
   const mem = await db.from('lr_b2b_members').insert({ account_id: ins.data.id, user_id: user.id, role: 'owner' });
   if (mem.error) {
     await db.from('lr_b2b_accounts').delete().eq('id', ins.data.id);
-    return json({ error: 'Registrierung fehlgeschlagen.' }, 500);
+    return json({ error: 'Registration failed.' }, 500);
   }
-  // Schriftlicher Nachweis: alle Angaben, Erklärungen im Wortlaut, Zeitpunkte, Prüfsumme.
+  // Written record: all details, statements word for word, timestamps, checksum.
   let au: { email_confirmed_at?: string | null; created_at?: string | null } | null = null;
   try { au = (await db.auth.admin.getUserById(user.id)).data?.user ?? null; } catch { au = null; }
   const proof: RegistrationProof = {
     proofId: 'REG-' + randomUUID().slice(0, 8).toUpperCase(),
     createdAt: now,
     customerNumber: String(ins.data.customer_number ?? ''),
-    company: { name: b.companyName, legalForm: b.legalForm, type: b.institutionType, registerNumber: reg || null, taxId: b.taxId || null, street: b.street, postalCode: b.postalCode, city: b.city, slug },
+    company: { name: b.companyName, legalForm, type: b.institutionType, registerNumber: reg || null, taxId: b.taxId || null, street: b.street, postalCode: b.postalCode, city: b.city, slug },
     person: { name: b.advisorName, email: user.email, phone: b.phone || null },
     account: { userId: user.id, emailConfirmedAt: au?.email_confirmed_at ?? null, signedUpAt: au?.created_at ?? null },
     consents: [
@@ -222,16 +229,16 @@ export async function POST(req: Request) {
   if (mailConfigured()) {
     let pdf: Buffer | null = null;
     try { pdf = await renderToBuffer(createElement(RegistrationProofDocument, { p: proof }) as unknown as Parameters<typeof renderToBuffer>[0]); } catch (e) { console.error('b2b_proof_pdf', e instanceof Error ? e.message : e); }
-    const att = pdf ? [{ filename: `LeaseRun_Registrierungsnachweis_${proof.proofId}.pdf`, content: pdf }] : [];
+    const att = pdf ? [{ filename: `LeaseRun_Registration_Record_${proof.proofId}.pdf`, content: pdf }] : [];
     const text = proofText(proof);
-    // Alle B2B-Meldungen an das Support-Postfach (support@leaserun.com).
+    // All business notifications go to the support inbox (support@leaserun.com).
     for (const to of [supportInbox()]) {
-      await sendMail(to, `Neue B2B-Registrierung: ${b.companyName} (${typeLabel(b.institutionType)})`, `${text}
+      await sendMail(to, `New business registration: ${b.companyName} (${typeLabel(b.institutionType)})`, `${text}
 
-Prüfen und freischalten: https://leaserun.com/internal/web-admin#partner`, att);
+Review and verify: https://leaserun.com/internal/web-admin#partner`, att);
     }
-    await sendMail(user.email, `Ihre Registrierung bei LeaseRun – Nachweis ${proof.proofId}`,
-      `Guten Tag ${b.advisorName},\n\nIhr Unternehmenskonto für ${b.companyName} ist angelegt (Kundennummer ${ins.data.customer_number}). Im Anhang finden Sie den Nachweis über Ihre Angaben und Erklärungen. Bitte prüfen Sie ihn; falsche Angaben teilen Sie uns bitte umgehend an support@leaserun.com mit.\n\nNächster Schritt: Gewerbenachweis im Portal hochladen (https://leaserun.com/business-portal#verifizierung). Den Auftragsverarbeitungsvertrag (Version ${AVV_VERSION}) können Sie jederzeit unter https://leaserun.com/business-portal#profil herunterladen.\n\n${text}\n\nIhr LeaseRun-Team`, att, { area: 'b2b' });
+    await sendMail(user.email, `Your LeaseRun registration – record ${proof.proofId}`,
+      `Hi ${b.advisorName},\n\nYour business account for ${b.companyName} has been created (customer number ${ins.data.customer_number}). Attached is the record of the details and statements you provided. Please review it and let us know right away at support@leaserun.com if anything is incorrect.\n\nNext step: upload your business verification in the portal (https://leaserun.com/business-portal#verifizierung). You can download the Data Processing Addendum (version ${AVV_VERSION}) at any time at https://leaserun.com/business-portal#profil.\n\n${text}\n\nThe LeaseRun team`, att, { area: 'b2b' });
   }
   return json({ ok: true, ...view(ins.data as B2BAccount, 'owner') }, 201);
 }
@@ -240,10 +247,10 @@ export async function PATCH(req: Request) {
   const ctx = await requireMember(req, { owner: true, bucket: 'b2b-patch', limit: 30 });
   if (ctx instanceof Response) return ctx;
   const parsed = PatchSchema.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return json({ error: `Bitte die Angabe „${String(parsed.error.issues[0]?.path[0] ?? '')}“ prüfen.` }, 400);
+  if (!parsed.success) return json({ error: `Please check the field "${String(parsed.error.issues[0]?.path[0] ?? '')}".` }, 400);
   const p = parsed.data;
   if (p.street !== undefined && p.postalCode !== undefined && p.city !== undefined) {
-    const err = await addressError({ postalCode: p.postalCode, city: p.city, street: p.street }, confirmedFlag(p.addressConfirmed));
+    const err = await addressError({ postalCode: p.postalCode, city: p.city, street: p.street, state: p.state && /^[A-Z]{2}$/.test(p.state) ? p.state : undefined }, confirmedFlag(p.addressConfirmed));
     if (err) return json({ error: err }, 400);
   }
   const up: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -263,11 +270,11 @@ export async function PATCH(req: Request) {
   if (p.leadGate !== undefined) up.lead_gate = p.leadGate;
   if (p.widgetActive !== undefined) up.widget_active = p.widgetActive;
   if (p.regenerateKey) up.widget_key = newWidgetKey();
-  // Support-Zugriff: Betreiber darf das Portal 7 Tage lesend einsehen (Auftragsverarbeitung nur auf Weisung).
+  // Support access: the operator may view the portal read-only for 7 days (processing only on instruction).
   if (p.leadRetentionMonths !== undefined) up.lead_retention_months = p.leadRetentionMonths;
   if (p.webhookUrl !== undefined) {
     if (p.webhookUrl) {
-      if (!effectiveTier(ctx.account) || effectiveTier(ctx.account) === 'BASIC') return json({ error: 'Webhooks gibt es ab Tarif Pro.' }, 402);
+      if (!effectiveTier(ctx.account) || effectiveTier(ctx.account) === 'BASIC') return json({ error: 'Webhooks are available on the Pro plan and above.' }, 402);
       const bad = await safeTarget(p.webhookUrl);
       if (bad) return json({ error: bad }, 400);
       up.webhook_url = p.webhookUrl;
@@ -276,22 +283,22 @@ export async function PATCH(req: Request) {
   }
   if (p.regenerateWebhookSecret) up.webhook_secret = newWebhookSecret();
   if (p.acceptSubmissions !== undefined) {
-    if (p.acceptSubmissions && ctx.account.institution_type !== 'BANK') return json({ error: 'Einreichungen empfangen können nur Kreditinstitute.' }, 400);
+    if (p.acceptSubmissions && ctx.account.institution_type !== 'BANK') return json({ error: 'Only lenders can receive submissions.' }, 400);
     up.accept_submissions = p.acceptSubmissions;
   }
   if (p.customDisclaimer !== undefined) {
-    if (p.customDisclaimer && effectiveTier(ctx.account) !== 'ENTERPRISE' && !ctx.account.has_whitelabel) return json({ error: 'Eigene Hinweistexte gibt es im Tarif Enterprise.' }, 402);
+    if (p.customDisclaimer && effectiveTier(ctx.account) !== 'ENTERPRISE' && !ctx.account.has_whitelabel) return json({ error: 'Custom disclaimers are available on the Enterprise plan.' }, 402);
     up.custom_disclaimer = p.customDisclaimer || null;
   }
   if (p.supportAccessDays !== undefined) up.support_access_until = p.supportAccessDays ? new Date(Date.now() + p.supportAccessDays * 864e5).toISOString() : null;
   const db = supabaseAdmin();
   if (p.slug !== undefined && p.slug !== ctx.account.slug) {
-    if (/^(admin|api|intern|b2b|app|auth|verify|p)(-|$)/.test(p.slug)) return json({ error: 'Diese Adresse ist reserviert.' }, 400);
+    if (/^(admin|api|intern|b2b|app|auth|verify|p)(-|$)/.test(p.slug)) return json({ error: 'This URL is reserved.' }, 400);
     const { data } = await db.from('lr_b2b_accounts').select('id').eq('slug', p.slug).maybeSingle();
-    if (data) return json({ error: 'Diese Adresse ist vergeben.' }, 409);
+    if (data) return json({ error: 'This URL is already taken.' }, 409);
     up.slug = p.slug;
   }
   const r = await db.from('lr_b2b_accounts').update(up).eq('id', ctx.account.id).select('*').single();
-  if (r.error || !r.data) return json({ error: 'Speichern fehlgeschlagen.' }, 500);
+  if (r.error || !r.data) return json({ error: 'Saving failed.' }, 500);
   return json({ ok: true, ...view(r.data as B2BAccount, ctx.role) });
 }

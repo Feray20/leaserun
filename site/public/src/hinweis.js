@@ -1,7 +1,7 @@
 // Datenschutz-Hinweis (DSGVO / § 25 TDDDG). Standard: LeaseRun setzt keine Tracking-Cookies – dann nur ein kurzer,
 // nicht blockierender Hinweis. Ist im Web-Admin Google Analytics 4 eingeschaltet, wird daraus ein Einwilligungs-Banner:
 // Google Analytics lädt erst nach „Zulassen“; „Ablehnen“ ist gleichwertig. „Do Not Track“/GPC zählt als Ablehnung.
-// Die Wahl liegt im lokalen Speicher (ia-ga = yes/no) und lässt sich über window.iaConsent() (Link in der Datenschutzerklärung) ändern.
+// Die Wahl liegt im lokalen Speicher (lr-ga = yes/no) und lässt sich über window.iaConsent() (Link in der Datenschutzerklärung) ändern.
 (() => {
   if (window.__iaHinweis) return;
   window.__iaHinweis = true;
@@ -59,7 +59,7 @@
     if (document.getElementById('iaPriv')) return;
     if (consent && !document.getElementById('iaPrivCss')) {
       const st = document.createElement('style'); st.id = 'iaPrivCss';
-      st.textContent = '.ia-priv-b{display:flex;gap:8px;flex:none}.ia-priv-no{flex:none;min-height:40px;padding:0 16px;border:1.5px solid #0F2C59;border-radius:10px;background:#fff;color:#0F2C59;font:inherit;font-weight:700;cursor:pointer}@media (max-width:420px){.ia-priv-b{width:100%}.ia-priv-b button{flex:1}}';
+      st.textContent = '.lr-priv-b{display:flex;gap:8px;flex:none}.lr-priv-no{flex:none;min-height:40px;padding:0 16px;border:1.5px solid #0F2C59;border-radius:10px;background:#fff;color:#0F2C59;font:inherit;font-weight:700;cursor:pointer}@media (max-width:420px){.lr-priv-b{width:100%}.lr-priv-b button{flex:1}}';
       document.head.appendChild(st);
     }
     const el = document.createElement('div');
@@ -71,8 +71,8 @@
     el.innerHTML = consent
       ? '<p><strong>Statistik mit Ihrer Einwilligung.</strong> Dürfen wir mit Google Analytics (Cookies, pseudonyme Nutzungsdaten, mögliche Übermittlung in die USA) messen, welche Seiten hilfreich sind? Ohne Werbefunktionen, keine Verknüpfung mit Ihrem Konto – jederzeit widerrufbar. <a href="/privacy#google-analytics">Details</a></p><span class="lr-priv-b"><button type="button" class="lr-priv-no">Ablehnen</button><button type="button" class="lr-priv-ok">Zulassen</button></span>'
       : '<p><strong>Keine Tracking-Cookies.</strong> LeaseRun speichert auf Ihrem Gerät nur, was für Anmeldung und Fortschritt technisch nötig ist – ohne Werbung, Datenbank in Frankfurt. <a href="/privacy">Datenschutzerklärung</a></p><button type="button" class="lr-priv-ok">Verstanden</button>';
-    el.querySelector('.ia-priv-ok').onclick = () => { if (consent) { set(GA, 'yes'); loadGa(); } set(KEY, '1'); el.remove(); };
-    const no = el.querySelector('.ia-priv-no'); if (no) no.onclick = () => { set(GA, 'no'); set(KEY, '1'); dropGa(); el.remove(); };
+    el.querySelector('.lr-priv-ok').onclick = () => { if (consent) { set(GA, 'yes'); loadGa(); } set(KEY, '1'); el.remove(); };
+    const no = el.querySelector('.lr-priv-no'); if (no) no.onclick = () => { set(GA, 'no'); set(KEY, '1'); dropGa(); el.remove(); };
     document.body.appendChild(el);
   };
   window.iaConsent = () => { if (!gaId) { alert('LeaseRun verwendet derzeit keine Analyse-Cookies.'); return; } document.getElementById('iaPriv')?.remove(); banner(true); };
@@ -108,7 +108,7 @@
 (() => {
   if (window.__iaBusy) return;
   window.__iaBusy = true;
-  const css = '.ia-busy{position:relative;cursor:progress!important;opacity:.9!important}.ia-busy::after{content:"";display:inline-block;width:1em;height:1em;margin-left:.55em;vertical-align:-.15em;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;opacity:.75;animation:iaBusySpin .75s linear infinite}@keyframes iaBusySpin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.ia-busy::after{animation-duration:2s}}';
+  const css = '.lr-busy{position:relative;cursor:progress!important;opacity:.9!important}.lr-busy::after{content:"";display:inline-block;width:1em;height:1em;margin-left:.55em;vertical-align:-.15em;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;opacity:.75;animation:iaBusySpin .75s linear infinite}@keyframes iaBusySpin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){.lr-busy::after{animation-duration:2s}}';
   const st = document.createElement('style'); st.textContent = css; (document.head || document.documentElement).appendChild(st);
   const check = (b) => { const on = b.disabled && /…\s*$/.test(b.textContent || ''); b.classList.toggle('lr-busy', on); if (on) b.setAttribute('aria-busy', 'true'); else b.removeAttribute('aria-busy'); };
   const scan = (root) => { if (root.nodeType !== 1) return; if (root.matches('button, .btn')) check(root); root.querySelectorAll?.('button:disabled').forEach(check); };
@@ -155,7 +155,7 @@
   addEventListener('pageshow', (e) => {
     if (!e.persisted) return;
     // App-Bereiche immer frisch (Anmeldung, Daten); sonst nur, wenn ein Lade-/Sperrzustand hängen geblieben ist.
-    const stuck = document.querySelector('.ia-ld.full, .buy-ov, [aria-busy="true"], .ia-work, form[data-busy]');
+    const stuck = document.querySelector('.lr-ld.full, .buy-ov, [aria-busy="true"], .lr-work, form[data-busy]');
     if (stuck || ((APPISH.test(location.pathname) || location.hostname.startsWith('admin.') || location.hostname.startsWith('partner.')) && (!window.__iaNeedReload || window.__iaNeedReload()))) location.reload();
     else check(true);
   });
@@ -166,13 +166,13 @@
 (() => {
   if (window.__iaUnstick) return;
   window.__iaUnstick = true;
-  const LOCKS = [['menu-open', '.mobile-nav:not([hidden])'], ['pt-sheet-open', '#ptSheet:not([hidden])'], ['dk-open', '#faDeck'], ['lr-pdfv-open', '.ia-pdfv'], ['lr-working', '.ia-work']];
+  const LOCKS = [['menu-open', '.mobile-nav:not([hidden])'], ['pt-sheet-open', '#ptSheet:not([hidden])'], ['dk-open', '#faDeck'], ['lr-pdfv-open', '.lr-pdfv'], ['lr-working', '.lr-work']];
   let last = 0;
   const unstick = () => {
     const now = Date.now(); if (now - last < 400) return; last = now;
     const b = document.body; if (!b) return;
     for (const [c, sel] of LOCKS) if (b.classList.contains(c) && !document.querySelector(sel)) b.classList.remove(c);
-    if ((b.style.overflow === 'hidden' || document.documentElement.style.overflow === 'hidden') && !document.querySelector('dialog[open], .ia-pdfv, .ia-work, #ptSheet:not([hidden]), .mobile-nav:not([hidden])')) { b.style.overflow = ''; document.documentElement.style.overflow = ''; }
+    if ((b.style.overflow === 'hidden' || document.documentElement.style.overflow === 'hidden') && !document.querySelector('dialog[open], .lr-pdfv, .lr-work, #ptSheet:not([hidden]), .mobile-nav:not([hidden])')) { b.style.overflow = ''; document.documentElement.style.overflow = ''; }
   };
   ['hashchange', 'popstate', 'pageshow', 'focus'].forEach((e) => addEventListener(e, () => setTimeout(unstick, 50)));
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') unstick(); });
@@ -231,7 +231,7 @@
         more: [...document.querySelectorAll('.lt-more:not([hidden])')].map((e) => e.id).filter(Boolean),
         det: [...document.querySelectorAll('details[open]')].map((d) => d.id).filter(Boolean),
         qa: [...document.querySelectorAll('.route-a:not([hidden])')].map((x) => x.previousElementSibling?.querySelector('strong')?.textContent || '').filter(Boolean),
-        mehr: [...document.querySelectorAll('section[data-mehr]')].filter((x) => !x.querySelector('.ia-mehr-btn')).map((x) => x.id).filter(Boolean),
+        mehr: [...document.querySelectorAll('section[data-mehr]')].filter((x) => !x.querySelector('.lr-mehr-btn')).map((x) => x.id).filter(Boolean),
       }));
     } catch { /* privat */ }
   };
@@ -246,7 +246,7 @@
     const t = +ss('lr-int-nav:' + location.pathname) || 0, h = +ss('lr-hid:' + location.pathname) || 0;
     const internal = t && h && h - t > -1000 && h - t < 10000;
     const fresh = h && Date.now() - h < 30 * 60_000;
-    const stuck = document.querySelector('.ia-ld.full, .buy-ov, #buyOverlay, .ia-work, form[data-busy]');
+    const stuck = document.querySelector('.lr-ld.full, .buy-ov, #buyOverlay, .lr-work, form[data-busy]');
     return !(internal && fresh && !stuck);
   };
   addEventListener('pageshow', (e) => { if (e.persisted && window.__iaNeedReload()) ss('lr-ret-back', '1'); }, { capture: true });
@@ -273,7 +273,7 @@
   const go = () => {
     if (stop || Date.now() - t0 > 12000) return;
     (rec.det || []).forEach((id) => { const d = document.getElementById(id); if (d && !d.open) d.open = true; });
-    (rec.mehr || []).forEach((id) => document.getElementById(id)?.querySelector('.ia-mehr-btn')?.click());
+    (rec.mehr || []).forEach((id) => document.getElementById(id)?.querySelector('.lr-mehr-btn')?.click());
     (rec.qa || []).forEach((q) => { const b = [...document.querySelectorAll('.route-q')].find((x) => x.querySelector('strong')?.textContent === q); const a = b?.nextElementSibling; if (b && a && a.hidden) b.click(); });
     const a = rec.aid && document.getElementById(rec.aid);
     const maxY = Math.max(0, document.documentElement.scrollHeight - innerHeight);

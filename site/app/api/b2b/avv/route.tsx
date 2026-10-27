@@ -22,15 +22,15 @@ const s = StyleSheet.create({
 function AvvPdf({ a: input }: { a: B2BAccount }) {
   const a = pdfSafeDeep(input);
   return (
-    <Document title={`AVV ${a.company_name}`} author="LeaseRun">
-      <Page size="A4" style={s.page}>
+    <Document title={`DPA ${a.company_name}`} author="LeaseRun">
+      <Page size="LETTER" style={s.page}>
         <Logo size={16} />
         <Text style={s.h1}>{AVV_TITLE}</Text>
         <Text>Version {a.avv_version || AVV_VERSION}</Text>
         <View style={s.box}>
-          <Text>Auftraggeber: {a.company_name} ({a.legal_form}), {a.street ? `${a.street}, ` : ''}{a.postal_code} {a.city}</Text>
-          <Text>Kundennummer: {a.customer_number}</Text>
-          <Text>Elektronisch geschlossen am: {a.avv_accepted_at ? stamp(a.avv_accepted_at) : '–'} durch Bestätigung im Portal</Text>
+          <Text>Customer: {a.company_name} ({a.legal_form}), {a.street ? `${a.street}, ` : ''}{a.city} {a.postal_code}</Text>
+          <Text>Customer number: {a.customer_number}</Text>
+          <Text>Accepted electronically on: {a.avv_accepted_at ? stamp(a.avv_accepted_at) : '–'} by confirmation in the portal</Text>
         </View>
         {AVV_SECTIONS.map((sec) => (
           <View key={sec.h} wrap>
@@ -39,15 +39,15 @@ function AvvPdf({ a: input }: { a: B2BAccount }) {
           </View>
         ))}
         <View style={s.footer} fixed>
-          <Text>LeaseRun · Georg-August-Zinn-Str. 25 · 64354 Reinheim · support@leaserun.com</Text>
-          <Text render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
+          <Text>LeaseRun · leaserun.com · support@leaserun.com</Text>
+          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
         </View>
       </Page>
     </Document>
   );
 }
 
-// Ohne Anmeldung: Vertragstext zur Ansicht vor Abschluss. Mit Anmeldung und ?pdf=1: unterzeichnete Fassung als PDF.
+// Without sign-in: DPA text to review before accepting. Signed in with ?pdf=1: the accepted version as PDF.
 export async function GET(req: Request) {
   if (new URL(req.url).searchParams.get('pdf') !== '1') {
     return NextResponse.json({ version: AVV_VERSION, title: AVV_TITLE, sections: AVV_SECTIONS }, { headers: { 'Cache-Control': 'public, max-age=600' } });
@@ -57,6 +57,6 @@ export async function GET(req: Request) {
   const el = createElement(AvvPdf, { a: ctx.account }) as unknown as Parameters<typeof renderToBuffer>[0];
   const pdf = await renderToBuffer(el);
   return new NextResponse(new Uint8Array(pdf), {
-    headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="LeaseRun_AVV_${ctx.account.customer_number}.pdf"`, 'Cache-Control': 'no-store' },
+    headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `attachment; filename="LeaseRun_DPA_${ctx.account.customer_number}.pdf"`, 'Cache-Control': 'no-store' },
   });
 }

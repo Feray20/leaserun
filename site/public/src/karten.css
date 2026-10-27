@@ -231,5 +231,5 @@ body:has(> footer.k-foot)>:not(main){flex-shrink:0}
 .k-foot nav{margin:0!important;gap:0 10px!important}
 .k-foot nav a{color:#94A3B8!important;font-size:11px;min-height:24px!important}
 .k-foot small{flex-basis:100%;font-size:10px!important;color:#A8B3C2!important;line-height:1.4!important}
-@media (hover:none) and (pointer:coarse){.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.cr-sticky,.ks-head,.k-top,.app-top,.ia-work{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.ks-head{background-color:rgba(255,255,255,.985)}}
+@media (hover:none) and (pointer:coarse){.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.cr-sticky,.ks-head,.k-top,.app-top,.lr-work{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.ks-head{background-color:rgba(255,255,255,.985)}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

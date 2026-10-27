@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const COLS = 'id, source, client_name, client_email, client_phone, message, property_data, metrics, consent_at, consent_text, status, assigned_to, notes, created_at';
 
-// Anfragen des eigenen Unternehmens (alle Mitglieder sehen die Pipeline).
+// Leads of the own business (all members see the pipeline).
 export async function GET(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-leads', limit: 60 });
   if (ctx instanceof Response) return ctx;
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   if (status && ['neu', 'in_bearbeitung', 'abgeschlossen', 'abgelehnt'].includes(status)) q = q.eq('status', status);
   if (u.searchParams.get('mine') === '1') q = q.eq('assigned_to', ctx.user.id);
   const { data, error } = await q;
-  if (error) return json({ error: 'Anfragen konnten nicht geladen werden.' }, 500);
+  if (error) return json({ error: 'Leads could not be loaded.' }, 500);
   if (u.searchParams.get('format') === 'csv') {
     const cell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""').replace(/^[=+\-@]/, "'$&")}"`;
     const rows = [['Eingang', 'Quelle', 'Status', 'Name', 'E-Mail', 'Telefon', 'Objekt', 'Kaufpreis', 'Kaltmiete', 'Eigenkapital', 'Darlehen', 'DSCR', 'Nachricht', 'Notizen']];
@@ -43,15 +43,15 @@ export async function PATCH(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-leads', limit: 60 });
   if (ctx instanceof Response) return ctx;
   const p = Patch.safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: 'Ungültige Anfrage.' }, 400);
+  if (!p.success) return json({ error: 'Invalid request.' }, 400);
   const db = supabaseAdmin();
   const up: Record<string, unknown> = {};
   if (p.data.status) up.status = p.data.status;
   if (p.data.notes !== undefined) up.notes = p.data.notes.trim() || null;
   if (p.data.assignedTo !== undefined) {
-    // Zuweisung nur an Mitglieder des eigenen Unternehmens; Berater dürfen nur sich selbst zuweisen oder freigeben.
+    // Assignment only to members of the own business; advisors may only assign themselves or release.
     if (p.data.assignedTo) {
-      if (ctx.role !== 'owner' && p.data.assignedTo !== ctx.user.id) return json({ error: 'Berater können Anfragen nur sich selbst zuweisen.' }, 403);
+      if (ctx.role !== 'owner' && p.data.assignedTo !== ctx.user.id) return json({ error: 'Team members can only assign leads to themselves.' }, 403);
       const { data: m } = await db.from('lr_b2b_members').select('user_id').eq('account_id', ctx.account.id).eq('user_id', p.data.assignedTo).maybeSingle();
       if (!m) return json({ error: 'Kein Mitglied dieses Unternehmens.' }, 400);
     }
@@ -62,13 +62,13 @@ export async function PATCH(req: Request) {
   return json({ ok: true });
 }
 
-// Löschen (z. B. nach Widerruf der Einwilligung oder Ablauf der Aufbewahrung beim Partner).
+// Delete (e.g. after consent is withdrawn or the partner's retention period has ended).
 export async function DELETE(req: Request) {
   const ctx = await requireMember(req, { owner: true, bucket: 'b2b-leads', limit: 60 });
   if (ctx instanceof Response) return ctx;
   const id = new URL(req.url).searchParams.get('id') ?? '';
-  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Ungültige Anfrage.' }, 400);
+  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Invalid request.' }, 400);
   const { error } = await supabaseAdmin().from('lr_b2b_leads').delete().eq('id', id).eq('account_id', ctx.account.id);
-  if (error) return json({ error: 'Löschen fehlgeschlagen.' }, 500);
+  if (error) return json({ error: 'Deleting failed.' }, 500);
   return json({ ok: true });
 }

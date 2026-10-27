@@ -2,7 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import type { PartnerBrand } from '@/lib/pdf/brand';
 import { canCobrand, type B2BAccount } from '@/lib/b2b/core';
 
-// Co-Branding für PDFs: Firmenname, Logo (als Data-URL) und Farbe – nur mit Berechtigung (Pro/Enterprise oder freigeschaltet).
+// Co-branding for PDFs: company name, logo (as data URL) and color – only when entitled (Pro/Enterprise or enabled).
 export async function partnerBrandFor(a: B2BAccount | null | undefined): Promise<PartnerBrand | null> {
   if (!a || a.status !== 'active' || !canCobrand(a)) return null;
   let logo: string | null = null;

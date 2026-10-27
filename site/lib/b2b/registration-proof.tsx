@@ -2,14 +2,14 @@ import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import { BRAND, Logo, SecureWatermark, stamp } from '@/lib/pdf/brand';
 import { pdfSafeDeep } from '@/lib/pdf/text';
 
-// Schriftlicher Registrierungsnachweis für Unternehmenskonten: alle Angaben, die bestätigten Erklärungen im Wortlaut,
-// Zeitpunkte, technische Kennungen und eine Prüfsumme. Geht an die Geschäftsadresse von LeaseRun und als Kopie an den Kunden.
+// Written registration record for business accounts: all details, the confirmed statements word for word,
+// timestamps, technical identifiers and a checksum. Sent to LeaseRun's support inbox and as a copy to the customer.
 
 export const CONSENT_TEXTS = {
-  richtig: 'Ich versichere, dass alle Angaben zum Unternehmen und zu meiner Person vollständig und richtig sind. Mir ist bekannt, dass LeaseRun das Konto bei falschen Angaben sperren kann.',
-  unternehmer: 'Ich bestätige, dass ich als Unternehmer im Sinne des § 14 BGB handele. Mir ist bekannt, dass kein Widerrufsrecht besteht.',
-  avv: 'Ich schließe für das Unternehmen den Auftragsverarbeitungsvertrag (Art. 28 DSGVO) in der oben angezeigten Fassung ab und bin dazu berechtigt.',
-  agb: 'Ich habe die Nutzungsbedingungen für Unternehmen und die Datenschutzhinweise gelesen.',
+  richtig: 'I confirm that all information about the business and about me is complete and accurate. I understand that LeaseRun may lock the account if any information is false.',
+  unternehmer: 'I confirm that I am acting on behalf of a business for business purposes, not as a consumer, and that I am authorized to bind the business.',
+  avv: 'On behalf of the business, I accept the Data Processing Addendum (DPA) in the version shown above and am authorized to do so.',
+  agb: 'I have read the Business Terms of Service and the Privacy Policy. I understand that LeaseRun does not originate or broker loans and that my business remains responsible for its own licensing (NMLS, state licenses), fair lending (ECOA/Regulation B) and FCRA compliance.',
 } as const;
 
 export type RegistrationProof = {
@@ -25,7 +25,7 @@ export type RegistrationProof = {
   sha256: string;
 };
 
-const TYPE: Record<string, string> = { BANK: 'Kreditinstitut', BROKER: 'Finanzierungsvermittler (§ 34i GewO)', REALTOR: 'Immobilienmakler (§ 34c GewO)', OTHER: 'Sonstiges Unternehmen' };
+const TYPE: Record<string, string> = { BANK: 'Lender, bank or credit union', BROKER: 'Mortgage broker / loan officer (NMLS)', REALTOR: 'Real estate agent / brokerage (state license)', ADVISOR: 'CPA / financial advisor', OTHER: 'Property manager / other firm' };
 export const typeLabel = (t: string) => TYPE[t] ?? t;
 
 const s = StyleSheet.create({
@@ -51,88 +51,88 @@ const Row = ({ k, v }: { k: string; v?: string | null }) => (
 export function RegistrationProofDocument({ p: input }: { p: RegistrationProof }) {
   const p = pdfSafeDeep(input);
   return (
-    <Document title={`Registrierungsnachweis ${p.company.name}`} author="LeaseRun" subject={`Nachweis ${p.proofId}`} language="de">
-      <Page size="A4" style={s.page}>
-        <SecureWatermark docId={p.proofId} label="REGISTRIERUNGSNACHWEIS" />
-        <View style={s.head} fixed><Logo /><Text style={{ fontSize: 8.5, color: '#64748B' }}>Nachweis-ID {p.proofId}</Text></View>
-        <Text style={s.h1}>Registrierungsnachweis Unternehmenskonto</Text>
+    <Document title={`Registration record ${p.company.name}`} author="LeaseRun" subject={`Record ${p.proofId}`} language="en-US">
+      <Page size="LETTER" style={s.page}>
+        <SecureWatermark docId={p.proofId} label="REGISTRATION RECORD" />
+        <View style={s.head} fixed><Logo /><Text style={{ fontSize: 8.5, color: '#64748B' }}>Record ID {p.proofId}</Text></View>
+        <Text style={s.h1}>Business Account Registration Record</Text>
         <Text style={s.lead}>
-          Dieses Dokument hält fest, welche Angaben bei der Registrierung gemacht und welche Erklärungen abgegeben wurden. Es wurde automatisch im Moment der Registrierung erzeugt. Die Prüfsumme (SHA-256) über alle Angaben belegt, dass der Inhalt nachträglich nicht verändert wurde.
+          This document records the details provided and the statements confirmed at registration. It was generated automatically at the moment of registration. The checksum (SHA-256) over all details shows that the content has not been changed afterwards.
         </Text>
 
-        <Text style={s.h2}>1. Unternehmen</Text>
-        <Row k="Firmenname" v={p.company.name} />
-        <Row k="Rechtsform" v={p.company.legalForm} />
-        <Row k="Art" v={typeLabel(p.company.type)} />
-        <Row k="Vermittler-Registernummer" v={p.company.registerNumber} />
-        <Row k="USt-IdNr. / Steuernummer" v={p.company.taxId} />
-        <Row k="Anschrift" v={`${p.company.street}, ${p.company.postalCode} ${p.company.city}`} />
-        <Row k="Kundennummer" v={p.customerNumber} />
-        <Row k="Partner-Adresse" v={`leaserun.com/partner?slug=${p.company.slug}`} />
-        <Row k="Partnercode" v={p.partnerCode} />
+        <Text style={s.h2}>1. Business</Text>
+        <Row k="Legal business name" v={p.company.name} />
+        <Row k="Entity type / state" v={p.company.legalForm} />
+        <Row k="Type" v={typeLabel(p.company.type)} />
+        <Row k="NMLS ID / license number" v={p.company.registerNumber} />
+        <Row k="EIN (optional)" v={p.company.taxId} />
+        <Row k="Address" v={`${p.company.street}, ${p.company.city} ${p.company.postalCode}`} />
+        <Row k="Customer number" v={p.customerNumber} />
+        <Row k="Partner URL" v={`leaserun.com/partners?slug=${p.company.slug}`} />
+        <Row k="Partner code" v={p.partnerCode} />
 
-        <Text style={s.h2}>2. Ansprechpartner und Zugang</Text>
+        <Text style={s.h2}>2. Contact person and login</Text>
         <Row k="Name" v={p.person.name} />
-        <Row k="Konto-E-Mail" v={p.person.email} />
-        <Row k="Telefon" v={p.person.phone} />
-        <Row k="E-Mail bestätigt am" v={p.account.emailConfirmedAt ? stamp(p.account.emailConfirmedAt) : 'noch nicht bestätigt'} />
-        <Row k="Benutzerkonto angelegt am" v={p.account.signedUpAt ? stamp(p.account.signedUpAt) : null} />
-        <Row k="Benutzer-ID" v={p.account.userId} />
+        <Row k="Account email" v={p.person.email} />
+        <Row k="Phone" v={p.person.phone} />
+        <Row k="Email confirmed on" v={p.account.emailConfirmedAt ? stamp(p.account.emailConfirmedAt) : 'not confirmed yet'} />
+        <Row k="User account created on" v={p.account.signedUpAt ? stamp(p.account.signedUpAt) : null} />
+        <Row k="User ID" v={p.account.userId} />
 
-        <Text style={s.h2}>3. Abgegebene Erklärungen (Wortlaut)</Text>
+        <Text style={s.h2}>3. Confirmed statements (exact wording)</Text>
         {p.consents.map((c) => (
           <View key={c.key} style={s.consent} wrap={false}>
             <Text style={s.ct}>{CONSENT_TEXTS[c.key]}</Text>
-            <Text style={s.cm}>Bestätigt am {stamp(c.at)}{c.version ? ` · Fassung ${c.version}` : ''}</Text>
+            <Text style={s.cm}>Confirmed on {stamp(c.at)}{c.version ? ` · Version ${c.version}` : ''}</Text>
           </View>
         ))}
 
-        <Text style={s.h2}>4. Technischer Nachweis</Text>
-        <Row k="Zeitpunkt der Registrierung" v={`${stamp(p.createdAt)} (${p.createdAt} UTC)`} />
-        <Row k="IP-Adresse (anonymisierter Hash)" v={p.tech.ipHash} />
+        <Text style={s.h2}>4. Technical record</Text>
+        <Row k="Time of registration" v={`${stamp(p.createdAt)} (${p.createdAt} UTC)`} />
+        <Row k="IP address (anonymized hash)" v={p.tech.ipHash} />
         <Row k="Browser" v={p.tech.userAgent} />
         <View style={[s.row, { flexDirection: 'column' }]}>
-          <Text style={s.k}>Prüfsumme SHA-256 über alle Angaben</Text>
+          <Text style={s.k}>SHA-256 checksum over all details</Text>
           <Text style={s.mono}>{p.sha256}</Text>
         </View>
         <Text style={[s.lead, { marginTop: 10 }]}>
-          Hinweis: Die Freischaltung für Partnerfunktionen erfolgt erst nach Prüfung der Gewerbenachweise durch LeaseRun. Dieser Nachweis bestätigt die Angaben des Kunden, nicht deren Richtigkeit durch LeaseRun.
+          Note: Partner features are unlocked only after LeaseRun has reviewed the business verification documents. This record confirms the details provided by the customer, not their accuracy as verified by LeaseRun.
         </Text>
         <View style={s.foot} fixed>
-          <Text>LeaseRun · Georg-August-Zinn-Str. 25 · 64354 Reinheim · support@leaserun.com</Text>
-          <Text render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
+          <Text>LeaseRun · leaserun.com · support@leaserun.com</Text>
+          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
         </View>
       </Page>
     </Document>
   );
 }
 
-// Klartext für die E-Mail (zusätzlich zum PDF).
+// Plain text for the email (in addition to the PDF).
 export function proofText(p: RegistrationProof): string {
   return [
-    `Registrierungsnachweis ${p.proofId}`,
-    `Zeitpunkt: ${stamp(p.createdAt)} (${p.createdAt} UTC)`,
+    `Registration record ${p.proofId}`,
+    `Time: ${stamp(p.createdAt)} (${p.createdAt} UTC)`,
     '',
-    'UNTERNEHMEN',
-    `Firmenname: ${p.company.name}`,
-    `Rechtsform: ${p.company.legalForm}`,
-    `Art: ${typeLabel(p.company.type)}`,
-    `Vermittler-Registernummer: ${p.company.registerNumber || '–'}`,
-    `USt-IdNr./Steuernummer: ${p.company.taxId || '–'}`,
-    `Anschrift: ${p.company.street}, ${p.company.postalCode} ${p.company.city}`,
-    `Kundennummer: ${p.customerNumber}`,
-    `Partnercode: ${p.partnerCode || '–'}`,
+    'BUSINESS',
+    `Legal business name: ${p.company.name}`,
+    `Entity type / state: ${p.company.legalForm}`,
+    `Type: ${typeLabel(p.company.type)}`,
+    `NMLS ID / license number: ${p.company.registerNumber || '–'}`,
+    `EIN: ${p.company.taxId || '–'}`,
+    `Address: ${p.company.street}, ${p.company.city} ${p.company.postalCode}`,
+    `Customer number: ${p.customerNumber}`,
+    `Partner code: ${p.partnerCode || '–'}`,
     '',
-    'ANSPRECHPARTNER',
+    'CONTACT PERSON',
     `Name: ${p.person.name}`,
-    `E-Mail: ${p.person.email} (${p.account.emailConfirmedAt ? 'bestätigt ' + stamp(p.account.emailConfirmedAt) : 'noch nicht bestätigt'})`,
-    `Telefon: ${p.person.phone || '–'}`,
-    `Benutzer-ID: ${p.account.userId}`,
+    `Email: ${p.person.email} (${p.account.emailConfirmedAt ? 'confirmed ' + stamp(p.account.emailConfirmedAt) : 'not confirmed yet'})`,
+    `Phone: ${p.person.phone || '–'}`,
+    `User ID: ${p.account.userId}`,
     '',
-    'ERKLÄRUNGEN',
-    ...p.consents.map((c) => `[x] ${CONSENT_TEXTS[c.key]}${c.version ? ` (Fassung ${c.version})` : ''} – ${stamp(c.at)}`),
+    'STATEMENTS',
+    ...p.consents.map((c) => `[x] ${CONSENT_TEXTS[c.key]}${c.version ? ` (version ${c.version})` : ''} – ${stamp(c.at)}`),
     '',
-    `IP (anonymisierter Hash): ${p.tech.ipHash || '–'}`,
+    `IP (anonymized hash): ${p.tech.ipHash || '–'}`,
     `Browser: ${p.tech.userAgent || '–'}`,
     `SHA-256: ${p.sha256}`,
   ].join('\n');

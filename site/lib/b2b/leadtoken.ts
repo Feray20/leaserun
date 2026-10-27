@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-// Kurzlebiger Download-Schlüssel für die Finanzierungsübersicht eines Interessenten (nur wer die Anfrage gestellt hat).
+// Short-lived download token for a prospect's financing summary (only for whoever submitted the inquiry).
 const secret = () => process.env.LEAD_TOKEN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const TTL = 2 * 60 * 60 * 1000;
 

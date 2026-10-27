@@ -140,7 +140,7 @@ function landing(loggedIn) {
   if ('IntersectionObserver' in window) {
     const seen = new Map();
     const io = new IntersectionObserver((es) => { es.forEach((e) => seen.set(e.target, e.isIntersecting)); sticky.hidden = [...seen.values()].some(Boolean); });
-    [$('.cr-hero'), $('.cr-end'), $('footer.ia-legal')].filter(Boolean).forEach((el) => { seen.set(el, true); io.observe(el); });
+    [$('.cr-hero'), $('.cr-end'), $('footer.lr-legal')].filter(Boolean).forEach((el) => { seen.set(el, true); io.observe(el); });
   }
 }
 

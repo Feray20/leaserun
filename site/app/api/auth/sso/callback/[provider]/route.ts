@@ -5,9 +5,9 @@ import { codeToIdToken, PROVS, provReady, supabaseSession, unseal, type Flow, ty
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Rückkehr vom Anbieter (Google/Microsoft per GET, Apple per POST-Formular). Prüft Zustand und Alter des Vorgangs,
-// tauscht den Code gegen das ID-Token, meldet bei Supabase an und gibt die Sitzung wie bisher an die Seite weiter
-// (#access_token=… – genau das Format, das /auth/callback und /business-portal schon verarbeiten).
+// Return from the provider (Google/Microsoft via GET, Apple via form POST). Checks state and age of the flow,
+// exchanges the code for the ID token, signs in with Supabase and hands the session to the page
+// (#access_token=… – the format /auth/callback and /business-portal already handle).
 async function handle(req: Request, provider: string, params: URLSearchParams) {
   const origin = new URL(req.url).origin;
   const jar = await cookies();
@@ -21,18 +21,18 @@ async function handle(req: Request, provider: string, params: URLSearchParams) {
   };
   const fail = (m: string) => go(`error_description=${encodeURIComponent(m)}`);
   const p = provider as Prov;
-  if (!PROVS.includes(p) || !provReady(p)) return fail('Diese Anmeldung ist gerade nicht verfügbar.');
-  if (params.get('error')) return fail(params.get('error') === 'user_cancelled_authorize' || params.get('error') === 'access_denied' ? 'Anmeldung abgebrochen.' : 'Die Anmeldung wurde vom Anbieter abgelehnt.');
-  if (!flow || flow.p !== p || !params.get('state') || params.get('state') !== flow.st || Date.now() - flow.t > 10 * 60_000) return fail('Die Anmeldung ist abgelaufen. Bitte erneut versuchen.');
+  if (!PROVS.includes(p) || !provReady(p)) return fail('This sign-in option is not available right now.');
+  if (params.get('error')) return fail(params.get('error') === 'user_cancelled_authorize' || params.get('error') === 'access_denied' ? 'Sign-in canceled.' : 'The provider declined the sign-in.');
+  if (!flow || flow.p !== p || !params.get('state') || params.get('state') !== flow.st || Date.now() - flow.t > 10 * 60_000) return fail('The sign-in expired. Please try again.');
   const code = params.get('code');
-  if (!code) return fail('Die Anmeldung konnte nicht abgeschlossen werden.');
+  if (!code) return fail('The sign-in could not be completed.');
   try {
     const idToken = await codeToIdToken(p, code, origin);
     const s = await supabaseSession(p, idToken, flow.n);
     return go(new URLSearchParams({ access_token: s.access_token, refresh_token: s.refresh_token, expires_in: String(s.expires_in), token_type: s.token_type }).toString());
   } catch (e) {
     console.warn('sso_callback', p, (e as Error).message);
-    return fail('Die Anmeldung konnte nicht abgeschlossen werden. Bitte erneut versuchen.');
+    return fail('The sign-in could not be completed. Please try again.');
   }
 }
 

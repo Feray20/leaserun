@@ -1,5 +1,5 @@
 /* Kaufdialog (buy.mjs) – wird von buy.mjs selbst geladen, damit er auf jeder Seite gleich aussieht. Quelle: institutional.css */
-.buy-dlg{border:0;padding:0;border-radius:18px;width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 30px 80px rgba(15,44,89,.35);color:var(--ia-navy,#0F2C59)}
+.buy-dlg{border:0;padding:0;border-radius:18px;width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;box-shadow:0 30px 80px rgba(15,44,89,.35);color:var(--lr-navy,#0F2C59)}
 .buy-dlg::backdrop{background:rgba(15,23,42,.55);backdrop-filter:blur(3px)}
 .buy-in{padding:22px 22px 18px;display:grid;gap:12px}
 .buy-head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding-bottom:12px;border-bottom:3px solid #0F2C59}

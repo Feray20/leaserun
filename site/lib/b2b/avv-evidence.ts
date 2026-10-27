@@ -1,7 +1,7 @@
 import { AVV_VERSION } from '@/lib/b2b/core';
 
-// Nachweis für den digitalen Abschluss des AVV (Art. 28 DSGVO): wer, wann, welche Fassung, von wo.
-// Die IP-Adresse wird gekürzt gespeichert (IPv4 letztes Oktett, IPv6 nach 3 Blöcken) – genug als Nachweis, datensparsam.
+// Evidence for the electronic acceptance of the DPA: who, when, which version, from where.
+// The IP address is stored truncated (IPv4 last octet, IPv6 after 3 groups) – enough as evidence, data-minimizing.
 export function truncateIp(ip: string): string {
   const v = (ip || '').split(',')[0].trim();
   if (!v) return '';

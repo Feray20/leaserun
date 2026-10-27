@@ -5,20 +5,21 @@ import { type B2BAccount, type Tier } from '@/lib/b2b/core';
 import { BRANCHEN, findPlan, getCatalog } from '@/lib/b2b/catalog';
 import { buyerFromAccount } from '@/lib/b2b/invoice';
 
-// Stripe für Unternehmenskonten: Nettopreise zzgl. 19 % USt (exklusiv), Abo monatlich oder jährlich.
+// Stripe for business accounts: prices in USD, subscription billed monthly or yearly. No VAT. Sales tax is only
+// collected when Stripe Tax is enabled for the account (env STRIPE_TAX_ENABLED=true → automatic_tax).
 
-// Preis je Paket aus dem B2B-Katalog (Web-Admin). Preisänderung → neuer Stripe-Preis (Lookup-Key enthält den Betrag);
-// bestehende Abos behalten ihren bisherigen Preis.
+// Price per plan from the business catalog (Web-Admin). Price change → new Stripe price (lookup key contains the amount);
+// existing subscriptions keep their previous price.
 export async function ensureB2BPrice(planId: string): Promise<{ price: string; name: string; tier: Tier; interval: 'month' | 'year' }> {
   const f = findPlan(await getCatalog(true), planId);
   if (!f) throw new Error('unknown_plan');
-  const lookup = `leaserun_b2b_${planId.replace(/-/g, '_')}_${f.cents}`;
-  const name = `${f.plan.name}${f.interval === 'year' ? ' (Jahr)' : ''}`;
+  const lookup = `leaserun_b2b_usd_${planId.replace(/-/g, '_')}_${f.cents}`;
+  const name = `${f.plan.name}${f.interval === 'year' ? ' (annual)' : ''}`;
   const s = stripe();
   const found = await s.prices.list({ lookup_keys: [lookup], active: true, limit: 1 });
   if (found.data[0]) return { price: found.data[0].id, name, tier: f.plan.tier, interval: f.interval };
   const price = await s.prices.create({
-    currency: 'eur', unit_amount: f.cents, tax_behavior: 'exclusive', lookup_key: lookup,
+    currency: 'usd', unit_amount: f.cents, tax_behavior: 'exclusive', lookup_key: lookup,
     recurring: { interval: f.interval },
     product_data: { name: `LeaseRun ${name}`, metadata: { leaserun_b2b_plan: planId, tier: f.plan.tier, branche: f.branche } },
     metadata: { leaserun_b2b_plan: planId, tier: f.plan.tier, branche: f.branche },
@@ -26,36 +27,37 @@ export async function ensureB2BPrice(planId: string): Promise<{ price: string; n
   return { price: price.id, name, tier: f.plan.tier, interval: f.interval };
 }
 
-// Zusatzbranche (Menge = Anzahl dazugebuchter Branchen), gleiches Intervall wie das Abo.
+// Add-on industry (quantity = number of added industries), same interval as the subscription.
 export async function ensureAddonPrice(interval: 'month' | 'year'): Promise<string> {
   const cat = await getCatalog(true);
   const cents = interval === 'year' ? cat.addon.yearCents : cat.addon.monthCents;
-  const lookup = `leaserun_b2b_addon_branche_${interval}_${cents}`;
+  const lookup = `leaserun_b2b_usd_addon_branche_${interval}_${cents}`;
   const s = stripe();
   const found = await s.prices.list({ lookup_keys: [lookup], active: true, limit: 1 });
   if (found.data[0]) return found.data[0].id;
   const price = await s.prices.create({
-    currency: 'eur', unit_amount: cents, tax_behavior: 'exclusive', lookup_key: lookup, recurring: { interval },
-    product_data: { name: 'LeaseRun Zusatzbranche', metadata: { leaserun_b2b_addon: 'branche' } }, metadata: { leaserun_b2b_addon: 'branche' },
+    currency: 'usd', unit_amount: cents, tax_behavior: 'exclusive', lookup_key: lookup, recurring: { interval },
+    product_data: { name: 'LeaseRun add-on industry', metadata: { leaserun_b2b_addon: 'branche' } }, metadata: { leaserun_b2b_addon: 'branche' },
   });
   return price.id;
 }
 export const parseExtras = (v: unknown): string[] => String(v || '').split(',').map((x) => x.trim()).filter((x) => (BRANCHEN as string[]).includes(x) && x !== 'bank').slice(0, 4);
 
-export async function ensureTaxRateExclusive(): Promise<string> {
-  const s = stripe();
-  const list = await s.taxRates.list({ active: true, inclusive: false, limit: 100 });
-  const hit = list.data.find((t) => t.metadata?.leaserun === 'ust19_excl');
-  if (hit) return hit.id;
-  const t = await s.taxRates.create({ display_name: 'USt', description: 'Umsatzsteuer 19 %', percentage: 19, inclusive: false, country: 'DE', jurisdiction: 'DE', metadata: { leaserun: 'ust19_excl' } });
-  return t.id;
+// US: no VAT and no fixed tax rate. Sales tax (where software is taxable) is calculated by Stripe Tax only when
+// STRIPE_TAX_ENABLED=true. Kept for compatibility: always returns null (no manual tax rate is attached).
+export const stripeTaxEnabled = () => process.env.STRIPE_TAX_ENABLED === 'true';
+export async function ensureTaxRateExclusive(): Promise<string | null> {
+  return null;
 }
+// Line-item tax rates (none in the US setup) and the automatic_tax switch for Checkout.
+export const taxRatesFor = (tax: string | null) => (tax ? { tax_rates: [tax] } : {});
+export const automaticTax = () => (stripeTaxEnabled() ? { automatic_tax: { enabled: true } } : {});
 
-// Zahlarten für Unternehmen – bewusst anders als bei Privatkunden: Firmenkarte und SEPA-Lastschrift,
-// keine Verbraucher-Zahlarten (Klarna, PayPal, Apple/Google Pay, Link). Eigene Stripe-Zahlarten-Konfiguration,
-// die einmal angelegt und danach wiederverwendet wird. Was im Stripe-Konto (noch) nicht freigeschaltet ist,
-// blendet Stripe einfach aus. Schlägt das Anlegen fehl, gilt die Standard-Konfiguration (Bezahlung bleibt möglich).
-const B2B_PMC_NAME = 'LeaseRun B2B';
+// Payment methods for businesses – deliberately different from consumers: business card and ACH bank debit
+// (US bank account), no consumer methods (Klarna, PayPal, Apple/Google Pay, Link). Own Stripe payment method
+// configuration, created once and reused. Anything not enabled in the Stripe account is simply hidden by Stripe.
+// If creating it fails, the default configuration applies (payment stays possible).
+const B2B_PMC_NAME = 'LeaseRun Business US';
 let b2bPmc: string | null = null;
 export async function ensureB2BPaymentConfig(): Promise<string | undefined> {
   if (b2bPmc) return b2bPmc;
@@ -68,7 +70,7 @@ export async function ensureB2BPaymentConfig(): Promise<string | undefined> {
     const off = { display_preference: { preference: 'off' as const } };
     const c = await s.paymentMethodConfigurations.create({
       name: B2B_PMC_NAME,
-      card: on, sepa_debit: on,
+      card: on, us_bank_account: on, sepa_debit: off,
       apple_pay: off, google_pay: off, link: off, klarna: off, paypal: off, amazon_pay: off,
       bancontact: off, eps: off, pix: off, kakao_pay: off, naver_pay: off, payco: off, samsung_pay: off, satispay: off, mb_way: off,
     } as Stripe.PaymentMethodConfigurationCreateParams);
@@ -85,10 +87,9 @@ export async function ensureB2BCustomer(a: B2BAccount): Promise<string> {
   const c = await s.customers.create({
     email: a.email,
     name: `${a.company_name}`,
-    preferred_locales: ['de'],
-    address: { line1: a.street || undefined, postal_code: a.postal_code, city: a.city, country: 'DE' },
-    metadata: { b2b_account_id: a.id, customer_number: a.customer_number },
-    ...(a.tax_id && /^DE[0-9]{9}$/.test(a.tax_id) ? { tax_id_data: [{ type: 'eu_vat' as const, value: a.tax_id }] } : {}),
+    preferred_locales: ['en-US'],
+    address: { line1: a.street || undefined, postal_code: a.postal_code, city: a.city, country: 'US' },
+    metadata: { b2b_account_id: a.id, customer_number: a.customer_number, ...(a.tax_id ? { ein: a.tax_id } : {}) },
   });
   await supabaseAdmin().from('lr_b2b_accounts').update({ stripe_customer_id: c.id }).eq('id', a.id);
   return c.id;
@@ -96,7 +97,7 @@ export async function ensureB2BCustomer(a: B2BAccount): Promise<string> {
 
 const TIERS: Tier[] = ['BASIC', 'PRO', 'ENTERPRISE'];
 
-// Abo-Zustand auf das Unternehmenskonto übertragen (idempotent).
+// Sync subscription state to the business account (idempotent).
 export async function syncSubscription(sub: Stripe.Subscription): Promise<void> {
   const accountId = sub.metadata?.b2b_account_id;
   if (!accountId) return;
@@ -109,7 +110,7 @@ export async function syncSubscription(sub: Stripe.Subscription): Promise<void> 
   const db = supabaseAdmin();
   const { data: a } = await db.from('lr_b2b_accounts').select('plan_source, stripe_subscription_id').eq('id', accountId).maybeSingle();
   if (!a) return;
-  // Manuelle Freischaltungen durch den Betreiber nicht überschreiben, außer es ist dasselbe Abo.
+  // Do not overwrite manual activations by the operator unless it is the same subscription.
   if (a.plan_source === 'manual' && a.stripe_subscription_id !== sub.id) return;
   await db.from('lr_b2b_accounts').update(
     live && tier
@@ -118,7 +119,7 @@ export async function syncSubscription(sub: Stripe.Subscription): Promise<void> 
   ).eq('id', accountId);
 }
 
-// Bezahlte Stripe-Rechnung eines Unternehmenskontos ins Rechnungsarchiv übernehmen (Nummer und PDF bleiben bei Stripe).
+// Copy a paid Stripe invoice of a business account into the invoice archive (number and PDF stay with Stripe).
 export async function archiveStripeInvoice(inv: Stripe.Invoice): Promise<void> {
   const customerId = typeof inv.customer === 'string' ? inv.customer : inv.customer?.id;
   if (!customerId || !inv.number) return;
@@ -133,11 +134,11 @@ export async function archiveStripeInvoice(inv: Stripe.Invoice): Promise<void> {
   const { error } = await db.rpc('lr_create_invoice', {
     p: {
       invoice_number: inv.number, kind: gross < 0 ? 'credit' : 'invoice', source: 'stripe', account_id: a.id, buyer: buyerFromAccount(a as B2BAccount), items,
-      net_cents: net, vat_rate: 19, vat_cents: gross - net, gross_cents: gross, payment_method: 'STRIPE_CARD', payment_status: 'PAID',
-      service_period: period ? `${fmt(period.start)} bis ${fmt(period.end)}` : '', paid_at: new Date().toISOString(),
+      net_cents: net, vat_rate: net > 0 ? Math.round(((gross - net) / net) * 10000) / 100 : 0, vat_cents: gross - net, gross_cents: gross, payment_method: 'STRIPE_CARD', payment_status: 'PAID',
+      service_period: period ? `${fmt(period.start)} to ${fmt(period.end)}` : '', paid_at: new Date().toISOString(),
       stripe_invoice_id: inv.id, stripe_pdf_url: inv.invoice_pdf || inv.hosted_invoice_url || '', created_by: 'stripe-webhook',
     },
   });
-  // Doppelte Zustellung: eindeutige Stripe-ID bzw. Nummer verhindert Doppelbuchung.
+  // Duplicate delivery: the unique Stripe id / number prevents double booking.
   if (error && !/duplicate key/i.test(error.message)) throw new Error(error.message);
 }

@@ -6,7 +6,7 @@ import { DEFAULT_CATALOG } from '@/lib/b2b/catalog';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Öffentliche Pakete und Preise je Branche (für /business und das Unternehmensportal).
+// Public plans and prices per industry (for /business and the business portal).
 export async function GET() {
   const cat = adminConfigured() ? await getCatalog() : DEFAULT_CATALOG;
   const branchen = Object.fromEntries(BRANCHEN.map((b) => {

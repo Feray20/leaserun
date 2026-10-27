@@ -52,7 +52,7 @@ if(/[#&]type=recovery(&|$)/.test(location.hash)&&location.pathname.indexOf('/aut
   // mit Ladeanzeigen, halbtransparenten Ebenen und gesperrten Knöpfen. Alles Zwischenzustände sofort entfernen,
   // damit jeder Knopf wieder reagiert.
   const unstick = () => {
-    document.querySelectorAll('.ia-work, #buyOverlay, .buy-overlay').forEach((el) => el.remove());
+    document.querySelectorAll('.lr-work, #buyOverlay, .buy-overlay').forEach((el) => el.remove());
     document.body?.classList.remove('lr-working', 'lr-switching', 'menu-open');
     document.documentElement.classList.remove('buy-busy');
     document.querySelectorAll('button[disabled][data-busy], button[disabled][data-flow], .btn.is-busy').forEach((b) => {

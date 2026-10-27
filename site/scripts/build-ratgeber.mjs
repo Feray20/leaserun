@@ -22,7 +22,7 @@ const deDate = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('de-DE',
 const BUILD_DATE = new Date('2026-10-26T12:00:00Z');
 
 // ---------- Vorlage aus einer bestehenden Seite ----------
-const tpl = read('rechner/budget/index.html');
+const tpl = read('calculators/budget/index.html');
 const headAssets = (/<!--seo:end-->([\s\S]*?)<\/head>/.exec(tpl) || [])[1];
 const header = (/<!--pre:start-->([\s\S]*?)<main/.exec(tpl) || [])[1];
 const footer = (/<\/main>([\s\S]*?)<!--pre:end-->/.exec(tpl) || [])[1];
@@ -139,11 +139,11 @@ const report = evaluate(built);
 for (const b of built) {
   const r = report[b.slug];
   r.status = b.topic.status;
-  write(`ratgeber/${b.slug}/index.html`, b.html);
+  write(`guides/${b.slug}/index.html`, b.html);
 }
 // Verwaiste Seiten (Thema entfernt oder umbenannt) löschen – die Registry ist die einzige Quelle.
-if (existsSync(new URL('ratgeber/', pub))) for (const d of readdirSync(new URL('ratgeber/', pub), { withFileTypes: true })) {
-  if (d.isDirectory() && !bySlug[d.name]) rmSync(new URL(`ratgeber/${d.name}/`, pub), { recursive: true });
+if (existsSync(new URL('guides/', pub))) for (const d of readdirSync(new URL('guides/', pub), { withFileTypes: true })) {
+  if (d.isDirectory() && !bySlug[d.name]) rmSync(new URL(`guides/${d.name}/`, pub), { recursive: true });
 }
 
 // Übersicht: Suche zuerst, wenige beliebte Themen, darunter die kompakte Gliederung – nur indexierbare Seiten.
@@ -161,7 +161,7 @@ const hub = page({
 <article class="dash-card rg-body"><h2>So rechnen die Ratgeber-Seiten</h2><p>Alle Zahlen stammen aus demselben Rechenkern wie die übrigen LeaseRun-Rechner und aus einer zentral gepflegten Liste von Annahmen. Modellwerte wie Sollzins oder Lebenshaltung sind als Annahme gekennzeichnet und in jedem Rechner änderbar – denn jede Bank rechnet mit eigenen Ansätzen. Gesetzliche Werte wie Grunderwerbsteuer oder Kindergeld sind mit Quelle und Stand angegeben.</p><p>Verwandte Themen: <a class="ck-link" href="/checklist">Unterlagen für die Bank</a> · <a class="ck-link" href="/calculators/amortization">Restschuld berechnen</a> · <a class="ck-link" href="/learn/erwerbsstatus">Probezeit, befristet, selbstständig</a></p></article>
 <script type="application/json" id="rg-index">${JSON.stringify(idx).replace(/</g, '\\u003c')}</script>`,
 });
-write('ratgeber/index.html', hub);
+write('guides/index.html', hub);
 // llms.txt: Ratgeber-Abschnitt aus der Registry (nur indexierbare Seiten).
 {
   const f = 'llms.txt', t = read(f);
@@ -176,7 +176,7 @@ write('src/ratgeber-index.js', `// Automatisch erzeugt (scripts/build-ratgeber.m
   const res = bankChance({ ...d, propertyCosts: OK });
   const form = renderForm(d, { id: 'a', slug: 'checker', heading: 'Ihre Angaben' }).replace('{{result}}', renderResult(res, { ...d, livingOverride: '' }, { slug: 'checker', date: BUILD_DATE }));
   const keys = ['zins_modell', 'tilgung_modell', 'lebenshaltung_erste_person', 'lebenshaltung_weiterer_erwachsener', 'lebenshaltung_kind', 'objektkosten_modell', 'mietanrechnung', 'ueberschuss_gruen', 'rate_quote_hinweis', 'notar_pct', 'grundbuch_pct', 'makler_pct'];
-  write('rechner/bank-chancen-checker/index.html', page({
+  write('calculators/approval-odds/index.html', page({
     title: 'Bank-Chancen-Checker: Ist meine Finanzierung tragfähig? | LeaseRun', kicker: 'Rechner', hero: 'Bank-Chancen-Checker: Wie tragfähig ist meine Finanzierung?',
     meta: 'Haushaltsnetto, Darlehen und laufende Kosten eintragen – das Modell zeigt Rate, Überschuss und den Spielraum.',
     body: `${crumbs([['Rechner', '/calculators'], ['Bank-Chancen-Checker']])}
@@ -190,9 +190,9 @@ ${assumptionsBox(keys)}`,
 // Manifest für build-seo.mjs: Metadaten, sichtbare FAQ (Klartext, exakt wie auf der Seite) und Indexierbarkeit.
 const plain = (h) => h.replace(/<[^>]+>/g, '').replace(/&nbsp;|\u00a0/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
 const manifest = [
-  { path: '/guides', file: 'ratgeber/index.html', title: 'Ratgeber Immobilienfinanzierung: Gehalt, Rate, Eigenkapital | LeaseRun', desc: 'Gehalt für 400.000 € Kredit, tragbare Rate, Eigenkapital, Haushaltsrechnung der Bank: Antworten mit Modellrechnung, Quellen und Datenstand.', crumbs: ['Ratgeber'], indexable: live.length > 0 },
-  { path: '/calculators/approval-odds', file: 'rechner/bank-chancen-checker/index.html', title: 'Bank-Chancen-Checker: Ist meine Finanzierung tragfähig? | LeaseRun', desc: 'Haushaltsnetto, Darlehen und laufende Kosten eintragen: Rate, Überschuss und tragfähiges Darlehen im Modell – mit Ampel, Annahmen und Quellen.', crumbs: ['Rechner', 'Bank-Chancen-Checker'], indexable: true, tool: true },
-  ...TOPICS.map((t) => ({ path: `/guides/${t.slug}`, file: `ratgeber/${t.slug}/index.html`, title: t.title, desc: t.meta_description, crumbs: ['Ratgeber', t.short || t.h1], indexable: report[t.slug].indexable,
+  { path: '/guides', file: 'guides/index.html', title: 'Ratgeber Immobilienfinanzierung: Gehalt, Rate, Eigenkapital | LeaseRun', desc: 'Gehalt für 400.000 € Kredit, tragbare Rate, Eigenkapital, Haushaltsrechnung der Bank: Antworten mit Modellrechnung, Quellen und Datenstand.', crumbs: ['Ratgeber'], indexable: live.length > 0 },
+  { path: '/calculators/approval-odds', file: 'calculators/approval-odds/index.html', title: 'Bank-Chancen-Checker: Ist meine Finanzierung tragfähig? | LeaseRun', desc: 'Haushaltsnetto, Darlehen und laufende Kosten eintragen: Rate, Überschuss und tragfähiges Darlehen im Modell – mit Ampel, Annahmen und Quellen.', crumbs: ['Rechner', 'Bank-Chancen-Checker'], indexable: true, tool: true },
+  ...TOPICS.map((t) => ({ path: `/guides/${t.slug}`, file: `guides/${t.slug}/index.html`, title: t.title, desc: t.meta_description, crumbs: ['Ratgeber', t.short || t.h1], indexable: report[t.slug].indexable,
     article: { headline: t.h1, datePublished: t.created_at, dateModified: t.last_verified }, faqs: t.faqs.map((f) => ({ q: f.q, a: plain(fill(f.a)) })) })),
 ];
 writeFileSync(new URL('../content/ratgeber/pages.json', import.meta.url), JSON.stringify(manifest, null, 1) + '\n');

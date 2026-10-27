@@ -6,8 +6,8 @@ import { json, requireMember } from '@/lib/b2b/http';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Fall-Analyse und Kunden-Präsentation: Kontingente und Erscheinungsbild.
-// Die Dokumente selbst werden im Browser ausgewertet und nie an LeaseRun übertragen – hier wird nur gezählt.
+// Client analysis and client presentation: allowances and branding.
+// The documents themselves are analyzed in the browser and never sent to LeaseRun – this only counts usage.
 const monthKey = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit' }).format(new Date()).slice(0, 7);
 
 function limitsFor(a: B2BAccount) {
@@ -19,8 +19,8 @@ function limitsFor(a: B2BAccount) {
     blocked: sr === 'off',
     fall: sr === 'on' ? null : l ? l.fall : TRIAL_LIMITS.fall,
     praes: sr === 'on' ? null : l ? l.praes : TRIAL_LIMITS.praes,
-    // leaserun = LeaseRun-Logo · eigen = eigenes Logo und Farben mit dezentem LeaseRun-Hinweis · whitelabel = komplett eigenes Erscheinungsbild
-    // Web-Admin-Freischaltung „White-Label-Export“ geht dem Tarif vor.
+    // leaserun = LeaseRun logo · eigen = own logo and colors with a subtle LeaseRun note · whitelabel = fully own branding
+    // A Web-Admin override for "White-label export" takes precedence over the plan.
     branding: wl === 'on' ? 'whitelabel' : wl === 'off' ? 'leaserun' : a.has_whitelabel || (l && l.whitelabel) ? 'whitelabel' : l && l.cobranding ? 'eigen' : 'leaserun',
   };
 }
@@ -50,25 +50,25 @@ export async function GET(req: Request) {
       mode: L.branding,
       company: a.company_name, advisor: a.advisor_name, city: a.city,
       color: (own && a.brand_color) || '#0F2C59', color2: (own && a.brand_color2) || '#0284C7', font: (own && a.brand_font) || 'sans',
-      title: (own && a.doc_title) || 'Finanzierungsübersicht', sender: (own && a.doc_sender) || null, footer: (own && a.doc_footer) || null,
+      title: (own && a.doc_title) || 'Financing Overview', sender: (own && a.doc_sender) || null, footer: (own && a.doc_footer) || null,
       logo: own ? await logoData(a) : null,
     },
   });
 }
 
-// Kontingent verbrauchen (eine Fall-Analyse bzw. eine Präsentation).
+// Use up allowance (one client analysis or one presentation).
 export async function POST(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-fall-take', limit: 30 });
   if (ctx instanceof Response) return ctx;
   const p = z.object({ kind: z.enum(['fall', 'praesentation']) }).safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: 'Ungültig.' }, 400);
+  if (!p.success) return json({ error: 'Invalid request.' }, 400);
   const a = ctx.account as B2BAccount;
-  if (!a.verified_at) return json({ error: 'Ihr Unternehmenskonto ist noch nicht freigeschaltet.' }, 403);
+  if (!a.verified_at) return json({ error: 'Your business account is not verified yet.' }, 403);
   const L = limitsFor(a);
-  if (L.blocked) return json({ error: 'Schnellrechner und Fall-Analysen sind für Ihr Unternehmenskonto nicht freigeschaltet. Bitte wenden Sie sich an support@leaserun.com.' }, 403);
+  if (L.blocked) return json({ error: 'The quick calculator and client analyses are not enabled for your business account. Please contact support@leaserun.com.' }, 403);
   const lim = p.data.kind === 'fall' ? L.fall : L.praes;
   const { data, error } = await supabaseAdmin().rpc('b2b_usage_take', { acc: a.id, mon: monthKey(), k: p.data.kind, lim });
-  if (error) return json({ error: 'Kontingent konnte nicht geprüft werden.' }, 502);
-  if (data === -1) return json({ error: p.data.kind === 'fall' ? `Ihr Testkontingent von ${lim} Fall-Analysen in diesem Monat ist aufgebraucht. Mit jedem gebuchten Tarif sind Fall-Analysen unbegrenzt.` : `Ihr Kontingent von ${lim} Präsentationen in diesem Monat ist aufgebraucht. Ab „Kanzlei & Baufi Pro“ unbegrenzt.`, code: 'quota' }, 402);
+  if (error) return json({ error: 'Your allowance could not be checked.' }, 502);
+  if (data === -1) return json({ error: p.data.kind === 'fall' ? `You have used your trial allowance of ${lim} client analyses this month. Client analyses are unlimited on every paid plan.` : `You have used your allowance of ${lim} presentations this month. Unlimited on the Pro plan.`, code: 'quota' }, 402);
   return json({ ok: true, used: data, limit: lim });
 }

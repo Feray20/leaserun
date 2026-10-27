@@ -1,8 +1,8 @@
-// Konto endgültig löschen (Art. 17 DSGVO) – gemeinsam für „Konto löschen“ im Konto und für den Web-Admin.
-// Dateien, Protokolle ohne Fremdschlüssel und der Zugang werden entfernt; Profil, Objekte, Dokumente, Freigaben,
-// Versionen und ein eigenes Unternehmenskonto folgen per CASCADE. Rechnungen bleiben nach § 147 AO erhalten
-// (Fremdschlüssel auf das Unternehmenskonto wird auf NULL gesetzt). Creator mit Abrechnungsdaten werden
-// vom Login gelöst und bereinigt statt gelöscht (siehe lr_creator_account_deleted).
+// Permanently delete an account (privacy right to delete, e.g. CCPA/CPRA) – shared by "Delete account" in the account area
+// and the Web-Admin. Files, logs without foreign keys and the login are removed; profile, properties, documents, shares,
+// versions and an owned business account follow via CASCADE. Invoices are kept for tax record-keeping (the foreign key to
+// the business account is set to NULL). Creators with billing records are detached from the login and scrubbed instead
+// of deleted (see lr_creator_account_deleted).
 import { DOCUMENT_BUCKET, supabaseAdmin } from '@/lib/supabase/admin';
 
 async function removeFolder(bucket: string, prefix: string): Promise<void> {
@@ -28,7 +28,7 @@ export async function purgeUser(userId: string, b2bAccountId: string | null, ema
   await removeFolder('bank-ready-pdf', userId);
   await removeFolder('immo-exports', userId);
 
-  // Protokolle mit SET NULL und Tabellen ohne Fremdschlüssel ausdrücklich löschen.
+  // Explicitly delete logs with SET NULL and tables without foreign keys.
   await db.from('lr_data_room_access_log').delete().eq('owner_id', userId);
   await db.from('lr_access_audit').delete().eq('owner_id', userId);
   await db.from('lr_kreditmappe_credits').delete().eq('owner_id', userId);
@@ -38,7 +38,7 @@ export async function purgeUser(userId: string, b2bAccountId: string | null, ema
   await db.from('lr_access_grants').delete().eq('user_id', userId);
   if (email) await db.from('lr_newsletter').delete().eq('email', email.toLowerCase());
 
-  // Ältere Bank-Pakete (falls vorhanden) haben RESTRICT-Abhängigkeiten.
+  // Older lender packages (if any) have RESTRICT dependencies.
   const { data: pk } = await db.from('lr_bank_packages').select('id').eq('owner_id', userId);
   const ids = (pk ?? []).map((x) => x.id as string);
   if (ids.length) {
@@ -48,8 +48,8 @@ export async function purgeUser(userId: string, b2bAccountId: string | null, ema
     await db.from('lr_bank_pdf_versions').delete().in('package_id', ids);
   }
 
-  // Creator Hub: ohne Abrechnungsdaten vollständig löschen, sonst vom Login lösen und bereinigen
-  // (Abrechnungen und Belege unterliegen der Aufbewahrungspflicht und blockieren sonst die Kaskade).
+  // Creator Hub: delete completely when there are no billing records; otherwise detach from the login and scrub
+  // (statements and receipts must be retained and would otherwise block the cascade).
   const cr = await db.rpc('lr_creator_account_deleted', { p_user: userId });
   if (cr.error && !/lr_creator_account_deleted|does not exist|schema cache/i.test(cr.error.message)) throw new Error(cr.error.message);
 

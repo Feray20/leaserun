@@ -87,7 +87,7 @@ async function ownDevice(req: NextRequest): Promise<boolean> {
 function report(req: NextRequest, ev: NextFetchEvent, kind: 'probe' | 'blocked', ip: string | null, detail: string) {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key) return;
-  ev.waitUntil(sha(`leaserun-sec:${key}`).then((t) => fetch(new URL('/api/sec/event', req.url), { method: 'POST', headers: { 'content-type': 'application/json', 'x-ia-sec': t.slice(0, 40) }, body: JSON.stringify({ kind, ip, detail: detail.slice(0, 160) }) })).then(() => null, () => null));
+  ev.waitUntil(sha(`leaserun-sec:${key}`).then((t) => fetch(new URL('/api/sec/event', req.url), { method: 'POST', headers: { 'content-type': 'application/json', 'x-lr-sec': t.slice(0, 40) }, body: JSON.stringify({ kind, ip, detail: detail.slice(0, 160) }) })).then(() => null, () => null));
 }
 
 // api.leaserun.com: eigene Adresse für die LeaseRun API v1. /v1/… wird intern auf /api/v1/… geleitet;

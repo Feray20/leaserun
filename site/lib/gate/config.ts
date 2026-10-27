@@ -1,13 +1,13 @@
 import { adminConfigured, supabaseAdmin } from '@/lib/supabase/admin';
 
-// Vorschau & Freischaltung – eine Einstellung für die ganze Website, im Web-Admin steuerbar.
-// vorschau = ohne Zugang nur Einblick; offen = für alle Besucher frei.
+// Preview & unlock: one site-wide setting, controlled in the Web-Admin.
+// 'vorschau' = preview only without access; 'offen' = open to all visitors. (Stored values are kept for compatibility.)
 export type GateConfig = {
   wissen: 'vorschau' | 'offen';
-  leseproben: number;        // so viele Wissens-Antworten sind ohne Zugang als Leseprobe sichtbar (erster Satz)
+  leseproben: number;        // number of Learn answers visible as a free sample without access (first sentence)
   rechner: 'vorschau' | 'offen';
   beispiele: 'vorschau' | 'offen';
-  pdfProzent: number;        // Anteil der Seiten der Muster-PDFs ohne Zugang
+  pdfProzent: number;        // share of pages of the sample PDFs shown without access
 };
 export const GATE_DEFAULT: GateConfig = { wissen: 'vorschau', leseproben: 10, rechner: 'vorschau', beispiele: 'vorschau', pdfProzent: 20 };
 const KEY = 'gate_config';

@@ -1,14 +1,14 @@
 import { drive } from '@/lib/booking/graph';
 import { blockedType } from '@/lib/cloud/inbox';
 
-// Meine Ablage (Web-Admin → System): Ferays eigener Speicher für wichtige Dokumente und Bilder. Liegt im verbundenen
-// OneDrive im Ordner „Meine Ablage“ – nur im Web-Admin erreichbar, keine öffentlichen Links. Hoch- und Herunterladen läuft
-// direkt zwischen Browser und Microsoft (nicht über den LeaseRun-Server). Gelöscht wird hier nichts.
-export const ABLAGE = 'Meine Ablage';
-export const START_FOLDERS = ['Dokumente', 'Bilder', 'Verträge', 'Steuer & Finanzen', 'Ausweise & Urkunden', 'Sonstiges'];
+// Archive (Web-Admin → System): the owner's own storage for important documents and images. Lives in the connected
+// OneDrive in the folder "LeaseRun Archive" – reachable only in the Web-Admin, no public links. Uploads and downloads go
+// directly between browser and Microsoft (not through the LeaseRun server). Nothing is deleted here.
+export const ABLAGE = 'LeaseRun Archive';
+export const START_FOLDERS = ['Documents', 'Images', 'Contracts', 'Taxes & Finance', 'IDs & Certificates', 'Other'];
 
 const clean = (s: string) => String(s || '').normalize('NFC').replace(/[\\/:*?"<>|#%\u0000-\u001f]/g, '_').replace(/^[.\s]+|[.\s]+$/g, '').slice(0, 120);
-// Unterpfad innerhalb der Ablage: jede Ebene bereinigt, „..“ und leere Teile entfallen – nie außerhalb von „Meine Ablage“.
+// Subpath inside the archive: each level cleaned, ".." and empty parts dropped – never outside the archive folder.
 export const subPath = (p: unknown) => String(p || '').split('/').map(clean).filter((x) => x && x !== '..').slice(0, 8).join('/');
 const full = (sub: string) => (sub ? `${ABLAGE}/${sub}` : ABLAGE);
 const enc = (p: string) => p.split('/').map(encodeURIComponent).join('/');
@@ -31,52 +31,52 @@ export async function listAblage(p: unknown): Promise<{ path: string; items: Abl
   ]);
   const items = (j.value || []).map((f): AblageItem => ({
     id: f.id, name: f.name, folder: Boolean(f.folder), count: Number(f.folder?.childCount || 0), size: Number(f.size || 0), at: f.lastModifiedDateTime || '',
-    mime: f.file?.mimeType || null, thumb: f.thumbnails?.[0]?.medium?.url || null, virus: f.malware ? f.malware.description || 'Schadsoftware erkannt' : null, web: f.webUrl || null,
+    mime: f.file?.mimeType || null, thumb: f.thumbnails?.[0]?.medium?.url || null, virus: f.malware ? f.malware.description || 'Malware detected' : null, web: f.webUrl || null,
   }));
-  items.sort((a, b) => (a.folder === b.folder ? a.name.localeCompare(b.name, 'de') : a.folder ? -1 : 1));
+  items.sort((a, b) => (a.folder === b.folder ? a.name.localeCompare(b.name, 'en-US') : a.folder ? -1 : 1));
   return { path: sub, items, web: meta.webUrl || null };
 }
 
 export async function newFolder(p: unknown, name: unknown): Promise<void> {
   const n = clean(String(name || ''));
-  if (!n) throw new TypeError('Bitte einen Ordnernamen angeben.');
+  if (!n) throw new TypeError('Please enter a folder name.');
   await ensureRoot();
   await drive(`/root:/${enc(full(subPath(p)))}:/children`, { method: 'POST', body: JSON.stringify({ name: n, folder: {}, '@microsoft.graph.conflictBehavior': 'rename' }) });
 }
 
 export async function ablageUpload(p: unknown, name: unknown): Promise<string> {
   const n = clean(String(name || ''));
-  if (!n) throw new TypeError('Datei fehlt.');
-  if (blockedType(n)) throw new TypeError('Dieser Dateityp ist aus Sicherheitsgründen nicht erlaubt.');
+  if (!n) throw new TypeError('File missing.');
+  if (blockedType(n)) throw new TypeError('This file type isn’t allowed for security reasons.');
   await ensureRoot();
   const j = await drive<{ uploadUrl?: string }>(`/root:/${enc(`${full(subPath(p))}/${n}`)}:/createUploadSession`, { method: 'POST', body: JSON.stringify({ item: { '@microsoft.graph.conflictBehavior': 'rename' }, deferCommit: false }) });
-  if (!j.uploadUrl) throw new Error('Microsoft hat keine Hochladeadresse geliefert.');
+  if (!j.uploadUrl) throw new Error('Microsoft didn’t return an upload address.');
   return j.uploadUrl;
 }
 
 async function inAblage(id: string): Promise<{ '@microsoft.graph.downloadUrl'?: string; malware?: { description?: string } }> {
-  if (!/^[A-Za-z0-9!_.-]{6,80}$/.test(id)) throw new Error('Ungültige Datei.');
+  if (!/^[A-Za-z0-9!_.-]{6,80}$/.test(id)) throw new Error('Invalid file.');
   const j = await drive<{ '@microsoft.graph.downloadUrl'?: string; parentReference?: { path?: string }; malware?: { description?: string } }>(`/items/${encodeURIComponent(id)}`);
-  if (!/\/root:\/Meine Ablage(\/|$)/.test(decodeURIComponent(j.parentReference?.path || ''))) throw new Error('Datei nicht in Meine Ablage.');
+  if (!/\/root:\/LeaseRun Archive(\/|$)/.test(decodeURIComponent(j.parentReference?.path || ''))) throw new Error('File is not in the archive.');
   return j;
 }
 
-// Umbenennen (Datei oder Ordner) – nur innerhalb der Ablage. Die Dateiendung bleibt erhalten, wenn sie weggelassen wurde.
+// Rename (file or folder) – only inside the archive. The file extension is kept if it was left out.
 export async function renameItem(itemId: unknown, name: unknown, old: unknown): Promise<void> {
   const id = String(itemId || '');
   await inAblage(id);
   let n = clean(String(name || ''));
-  if (!n) throw new TypeError('Bitte einen Namen angeben.');
+  if (!n) throw new TypeError('Please enter a name.');
   const ext = /\.[A-Za-z0-9]{1,6}$/.exec(String(old || ''))?.[0];
   if (ext && !/\.[A-Za-z0-9]{1,6}$/.test(n)) n += ext;
-  if (blockedType(n)) throw new TypeError('Dieser Dateityp ist aus Sicherheitsgründen nicht erlaubt.');
+  if (blockedType(n)) throw new TypeError('This file type isn’t allowed for security reasons.');
   await drive(`/items/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ name: n, '@microsoft.graph.conflictBehavior': 'rename' }) });
 }
 
-// Kurzlebige Download-Adresse – nur für Dateien, die wirklich in „Meine Ablage“ liegen.
+// Short-lived download address – only for files that really are in the archive.
 export async function ablageFile(itemId: unknown): Promise<string> {
   const j = await inAblage(String(itemId || ''));
-  if (j.malware) throw new Error('Virus gefunden – Download gesperrt.');
-  if (!j['@microsoft.graph.downloadUrl']) throw new Error('Download-Adresse nicht verfügbar.');
+  if (j.malware) throw new Error('Malware found – download blocked.');
+  if (!j['@microsoft.graph.downloadUrl']) throw new Error('Download address not available.');
   return j['@microsoft.graph.downloadUrl'];
 }

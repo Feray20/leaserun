@@ -1,21 +1,42 @@
-// Werktage für Fristen und automatischen Versand (ohne Abhängigkeiten, testbar).
+// Business days for deadlines and scheduled sending (no dependencies, testable).
 
-// Deutsche Feiertage (bundeseinheitlich) für die Werktagsberechnung; Ostern nach Gauß.
-function easter(y: number): Date {
-  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
-  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4;
-  const l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
-  return new Date(Date.UTC(y, month - 1, day));
+// US federal holidays (5 U.S.C. 6103) incl. observed dates: a holiday on Saturday is observed on Friday,
+// a holiday on Sunday on Monday.
+const nthWeekday = (y: number, m0: number, wd: number, n: number) => {
+  const first = new Date(Date.UTC(y, m0, 1)).getUTCDay();
+  return 1 + ((wd - first + 7) % 7) + (n - 1) * 7;
+};
+const lastWeekday = (y: number, m0: number, wd: number) => {
+  const last = new Date(Date.UTC(y, m0 + 1, 0));
+  return last.getUTCDate() - ((last.getUTCDay() - wd + 7) % 7);
+};
+const observed = (d: Date): number => {
+  const wd = d.getUTCDay();
+  return d.getTime() + (wd === 6 ? -864e5 : wd === 0 ? 864e5 : 0);
+};
+
+export function federalHolidays(y: number): number[] {
+  const D = (m0: number, day: number) => new Date(Date.UTC(y, m0, day));
+  const fixed = [D(0, 1), D(5, 19), D(6, 4), D(10, 11), D(11, 25)].map(observed); // New Year, Juneteenth, Independence Day, Veterans Day, Christmas
+  const floating = [
+    D(0, nthWeekday(y, 0, 1, 3)), // Martin Luther King Jr. Day – 3rd Monday of January
+    D(1, nthWeekday(y, 1, 1, 3)), // Washington's Birthday – 3rd Monday of February
+    D(4, lastWeekday(y, 4, 1)), // Memorial Day – last Monday of May
+    D(8, nthWeekday(y, 8, 1, 1)), // Labor Day – 1st Monday of September
+    D(9, nthWeekday(y, 9, 1, 2)), // Columbus Day – 2nd Monday of October
+    D(10, nthWeekday(y, 10, 4, 4)), // Thanksgiving – 4th Thursday of November
+  ].map((d) => d.getTime());
+  // New Year's Day of the following year observed on Dec 31 when Jan 1 falls on a Saturday.
+  const nextNy = observed(new Date(Date.UTC(y + 1, 0, 1)));
+  return [...fixed, ...floating, ...(new Date(nextNy).getUTCFullYear() === y ? [nextNy] : [])];
 }
+
 export function isHoliday(d: Date): boolean {
-  const y = d.getUTCFullYear(), md = `${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
-  if (['1-1', '5-1', '10-3', '12-25', '12-26'].includes(md)) return true;
-  const e = easter(y).getTime(), day = 864e5;
-  return [-2, 1, 39, 50].some((o) => e + o * day === Date.UTC(y, d.getUTCMonth(), d.getUTCDate()));
+  const t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  return federalHolidays(d.getUTCFullYear()).includes(t);
 }
 
-// n-ter Werktag (Mo–Fr ohne bundeseinheitliche Feiertage) eines Monats als YYYY-MM-DD.
+// n-th business day (Mon–Fri excluding US federal holidays) of a month as YYYY-MM-DD.
 export function nthWorkday(year: number, month1: number, n: number): string {
   let count = 0;
   for (let day = 1; day <= 31; day++) {

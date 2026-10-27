@@ -1,10 +1,10 @@
-// Reichweitenmessung ohne Cookies und ohne lokale Speicherung (siehe Datenschutzhinweise, Abschnitt Reichweitenmessung).
-// Gesendet werden nur: Seite (ohne Parameter), Herkunftsseite (Domain), Kampagnen-Parameter (utm_*), Ereignisname.
-// Bei aktivem „Do Not Track“ oder Global Privacy Control wird nichts gesendet.
+// Audience measurement without cookies and without local storage (see the privacy policy, section "Audience measurement").
+// Only sent: page (without parameters), referring domain, campaign parameters (utm_*), event name.
+// With "Do Not Track" or Global Privacy Control enabled, nothing is sent.
 (function () {
   if (window.iaTrack) return;
   var off = navigator.doNotTrack === '1' || window.doNotTrack === '1' || navigator.globalPrivacyControl === true || /^(localhost|127\.)/.test(location.hostname) || navigator.webdriver;
-  var p = location.pathname, seg = /^\/(b2b|b2b-portal|p\/|partner)/.test(p) || /^partner\./.test(location.hostname) ? 'b2b' : 'b2c';
+  var p = location.pathname, seg = /^\/(business|business-portal|p\/|partners)/.test(p) || /^partner\./.test(location.hostname) ? 'b2b' : 'b2c';
   var q = new URLSearchParams(location.search);
   function send(ev, extra) {
     if (off) return;
@@ -14,11 +14,11 @@
       var s = JSON.stringify(b);
       if (navigator.sendBeacon) navigator.sendBeacon('/api/a', new Blob([s], { type: 'text/plain' }));
       else fetch('/api/a', { method: 'POST', body: s, keepalive: true }).catch(function () {});
-    } catch (e) { /* nie stören */ }
+    } catch (e) { /* never interfere */ }
   }
   window.iaTrack = send;
-  // Empfehlungs-Code (?ref=) für diese Sitzung merken, damit er bei der Registrierung ankommt (nur sessionStorage,
-  // endet mit dem Schließen des Tabs; bei „Do Not Track“/GPC nicht).
+  // Remember the referral code (?ref=) for this session so it reaches sign-up (sessionStorage only,
+  // ends when the tab closes; not with Do Not Track/GPC).
   try {
     var rf = q.get('ref');
     if (!off && rf && /^[a-z0-9-]{3,40}$/.test(rf)) {
@@ -26,9 +26,9 @@
       var cp = (q.get('utm_campaign') || '').toLowerCase();
       if (/^[a-z0-9-]{3,40}$/.test(cp)) sessionStorage.setItem('lr-camp', cp); else sessionStorage.removeItem('lr-camp');
     }
-  } catch (e) { /* ohne Speicher */ }
-  if (/^\/intern\b/.test(p)) { off = true; return; }
+  } catch (e) { /* no storage */ }
+  if (/^\/(intern|internal)\b/.test(p)) { off = true; return; }
   send('pv');
-  if (/^\/angebote/.test(p)) send('offer_view');
+  if (/^\/pricing/.test(p)) send('offer_view');
   if (q.get('checkout') === 'success') send('purchase_return');
 })();

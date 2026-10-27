@@ -1,6 +1,6 @@
 // Vorschau für Nicht-Kunden: Rechner laufen nur mit Beispielwerten, die Wissenszentrale zeigt nur Allgemeines –
 // die ausführlichen Antworten (Rechenweg, Rechtsgrundlage, Bankpraxis) lädt nur ein zahlender Kunde vom Server.
-// Kunden erkennt menu.js (Klasse ia-paid am <html>, Zwischenspeicher ia-access); sobald sie gesetzt ist, ist alles offen.
+// Kunden erkennt menu.js (Klasse lr-paid am <html>, Zwischenspeicher lr-access); sobald sie gesetzt ist, ist alles offen.
 (() => {
   if (window.__iaGate) return;
   window.__iaGate = true;
@@ -16,33 +16,33 @@
 
   const css = document.createElement('style');
   css.textContent = `
-  .ia-gate-box{display:none}
-  html.ia-demo .ia-gate-box{display:grid;gap:8px;position:relative;margin:12px 0;padding:16px 18px;border-radius:14px;border:1px solid #BFDBFE;background:linear-gradient(135deg,#EFF6FF,#F8FAFC);color:#0F2C59;font:500 15px/1.5 Inter,system-ui,sans-serif}
-  .ia-gate-box strong{font-size:16px}
-  .ia-gate-box .ia-gate-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .ia-gate-box a.btn{min-height:44px}
-  html.ia-demo .ia-demo-ctl{opacity:.75;cursor:not-allowed}
-  html.ia-demo [data-gate-hid]{display:none!important}
-  html.ia-demo .ia-gate-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;box-sizing:border-box;width:100%;margin:0 0 18px;padding:12px 16px}
-  html.ia-demo .ia-gate-bar .btn{min-height:40px}
-  html.ia-demo .wq-more{display:none!important}
+  .lr-gate-box{display:none}
+  html.lr-demo .lr-gate-box{display:grid;gap:8px;position:relative;margin:12px 0;padding:16px 18px;border-radius:14px;border:1px solid #BFDBFE;background:linear-gradient(135deg,#EFF6FF,#F8FAFC);color:#0F2C59;font:500 15px/1.5 Inter,system-ui,sans-serif}
+  .lr-gate-box strong{font-size:16px}
+  .lr-gate-box .lr-gate-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .lr-gate-box a.btn{min-height:44px}
+  html.lr-demo .lr-demo-ctl{opacity:.75;cursor:not-allowed}
+  html.lr-demo [data-gate-hid]{display:none!important}
+  html.lr-demo .lr-gate-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;box-sizing:border-box;width:100%;margin:0 0 18px;padding:12px 16px}
+  html.lr-demo .lr-gate-bar .btn{min-height:40px}
+  html.lr-demo .wq-more{display:none!important}
   .wq-tag{display:none}
-  html.ia-demo .wq-tag{display:block;width:fit-content;margin-top:6px;padding:1px 9px;border-radius:999px;font:600 12px/1.6 Inter,system-ui,sans-serif;font-style:normal;white-space:nowrap}
-  html.ia-demo .wq-free{background:#DCFCE7;color:#166534}
-  html.ia-demo .wq-lock{background:#EEF2FF;color:#3730A3}
+  html.lr-demo .wq-tag{display:block;width:fit-content;margin-top:6px;padding:1px 9px;border-radius:999px;font:600 12px/1.6 Inter,system-ui,sans-serif;font-style:normal;white-space:nowrap}
+  html.lr-demo .wq-free{background:#DCFCE7;color:#166534}
+  html.lr-demo .wq-lock{background:#EEF2FF;color:#3730A3}
   .wq-hook{display:none}
-  html.ia-demo .wq-hook{display:block;margin:10px 0 4px;padding-left:12px;border-left:3px solid #93C5FD;color:#0F2C59;font-weight:600}
-  .ia-gate-note{display:none}
-  html.ia-demo .ia-gate-note{display:block;margin:8px 0 0;color:#475569;font-size:14px}
-  .report > h2 .ia-gate-tag{display:inline-block;margin:0 0 0 8px;vertical-align:middle}
-  html.ia-demo .report .route-a .ia-gate-hook{margin:4px 0 8px}`;
+  html.lr-demo .wq-hook{display:block;margin:10px 0 4px;padding-left:12px;border-left:3px solid #93C5FD;color:#0F2C59;font-weight:600}
+  .lr-gate-note{display:none}
+  html.lr-demo .lr-gate-note{display:block;margin:8px 0 0;color:#475569;font-size:14px}
+  .report > h2 .lr-gate-tag{display:inline-block;margin:0 0 0 8px;vertical-align:middle}
+  html.lr-demo .report .route-a .lr-gate-hook{margin:4px 0 8px}`;
   document.head.append(css);
 
   // Eine kurze Anleitung ganz oben – und nur dort ein Knopf „Zugang freischalten“ (keine Wiederholung je Eintrag).
   const OPEN = CALC ? 'jeder Rechner mit Ihren eigenen Zahlen – speichern, drucken, teilen.' : MUSTER ? 'die komplette Mustermappe und Ihre eigene Kreditmappe.' : 'alle Antworten mit Kernaussage, nächstem Schritt, Rechenweg und Rechtsgrundlage.';
   const guide = () => {
     const d = document.createElement('div');
-    d.className = 'lr-gate-box ia-gate-bar'; d.setAttribute('role', 'note');
+    d.className = 'lr-gate-box lr-gate-bar'; d.setAttribute('role', 'note');
     d.innerHTML = `<span><strong>Vorschau.</strong> Mit Zugang sofort offen: ${OPEN}</span>
       <span class="lr-gate-act"><a class="btn btn-dark" href="/pricing">Zugang freischalten</a>${user() ? '' : '<a class="ck-link" href="/auth/login">Schon Kunde? Anmelden</a>'}</span>`;
     return d;
@@ -58,7 +58,7 @@
     else if (p.dataset.orig !== undefined) { p.textContent = p.dataset.orig; delete p.dataset.orig; }
   };
   const placeGuide = () => {
-    const main = document.querySelector('main'); if (!main || main.querySelector('.ia-gate-bar')) return;
+    const main = document.querySelector('main'); if (!main || main.querySelector('.lr-gate-bar')) return;
     const host = main.querySelector('.route-search, .calc-pages > .crumbs, .calc-pages, form[data-bcc], .ex-grid');
     const g = guide();
     if (host && host.classList.contains('crumbs')) host.after(g); else if (host && host.classList.contains('calc-pages')) host.prepend(g); else if (host) host.before(g); else main.prepend(g);
@@ -84,7 +84,7 @@
       .catch(() => { try { return JSON.parse(sessionStorage.getItem(SK) || 'null') || {}; } catch { return {}; } });
   })());
   const areaOpen = () => (WISSEN && GATE.wissen === 'offen') || (CALC && GATE.rechner === 'offen') || (MUSTER && GATE.beispiele === 'offen');
-  // Freigabe je Bereich (Tarif oder Einzelfreigabe im Web-Admin) – ia-open-wissen / -beispiele / -rechner von menu.js
+  // Freigabe je Bereich (Tarif oder Einzelfreigabe im Web-Admin) – lr-open-wissen / -beispiele / -rechner von menu.js
   const granted = () => root.classList.contains('lr-open-' + (WISSEN ? 'wissen' : MUSTER ? 'beispiele' : 'rechner')) || (() => { try { const a = JSON.parse(localStorage.getItem('lr-access') || 'null'); return !!(a && (a.areas ? a.areas[WISSEN ? 'wissen' : MUSTER ? 'beispiele' : 'rechner'] : a.paid)); } catch { return false; } })();
   const full = () => granted() || areaOpen();
   let DET = null, detP = null, PREV = null, prevP = null;
@@ -138,7 +138,7 @@
       el.dataset.gate = el.disabled ? 'was' : '1'; el.disabled = true; el.classList.add('lr-demo-ctl');
     });
     main.querySelectorAll('button:not([data-gate]), a.btn:not([data-gate])').forEach((el) => {
-      if (!NOFREE.test(el.textContent || '') || el.closest('.ia-gate-box')) return;
+      if (!NOFREE.test(el.textContent || '') || el.closest('.lr-gate-box')) return;
       el.dataset.gate = el.tagName === 'BUTTON' && el.disabled ? 'was' : '1';
       if (el.tagName === 'BUTTON') el.disabled = true; else { el.dataset.href = el.getAttribute('href') || ''; el.removeAttribute('href'); el.setAttribute('aria-disabled', 'true'); }
       el.classList.add('lr-demo-ctl');
@@ -155,16 +155,16 @@
       const arts = [...rep.querySelectorAll('.route-accordion > article')];
       arts.forEach((a, k) => {
         const tag = a.querySelector('.route-q .wq-tag');
-        if (tag) { tag.textContent = k ? 'Mit Zugang' : 'Leseprobe'; tag.className = 'wq-tag ia-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); }
+        if (tag) { tag.textContent = k ? 'Mit Zugang' : 'Leseprobe'; tag.className = 'wq-tag lr-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); }
         if (!k) return;
         const body = a.querySelector('.route-a'); if (!body) return;
         [...body.children].forEach((el) => { el.dataset.gateHid = '1'; });
-        const hook = document.createElement('p'); hook.className = 'wq-hook ia-gate-hook'; hook.textContent = a.dataset.hook || 'Diesen Abschnitt sehen Sie vollständig mit Zugang.';
+        const hook = document.createElement('p'); hook.className = 'wq-hook lr-gate-hook'; hook.textContent = a.dataset.hook || 'Diesen Abschnitt sehen Sie vollständig mit Zugang.';
         body.append(hook);
       });
       // Ältere Darstellung (Überschriften statt Fragen): erster Abschnitt offen, Rest ausgeblendet.
       if (!arts.length) [...rep.querySelectorAll(':scope > h2')].forEach((h, k) => {
-        const tag = document.createElement('em'); tag.className = 'wq-tag ia-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); tag.textContent = k ? 'Mit Zugang' : 'Leseprobe';
+        const tag = document.createElement('em'); tag.className = 'wq-tag lr-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); tag.textContent = k ? 'Mit Zugang' : 'Leseprobe';
         h.append(' ', tag);
         if (!k) return;
         const labels = [];
@@ -174,7 +174,7 @@
           el.dataset.gateHid = '1';
         }
         // Kleiner Einblick: was der Abschnitt enthält (nur Bezeichnungen, keine Werte).
-        const note = document.createElement('p'); note.className = 'lr-gate-note ia-gate-sec';
+        const note = document.createElement('p'); note.className = 'lr-gate-note lr-gate-sec';
         note.textContent = labels.length ? `Enthält: ${labels.join(', ')} …` : 'Mit Zugang vollständig sichtbar.';
         h.after(note);
       });
@@ -209,8 +209,8 @@
       if (el.dataset.gate === '1') { if ('disabled' in el && el.tagName !== 'A') el.disabled = false; if (el.dataset.href !== undefined) { el.setAttribute('href', el.dataset.href); el.removeAttribute('aria-disabled'); delete el.dataset.href; } }
       el.classList.remove('lr-demo-ctl'); delete el.dataset.gate;
     });
-    document.querySelectorAll('.ia-gate-bar, .ia-gate-more, .ia-gate-note, .ia-gate-hook').forEach((b) => b.remove());
-    document.querySelectorAll('.ia-gate-tag').forEach((t) => { if (t.closest('.route-q')) { t.textContent = ''; t.className = 'wq-tag'; } else t.remove(); });
+    document.querySelectorAll('.lr-gate-bar, .lr-gate-more, .lr-gate-note, .lr-gate-hook').forEach((b) => b.remove());
+    document.querySelectorAll('.lr-gate-tag').forEach((t) => { if (t.closest('.route-q')) { t.textContent = ''; t.className = 'wq-tag'; } else t.remove(); });
     document.querySelectorAll('[data-gate-done]').forEach((e) => { delete e.dataset.gateDone; });
     heroText(false);
     document.querySelectorAll('[data-gate-hid]').forEach((e) => { delete e.dataset.gateHid; });

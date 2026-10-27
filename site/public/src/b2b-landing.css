@@ -171,6 +171,6 @@
   .b2b-mbar .b2b-mbar-go:hover{background:#163a73;color:#fff}
   .b2b-mbar-doc{flex:none;display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:#0F2C59;text-decoration:underline;text-underline-offset:3px}
   body:has(.b2b-mbar){padding-bottom:calc(72px + env(safe-area-inset-bottom))!important}
-  body:has(.b2b-mbar) .bottom-nav,body:has(.ia-priv) .b2b-mbar,body.menu-open .b2b-mbar{display:none!important}
+  body:has(.b2b-mbar) .bottom-nav,body:has(.lr-priv) .b2b-mbar,body.menu-open .b2b-mbar{display:none!important}
 }
 @media print{.b2b-mbar{display:none!important}}

@@ -1293,15 +1293,15 @@ details.fa-priv p{margin:8px 0 0}
 .btn,a.btn,button.btn,.btn-pay{border-radius:999px!important}
 
 /* Fußzeile wie im Privatbereich: in der Inhaltsspalte, Seitenleiste läuft bis unten durch */
-body:has(.pt-main .ia-legal-in-main)>footer.ia-legal-b2b{display:none}
-.pt-main>.ia-legal .ia-legal-in{width:auto;padding:22px 28px 24px!important}
+body:has(.pt-main .lr-legal-in-main)>footer.lr-legal-b2b{display:none}
+.pt-main>.lr-legal .lr-legal-in{width:auto;padding:22px 28px 24px!important}
 @media(min-width:901px){
   .pt-main{display:flex;flex-direction:column;min-height:100vh}
   .pt-main>.pt-liab{margin-bottom:40px}
-  .pt-main>.ia-legal{margin:auto -28px -48px}
+  .pt-main>.lr-legal{margin:auto -28px -48px}
 }
-@media(max-width:900px){.pt-main>.ia-legal{margin:32px -14px 0}.pt-main>.ia-legal .ia-legal-in{padding-left:14px!important;padding-right:14px!important}}
-.ia-copy{white-space:nowrap}
+@media(max-width:900px){.pt-main>.lr-legal{margin:32px -14px 0}.pt-main>.lr-legal .lr-legal-in{padding-left:14px!important;padding-right:14px!important}}
+.lr-copy{white-space:nowrap}
 /* B2B-Hero im LeaseRun-Fade-Stil (wie Startseite/KPI-Bänder) */
 .b2b-exec.bx-hero{position:relative;overflow:hidden;background:radial-gradient(70% 90% at 100% 0%,rgba(56,189,248,.34) 0%,rgba(56,189,248,0) 60%),radial-gradient(60% 70% at 0% 100%,rgba(2,132,199,.28) 0%,rgba(2,132,199,0) 65%),linear-gradient(140deg,#0F2C59 0%,#0B3B73 50%,#0369A1 100%)}
 .b2b-exec.bx-hero::after{content:"";position:absolute;inset:auto 0 0 0;height:90px;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.06));pointer-events:none}
@@ -1353,7 +1353,7 @@ body:has(.pt-main .ia-legal-in-main)>footer.ia-legal-b2b{display:none}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .tf-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}@media(max-width:600px){.tf-acts .btn{flex:1 1 100%}}
 /* Unternehmensseiten: „Mein Konto“ neben „Menü“ wie im Privatbereich (führt ins Unternehmensportal) */
-.nav-actions a.b2b-acc{background-image:var(--ia-grad)!important;color:#fff!important;border-color:transparent!important}
+.nav-actions a.b2b-acc{background-image:var(--lr-grad)!important;color:#fff!important;border-color:transparent!important}
 @media (max-width:900px){
   .site-header .nav-wrap>.nav-actions{display:flex!important;align-items:center;gap:8px;margin-left:auto;margin-right:8px}
   .site-header .nav-actions a.b2b-acc{display:inline-flex!important;align-items:center;justify-content:center;min-height:44px;height:44px;padding:0 16px;border-radius:999px;font-size:14.5px;font-weight:700;white-space:nowrap;margin:0}
@@ -1401,7 +1401,7 @@ body.intern .wa-main :is(div,section,article,aside,form,nav,ul,ol,li,label,p){mi
 @media(max-width:980px){body.intern .wa-main :is(.pf,.pf-cols){grid-template-columns:minmax(0,1fr)}}
 body.intern .wa-main .panic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:700px){body.intern .wa-main .panic-grid{grid-template-columns:minmax(0,1fr)}}
-body.intern .wa-main .ia-kl-btn{white-space:normal;text-align:left}
+body.intern .wa-main .lr-kl-btn{white-space:normal;text-align:left}
 body.intern .wa-main img,body.intern .wa-main iframe,body.intern .wa-main video{max-width:100%}
 body.intern .wa-main pre,body.intern .wa-main code{max-width:100%;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
 /* Web-Admin Handy: Luft zwischen Kopf, Knöpfen, Suche und Filtern; Aktionen-Menü nie hinter der unteren Leiste. */
@@ -1424,5 +1424,5 @@ body.intern .wa-main pre,body.intern .wa-main code{max-width:100%;overflow-x:aut
 @media(max-width:600px){.wa-scope-band .wa-asof{margin-left:0;order:3}}
 .an-ga{margin:0 0 12px;padding:10px 14px}.an-ga summary{cursor:pointer}
 .an-ga-f{display:grid;gap:8px;margin-top:10px;max-width:520px}.an-ga-f input[name=gid]{font-family:ui-monospace,Menlo,monospace;text-transform:uppercase}
-@media (hover:none) and (pointer:coarse){.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.cr-sticky,.ks-head,.k-top,.app-top,.ia-work{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.ks-head{background-color:rgba(255,255,255,.985)}}
+@media (hover:none) and (pointer:coarse){.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.cr-sticky,.ks-head,.k-top,.app-top,.lr-work{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}.site-header,.route-header,.wa-sticky,.pt-top,.lp-sticky,.ks-head{background-color:rgba(255,255,255,.985)}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

@@ -8,21 +8,21 @@ import { intakeClosed } from '@/lib/security/panic';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Ersteinrichtung nach dem ersten Login: Passwort wurde im Browser geändert (Supabase); hier werden die Erklärungen
-// des Inhabers gespeichert (§ 14 BGB, AVV, Nutzungsbedingungen) und die Pflicht zum Passwortwechsel aufgehoben.
+// Initial setup after the first sign-in: the password was changed in the browser (Supabase); here the owner's
+// statements are stored (business use, DPA, Business Terms) and the forced password change is cleared.
 const Body = z.object({ passwordChanged: z.literal(true), unternehmer: z.boolean().optional(), avv: z.boolean().optional(), agb: z.boolean().optional() });
 
 export async function POST(req: Request) {
-  if (await intakeClosed()) return json({ error: 'Vorübergehend nicht möglich (Wartung). Bitte später erneut versuchen.' }, 503);
+  if (await intakeClosed()) return json({ error: 'Temporarily unavailable (maintenance). Please try again later.' }, 503);
   const ctx = await requireMember(req, { allowLocked: true, onboarding: true, bucket: 'b2b-onboard', limit: 10 });
   if (ctx instanceof Response) return ctx;
   const p = Body.safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: 'Bitte zuerst ein neues Passwort festlegen.' }, 400);
+  if (!p.success) return json({ error: 'Please set a new password first.' }, 400);
   const db = supabaseAdmin();
   const now = new Date().toISOString();
   const a = ctx.account;
   if (ctx.role === 'owner' && (!a.unternehmer_confirmed_at || !a.avv_accepted_at)) {
-    if (!p.data.unternehmer || !p.data.avv || !p.data.agb) return json({ error: 'Bitte alle drei Erklärungen bestätigen.' }, 400);
+    if (!p.data.unternehmer || !p.data.avv || !p.data.agb) return json({ error: 'Please confirm all three statements.' }, 400);
     await db.from('lr_b2b_accounts').update({ unternehmer_confirmed_at: a.unternehmer_confirmed_at || now, avv_accepted_at: a.avv_accepted_at || now, avv_version: a.avv_accepted_at ? a.avv_version : AVV_VERSION, ...(a.avv_accepted_at ? {} : { avv_evidence: avvEvidence(req, { userId: ctx.user.id, email: ctx.user.email, name: a.advisor_name, role: ctx.role }) }) }).eq('id', a.id);
   }
   const { data: u } = await db.auth.admin.getUserById(ctx.user.id);

@@ -15,7 +15,7 @@
 
   const MIN = 140; // ab dieser Textlänge einklappen
   const BLOCK = new Set(['P', 'DIV', 'UL', 'OL', 'DL', 'TABLE', 'FORM', 'INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'DETAILS', 'SECTION', 'ARTICLE', 'ASIDE', 'NAV', 'HEADER', 'FOOTER', 'LABEL', 'FIGURE', 'IMG', 'SVG', 'CANVAS', 'IFRAME', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'FIELDSET', 'VIDEO', 'A']);
-  const SKIP = 'nav,header,footer,summary,label,button,table,form,dialog form,pre,code,[contenteditable],[role=alert],[role=status],[aria-live],.toast,.auth-message,.ia-legal,.mobile-nav,[class*=hero],.wl-prev,.wl-mail,.sim,[data-noklapp],.ia-kl-btn,.ia-kl,.lt-body,.lt-qa,.bw,.glossar,.gl-item,.route-accordion,.ia-gate-box';
+  const SKIP = 'nav,header,footer,summary,label,button,table,form,dialog form,pre,code,[contenteditable],[role=alert],[role=status],[aria-live],.toast,.auth-message,.lr-legal,.mobile-nav,[class*=hero],.wl-prev,.wl-mail,.sim,[data-noklapp],.lr-kl-btn,.lr-kl,.lt-body,.lt-qa,.bw,.glossar,.gl-item,.route-accordion,.lr-gate-box';
   const leaf = (el) => { for (const c of el.children) { if (BLOCK.has(c.tagName) && !(c.tagName === 'A' && c.textContent.length < 80)) return false; } return true; };
 
   // Einordnung nach Inhalt – eine kurze, sachliche Überschrift für die geschlossene Zeile.
@@ -45,21 +45,21 @@
 
   // Gestaltung einmalig – überschreibt die frühere Zwei-Zeilen-Ansicht in allen Stylesheets.
   const css = document.createElement('style');
-  css.textContent = `.ia-kl-host.ia-kl-host{display:block}
-.ia-kl-host>.ia-kl-btn.ia-kl-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;margin:0;padding:11px 14px;border:1px solid #E2E8F0;border-radius:12px;background:rgba(248,250,252,.92);color:#0F2C59;font:inherit;font-size:14.5px;font-weight:700;line-height:1.3;text-align:left;cursor:pointer;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s}
-.ia-kl-host>.ia-kl-btn.ia-kl-btn:hover{background:#F1F5F9;border-color:#CBD5E1;text-decoration:none}
-.ia-kl-host>.ia-kl-btn .ia-kl-ic{flex:none;color:#0284C7}
-.ia-kl-host>.ia-kl-btn .ia-kl-lbl{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.ia-kl-host>.ia-kl-btn .ia-kl-cat{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0284C7;margin:0}
-.ia-kl-host>.ia-kl-btn .ia-kl-sum{display:block;font-size:14.5px;font-weight:700;color:#0F2C59;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ia-kl-host>.ia-kl-btn[aria-expanded=true] .ia-kl-sum{display:none}
-.ia-kl-host>.ia-kl-btn .ia-kl-chev{flex:none;color:#94A3B8;transition:transform .2s}
-.ia-kl-host>.ia-kl-btn[aria-expanded=true]{border-bottom-left-radius:0;border-bottom-right-radius:0;background:#F1F5F9}
-.ia-kl-host>.ia-kl-btn[aria-expanded=true] .ia-kl-chev{transform:rotate(180deg)}
-.ia-kl-host>.ia-kl.ia-kl:not(.ia-kl-open){display:none!important}
-.ia-kl-host>.ia-kl.ia-kl-open{display:block!important;-webkit-line-clamp:unset;overflow:visible;margin:0;padding:12px 14px 14px;border:1px solid #E2E8F0;border-top:0;border-radius:0 0 12px 12px;background:#fff;color:#334155;cursor:auto}
-.ia-kl-host+.ia-kl-host{margin-top:8px}
-@media print{.ia-kl-host>.ia-kl{display:block!important;border:0!important;padding:0!important}.ia-kl-host>.ia-kl-btn{display:none!important}}`;
+  css.textContent = `.lr-kl-host.lr-kl-host{display:block}
+.lr-kl-host>.lr-kl-btn.lr-kl-btn{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;margin:0;padding:11px 14px;border:1px solid #E2E8F0;border-radius:12px;background:rgba(248,250,252,.92);color:#0F2C59;font:inherit;font-size:14.5px;font-weight:700;line-height:1.3;text-align:left;cursor:pointer;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s}
+.lr-kl-host>.lr-kl-btn.lr-kl-btn:hover{background:#F1F5F9;border-color:#CBD5E1;text-decoration:none}
+.lr-kl-host>.lr-kl-btn .lr-kl-ic{flex:none;color:#0284C7}
+.lr-kl-host>.lr-kl-btn .lr-kl-lbl{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.lr-kl-host>.lr-kl-btn .lr-kl-cat{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0284C7;margin:0}
+.lr-kl-host>.lr-kl-btn .lr-kl-sum{display:block;font-size:14.5px;font-weight:700;color:#0F2C59;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr-kl-host>.lr-kl-btn[aria-expanded=true] .lr-kl-sum{display:none}
+.lr-kl-host>.lr-kl-btn .lr-kl-chev{flex:none;color:#94A3B8;transition:transform .2s}
+.lr-kl-host>.lr-kl-btn[aria-expanded=true]{border-bottom-left-radius:0;border-bottom-right-radius:0;background:#F1F5F9}
+.lr-kl-host>.lr-kl-btn[aria-expanded=true] .lr-kl-chev{transform:rotate(180deg)}
+.lr-kl-host>.lr-kl.lr-kl:not(.lr-kl-open){display:none!important}
+.lr-kl-host>.lr-kl.lr-kl-open{display:block!important;-webkit-line-clamp:unset;overflow:visible;margin:0;padding:12px 14px 14px;border:1px solid #E2E8F0;border-top:0;border-radius:0 0 12px 12px;background:#fff;color:#334155;cursor:auto}
+.lr-kl-host+.lr-kl-host{margin-top:8px}
+@media print{.lr-kl-host>.lr-kl{display:block!important;border:0!important;padding:0!important}.lr-kl-host>.lr-kl-btn{display:none!important}}`;
   (document.head || document.documentElement).appendChild(css);
 
   const toggle = (el, btn, open) => {
@@ -70,11 +70,11 @@
   // Vorgerenderte Seiten enthalten teils noch die alte Einklapp-Ansicht („Mehr anzeigen“): zurückbauen, dann neu einordnen.
   const unbake = (root) => {
     // Alle Altstände entfernen (auch doppelt verschachtelte): Knöpfe ohne Laufzeit-Kennung raus, Inhalte auspacken.
-    for (const btn of root.querySelectorAll('.ia-kl-btn:not([data-rt])')) {
+    for (const btn of root.querySelectorAll('.lr-kl-btn:not([data-rt])')) {
       const host = btn.parentElement; btn.remove();
       if (host) { host.classList.remove('lr-kl-host'); delete host.dataset.kl; }
     }
-    for (const t of root.querySelectorAll('span.ia-kl')) {
+    for (const t of root.querySelectorAll('span.lr-kl')) {
       const prev = t.previousElementSibling;
       if (prev && prev.classList.contains('lr-kl-btn')) continue; // gehört zu einem Laufzeit-Knopf
       while (t.firstChild) t.parentNode.insertBefore(t.firstChild, t); t.remove();
@@ -122,7 +122,7 @@
     }
   };
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest?.('.ia-kl-btn');
+    const btn = e.target.closest?.('.lr-kl-btn');
     if (btn) { const el = document.getElementById(btn.getAttribute('aria-controls')); if (el) toggle(el, btn, !el.classList.contains('lr-kl-open')); }
   });
   let t = 0;
@@ -137,7 +137,7 @@
     addEventListener('load', later);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
-  window.addEventListener('beforeprint', () => document.querySelectorAll('.ia-kl').forEach((el) => el.classList.add('lr-kl-open')));
+  window.addEventListener('beforeprint', () => document.querySelectorAll('.lr-kl').forEach((el) => el.classList.add('lr-kl-open')));
 })();
 
 // „Mehr anzeigen“ für ganze Abschnitte (Startseite, Portale): sichtbar bleiben Überschrift, Kennzeile und ein Einleitungssatz;
@@ -145,8 +145,8 @@
 (() => {
   if (window.__iaMehr) return;
   window.__iaMehr = true;
-  if (!document.getElementById('iaMehrCss')) { const st = document.createElement('style'); st.id = 'iaMehrCss'; st.textContent = '[data-mehr-hid]{display:none!important}.ia-mehr-btn{display:flex;margin:14px auto 0;min-height:44px}'; document.head.append(st); }
-  const btn = (label, onOpen) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-ghost ia-mehr-btn'; b.textContent = label; b.setAttribute('aria-expanded', 'false'); b.onclick = () => { onOpen(); b.remove(); }; return b; };
+  if (!document.getElementById('iaMehrCss')) { const st = document.createElement('style'); st.id = 'iaMehrCss'; st.textContent = '[data-mehr-hid]{display:none!important}.lr-mehr-btn{display:flex;margin:14px auto 0;min-height:44px}'; document.head.append(st); }
+  const btn = (label, onOpen) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn btn-ghost lr-mehr-btn'; b.textContent = label; b.setAttribute('aria-expanded', 'false'); b.onclick = () => { onOpen(); b.remove(); }; return b; };
   const run = () => {
     document.querySelectorAll('section[data-mehr]:not([data-mehr-done])').forEach((sec) => {
       sec.dataset.mehrDone = '1';
@@ -182,7 +182,7 @@
   if (document.readyState === 'loading') addEventListener('DOMContentLoaded', run, { once: true }); else run();
   setTimeout(run, 1500);
   // Sprung per Link (#funktion, #faq …) auf einen eingeklappten Abschnitt: dort direkt alles zeigen.
-  const openFor = (hash) => { try { const t = hash && document.querySelector(hash); t?.closest?.('section[data-mehr]')?.querySelector('.ia-mehr-btn')?.click(); } catch { /* ungültiger Anker */ } };
+  const openFor = (hash) => { try { const t = hash && document.querySelector(hash); t?.closest?.('section[data-mehr]')?.querySelector('.lr-mehr-btn')?.click(); } catch { /* ungültiger Anker */ } };
   addEventListener('hashchange', () => openFor(location.hash));
   document.addEventListener('click', (e) => { const a = e.target.closest?.('a[href^="#"]'); if (a) openFor(a.getAttribute('href')); });
   if (location.hash) setTimeout(() => openFor(location.hash), 50);

@@ -50,7 +50,7 @@ function inspect() {
   }
   // 3. Zu kleine Schrift im Inhalt (Fließtext ab 40 Zeichen unter 13 px)
   if (!/^\/(intern|app|b2b-portal)/.test(location.pathname)) {
-    const small = [...document.querySelectorAll('main p, main li, main dd, main td')].filter((e) => vis(e) && (e.innerText || '').trim().length > 40 && parseFloat(getComputedStyle(e).fontSize) < 13 && !e.closest('footer, .footer, small, .form-note, .crumbs, .legal, .ia-legal'));
+    const small = [...document.querySelectorAll('main p, main li, main dd, main td')].filter((e) => vis(e) && (e.innerText || '').trim().length > 40 && parseFloat(getComputedStyle(e).fontSize) < 13 && !e.closest('footer, .footer, small, .form-note, .crumbs, .legal, .lr-legal'));
     if (small.length) out.push({ kind: 'kleine-schrift', level: small.length > 5 ? 'hoch' : 'mittel', detail: `${small.length} Textstelle(n) unter 13 px, z. B. „${label(small[0])}“ (${getComputedStyle(small[0]).fontSize}).`, fix: 'Schriftgröße für Inhaltstexte auf mindestens 15 px setzen.' });
   }
   // 4. Doppelte Einträge direkt untereinander (Überschriften, Begriffe, Fragen)
