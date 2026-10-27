@@ -23,6 +23,8 @@ export const DEFAULT_BOOKING: BookingConfig = {
   timeZone: OWNER_TZ,
 };
 
+const LEGACY_TOPICS = new Set(['Kennenlernen', 'Demo für Unternehmen', 'Presse & Kooperation', 'Fragen zu meiner Finanzierung']);
+
 export function validTz(tz: unknown): string | null {
   if (typeof tz !== 'string' || !tz || tz.length > 60 || !/^[A-Za-z_]+(?:\/[A-Za-z0-9_+-]+){0,2}$/.test(tz)) return null;
   try { new Intl.DateTimeFormat('en-US', { timeZone: tz }).format(0); return tz; } catch { return null; }
@@ -33,7 +35,10 @@ export async function getBookingConfig(): Promise<BookingConfig> {
     const { data } = await supabaseAdmin().from('lr_settings').select('value').eq('key', 'booking_config').maybeSingle();
     const v = data?.value as Partial<BookingConfig> | null;
     if (!v || typeof v !== 'object') return DEFAULT_BOOKING;
-    return { ...DEFAULT_BOOKING, ...v, timeZone: validTz(v.timeZone) || DEFAULT_BOOKING.timeZone, days: { ...DEFAULT_BOOKING.days, ...(v.days || {}) } };
+    // Configs saved by the original (German) product: drop its default topics/intro so the US page stays in English.
+    const topics = Array.isArray(v.topics) ? v.topics.filter((t) => typeof t === 'string' && !LEGACY_TOPICS.has(t)) : DEFAULT_BOOKING.topics;
+    const intro = typeof v.intro === 'string' && v.intro && !/[äöüß]|\b(Sie|Termin|Wählen)\b/.test(v.intro) ? v.intro : DEFAULT_BOOKING.intro;
+    return { ...DEFAULT_BOOKING, ...v, topics: topics.length ? topics : DEFAULT_BOOKING.topics, intro, timeZone: validTz(v.timeZone) || DEFAULT_BOOKING.timeZone, days: { ...DEFAULT_BOOKING.days, ...(v.days || {}) } };
   } catch { return DEFAULT_BOOKING; }
 }
 

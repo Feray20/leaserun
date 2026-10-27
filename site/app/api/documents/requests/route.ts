@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic';
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 
-// Offene Unterlagen-Anforderungen des angemeldeten Eigentümers.
+// Open document requests for the signed-in owner.
 export async function GET(req: Request) {
   if (!adminConfigured()) return json({ requests: [] });
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
   const { data, error } = await supabaseAdmin()
     .from('lr_document_requests')
     .select('id, object_ref, category, note, status, created_at')
@@ -20,17 +20,17 @@ export async function GET(req: Request) {
     .eq('status', 'offen')
     .order('created_at', { ascending: false })
     .limit(50);
-  if (error) return json({ error: 'Anfragen konnten nicht geladen werden.' }, 502);
+  if (error) return json({ error: 'Couldn’t load requests.' }, 502);
   return json({ requests: (data ?? []).map((r) => ({ ...r, label: isCategory(r.category) ? CATEGORY_LABEL[r.category] : r.category })) });
 }
 
-// Anfrage als erledigt markieren.
+// Mark a request as done.
 export async function PATCH(req: Request) {
-  if (!adminConfigured()) return json({ error: 'Nicht verfügbar.' }, 503);
+  if (!adminConfigured()) return json({ error: 'Not available.' }, 503);
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
   const id = new URL(req.url).searchParams.get('id') ?? '';
-  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Ungültige Anfrage.' }, 400);
+  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Invalid request.' }, 400);
   const { data, error } = await supabaseAdmin()
     .from('lr_document_requests')
     .update({ status: 'erledigt', resolved_at: new Date().toISOString() })
@@ -38,7 +38,7 @@ export async function PATCH(req: Request) {
     .eq('owner_id', user.id)
     .eq('status', 'offen')
     .select('id');
-  if (error) return json({ error: 'Speichern fehlgeschlagen.' }, 502);
-  if (!data?.length) return json({ error: 'Anfrage nicht gefunden.' }, 404);
+  if (error) return json({ error: 'Saving failed.' }, 502);
+  if (!data?.length) return json({ error: 'Request not found.' }, 404);
   return json({ ok: true });
 }

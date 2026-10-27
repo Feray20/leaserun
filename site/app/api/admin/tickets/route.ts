@@ -9,13 +9,13 @@ import { mailConfigured, sendMail } from '@/lib/notify/mail';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Web-Admin „Technische Probleme“: Meldungen des aktiven Bereichs (B2C bzw. B2B) mit Screenshots (signierte Links, 10 Minuten).
+// Web-Admin "Technical problems": reports for the active area (B2C or B2B) with screenshots (signed links, 10 minutes).
 const j = (b: unknown, s = 200) => NextResponse.json(b, { status: s, headers: { 'Cache-Control': 'no-store' } });
 
 export async function GET(req: Request) {
   const auth = await requireAdmin(req, 'support');
   if (auth instanceof NextResponse) return auth;
-  if (!adminConfigured()) return j({ error: 'Nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return j({ error: 'Not configured.' }, 503);
   const u = new URL(req.url);
   const scope = customerScope(req);
   const area = u.searchParams.get('area') === 'b2b' ? 'b2b' : u.searchParams.get('area') === 'b2c' ? 'b2c' : scope || null;
@@ -36,16 +36,16 @@ export async function GET(req: Request) {
   return j({ items, open: openCount });
 }
 
-// Status setzen, antworten (optional mit E-Mail an den Kunden), interne Notiz.
+// Set status, answer (optionally with an email to the customer), internal note.
 export async function POST(req: Request) {
   const auth = await requireAdmin(req, 'support');
   if (auth instanceof NextResponse) return auth;
-  if (!adminConfigured()) return j({ error: 'Nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return j({ error: 'Not configured.' }, 503);
   const p = SupportAdmin.safeParse(await req.json().catch(() => null));
-  if (!p.success) return j({ error: 'Ungültig.' }, 400);
+  if (!p.success) return j({ error: 'Invalid.' }, 400);
   const d = p.data, db = supabaseAdmin();
   const { data: cur } = await db.from('lr_support_tickets').select('id, no, area, user_email, title, answer, status').eq('id', d.id).maybeSingle();
-  if (!cur) return j({ error: 'Meldung nicht gefunden.' }, 404);
+  if (!cur) return j({ error: 'Report not found.' }, 404);
   const now = new Date().toISOString();
   const up: Record<string, unknown> = { updated_at: now };
   if (d.status) { up.status = d.status; if (d.status === 'geloest' || d.status === 'geschlossen') up.resolved_at = now; }
@@ -57,8 +57,8 @@ export async function POST(req: Request) {
   let mailed = false;
   if (d.notify && d.answer && cur.user_email && mailConfigured()) {
     const ref = ticketNo(cur.no), st = SUP_STATUS[(d.status || cur.status) as keyof typeof SUP_STATUS] || '';
-    mailed = await sendMail(cur.user_email, `Antwort zu Ihrer Meldung ${ref}`, `Guten Tag,\n\nzu Ihrer Meldung „${cur.title}“ (${ref}) gibt es eine Antwort:\n\n${d.answer}\n\nStatus: ${st}\n\nMit freundlichen Grüßen\nIhr LeaseRun-Team`, [], {
-      area: cur.area as 'b2c' | 'b2b', title: `Antwort zu ${ref}`, button: { label: 'Meldung ansehen', url: cur.area === 'b2b' ? 'https://leaserun.com/business-portal#support' : 'https://leaserun.com/app/dashboard#konto' },
+    mailed = await sendMail(cur.user_email, `Update on your report ${ref}`, `Hi there,\n\nthere's an answer to your report "${cur.title}" (${ref}):\n\n${d.answer}\n\nStatus: ${st}\n\nBest regards,\nThe LeaseRun team`, [], {
+      area: cur.area as 'b2c' | 'b2b', title: `Update on ${ref}`, button: { label: 'View report', url: cur.area === 'b2b' ? 'https://leaserun.com/business-portal#support' : 'https://leaserun.com/app/dashboard#konto' },
     }).catch(() => false);
   }
   return j({ ok: true, mailed });

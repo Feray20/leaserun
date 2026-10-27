@@ -35,9 +35,9 @@ export async function POST(req: Request) {
   const ctx = await requireMember(req, { owner: true, bucket: 'b2b-invite', limit: 10 });
   if (ctx instanceof Response) return ctx;
   const p = Invite.safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: 'Bitte eine gültige E-Mail-Adresse angeben.' }, 400);
+  if (!p.success) return json({ error: 'Please enter a valid email address.' }, 400);
   const tier = effectiveTier(ctx.account);
-  if (!tier) return json({ error: 'Weitere Berater-Zugänge gibt es ab einem gebuchten Tarif.' }, 402);
+  if (!tier) return json({ error: 'Additional seats are available with a paid plan.' }, 402);
   const db = supabaseAdmin();
   const now = new Date().toISOString();
   const [{ count: m }, { count: i }] = await Promise.all([
@@ -45,17 +45,17 @@ export async function POST(req: Request) {
     db.from('lr_b2b_invites').select('id', { count: 'exact', head: true }).eq('account_id', ctx.account.id).is('accepted_at', null).gt('expires_at', now),
   ]);
   const seats = TIER_LIMITS[tier].seats;
-  if ((m ?? 0) + (i ?? 0) >= seats) return json({ error: `Alle ${seats} Berater-Zugänge Ihres Tarifs sind vergeben.` }, 409);
-  // Zugang direkt anlegen (keine Selbstregistrierung): Startpasswort einmalig anzeigen, Wechsel bei der ersten Anmeldung.
+  if ((m ?? 0) + (i ?? 0) >= seats) return json({ error: `All ${seats} seats of your plan are in use.` }, 409);
+  // Create the login directly (no self-registration): show the initial password once, change at first sign-in.
   const login = await createB2BLogin(p.data.email, '');
   if (!login.ok) return json({ error: login.error }, login.status);
   const mem = await db.from('lr_b2b_members').insert({ account_id: ctx.account.id, user_id: login.userId, role: 'advisor' });
-  if (mem.error) { await db.auth.admin.deleteUser(login.userId).catch(() => null); return json({ error: 'Zugang konnte nicht angelegt werden.' }, 500); }
+  if (mem.error) { await db.auth.admin.deleteUser(login.userId).catch(() => null); return json({ error: 'The login could not be created.' }, 500); }
   let mailed = false;
   if (mailConfigured() && p.data.send) {
-    mailed = await sendMail(p.data.email, `Ihr Zugang für ${ctx.account.company_name} auf LeaseRun`,
-      `Guten Tag,\n\n${ctx.account.advisor_name} hat für Sie einen Berater-Zugang im LeaseRun-Unternehmensportal von ${ctx.account.company_name} eingerichtet.\n\nPortal: https://partner.leaserun.com\nBenutzername: ${p.data.email}\nStartpasswort: ${login.password}\n\nBei der ersten Anmeldung legen Sie ein eigenes Passwort fest.`,
-      [], { area: 'b2b', title: 'Ihr Berater-Zugang', button: { label: 'Zum Unternehmensportal', url: 'https://partner.leaserun.com' }, note: 'Bitte das Startpasswort nicht weitergeben.' });
+    mailed = await sendMail(p.data.email, `Your ${ctx.account.company_name} login on LeaseRun`,
+      `Hello,\n\n${ctx.account.advisor_name} has set up a team login for you in the LeaseRun business portal of ${ctx.account.company_name}.\n\nPortal: https://partner.leaserun.com\nUsername: ${p.data.email}\nInitial password: ${login.password}\n\nYou will choose your own password at your first sign-in.`,
+      [], { area: 'b2b', title: 'Your team login', button: { label: 'Go to the business portal', url: 'https://partner.leaserun.com' }, note: 'Please do not share the initial password.' });
   }
   return json({ ok: true, email: p.data.email, password: login.password, mailed }, 201);
 }
@@ -72,25 +72,25 @@ export async function DELETE(req: Request) {
     return json({ ok: true });
   }
   if (member && /^[0-9a-f-]{36}$/.test(member)) {
-    if (member === ctx.user.id) return json({ error: 'Der Kontoinhaber kann sich nicht selbst entfernen.' }, 400);
+    if (member === ctx.user.id) return json({ error: 'The account owner cannot remove themselves.' }, 400);
     await db.from('lr_b2b_members').delete().eq('account_id', ctx.account.id).eq('user_id', member).eq('role', 'advisor');
     return json({ ok: true });
   }
-  return json({ error: 'Ungültige Anfrage.' }, 400);
+  return json({ error: 'Invalid request.' }, 400);
 }
 
-// Einladung annehmen: angemeldeter Nutzer mit genau der eingeladenen E-Mail-Adresse.
+// Accept an invitation: signed-in user with exactly the invited email address.
 export async function PUT(req: Request) {
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst mit der eingeladenen E-Mail-Adresse anmelden.' }, 401);
+  if (!user) return json({ error: 'Please sign in with the invited email address first.' }, 401);
   if (!allowRequest(`b2b-accept:${user.id}`, 10, 60_000)) return json({ error: 'Zu viele Anfragen.' }, 429);
   const b = (await req.json().catch(() => null)) as { token?: unknown } | null;
-  if (typeof b?.token !== 'string' || b.token.length < 20 || b.token.length > 80) return json({ error: 'Ungültiger Einladungslink.' }, 400);
+  if (typeof b?.token !== 'string' || b.token.length < 20 || b.token.length > 80) return json({ error: 'Invalid invitation link.' }, 400);
   const db = supabaseAdmin();
   const { data: inv } = await db.from('lr_b2b_invites').select('*').eq('token_hash', hashToken(b.token)).maybeSingle();
-  if (!inv || inv.accepted_at || new Date(inv.expires_at).getTime() < Date.now()) return json({ error: 'Die Einladung ist abgelaufen oder wurde schon genutzt.' }, 410);
-  if (inv.email.toLowerCase() !== user.email.toLowerCase()) return json({ error: `Diese Einladung gilt für ${inv.email}. Bitte mit dieser Adresse anmelden.` }, 403);
-  if (await membershipFor(user.id)) return json({ error: 'Ihr Konto gehört bereits zu einem Unternehmen.' }, 409);
+  if (!inv || inv.accepted_at || new Date(inv.expires_at).getTime() < Date.now()) return json({ error: 'This invitation has expired or was already used.' }, 410);
+  if (inv.email.toLowerCase() !== user.email.toLowerCase()) return json({ error: `This invitation is for ${inv.email}. Please sign in with that address.` }, 403);
+  if (await membershipFor(user.id)) return json({ error: 'Your login already belongs to a business account.' }, 409);
   const ins = await db.from('lr_b2b_members').insert({ account_id: inv.account_id, user_id: user.id, role: 'advisor' });
   if (ins.error) return json({ error: 'Beitritt fehlgeschlagen.' }, 500);
   await db.from('lr_b2b_invites').update({ accepted_at: new Date().toISOString() }).eq('id', inv.id);

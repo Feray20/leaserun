@@ -3,7 +3,7 @@ import { billingEnabled } from '@/lib/billing/stripe';
 
 export const dynamic = 'force-dynamic';
 
-// Ob Käufe möglich sind. In Produktion bleibt das aus, bis Live-Schlüssel und Lieferung bereitstehen.
+// Whether purchases are possible. Stays off in production until live keys and delivery are ready.
 export function GET() {
   const key = process.env.STRIPE_SECRET_KEY || '';
   return NextResponse.json(

@@ -6,11 +6,11 @@ import { verifyImg } from '@/lib/mail/img-proxy';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Bild-Abruf für das Postfach (siehe lib/mail/img-proxy.ts): nur signierte Adressen, nur öffentliche Server,
-// nur Bilddateien bis 6 MB, höchstens 3 Weiterleitungen. Antwort ohne Cookies, mit strenger Sicherheitsrichtlinie.
+// Image fetch for the mailbox (see lib/mail/img-proxy.ts): signed URLs only, public servers only, image files up to 6 MB,
+// at most 3 redirects. Response without cookies, with a strict security policy.
 const MAX = 6 * 1024 * 1024;
 const PRIVATE = [/^127\./, /^10\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[01])\./, /^169\.254\./, /^0\./, /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./, /^::1$/, /^f[cd]/i, /^fe80/i, /^::ffff:(127|10|192\.168|169\.254)\./i];
-// Vollständige Liste nicht öffentlicher Netze (inkl. IPv4-in-IPv6, 198.18/15, Dokumentationsnetze) aus lib/api/net.ts.
+// Full list of non-public networks (incl. IPv4-in-IPv6, 198.18/15, documentation ranges) from lib/api/net.ts.
 const isPrivate = (ip: string) => PRIVATE.some((r) => r.test(ip)) || !isPublicIp(ip);
 const PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
 const empty = (status = 200) => new Response(PIXEL, { status, headers: { 'content-type': 'image/gif', 'cache-control': 'private, max-age=600' } });
@@ -52,8 +52,8 @@ export async function GET(req: Request) {
   let type = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
   const len = Number(res.headers.get('content-length') || 0);
   if (len > MAX) return empty(413);
-  // Manche Absender (z. B. eBay) liefern Bilder als „application/octet-stream“ oder ohne Typ: Dann den Typ an den ersten
-  // Bytes erkennen. Nur echte Rasterbilder werden durchgelassen – nie HTML, Skripte oder SVG mit falschem Typ.
+  // Some senders deliver images as "application/octet-stream" or without a type: then detect the type from the first bytes.
+  // Only real raster images pass – never HTML, scripts or SVG with a wrong type.
   const buf = Buffer.from(await res.arrayBuffer());
   if (buf.length > MAX) return empty(413);
   if (!type.startsWith('image/')) { const t = sniff(buf); if (!t) return empty(415); type = t; }

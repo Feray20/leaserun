@@ -8,8 +8,8 @@ import { BRANCHEN, DEFAULT_CATALOG, TOOL_IDS, TOOL_LABEL, getCatalog, saveCatalo
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Web-Admin → Partner → Pakete & Preise: Branchen-Pakete, Preise, Leistungen, Tools und Zusatzbranche pflegen.
-// Preisänderungen gelten für neue Buchungen (neuer Stripe-Preis); laufende Abos behalten ihren Preis.
+// Web-Admin → Partners → Plans & pricing: maintain industry plans, prices (USD cents), features, tools and the add-on industry.
+// Price changes apply to new purchases (new Stripe price); running subscriptions keep their price.
 const j = (b: unknown, s = 200) => NextResponse.json(b, { status: s, headers: { 'Cache-Control': 'no-store' } });
 const Tool = z.enum(TOOL_IDS);
 const txt = (n: number) => z.string().trim().min(1).max(n);
@@ -40,12 +40,12 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (body?.reset === true) { await saveCatalog(DEFAULT_CATALOG, auth.user.email); await adminAudit(auth.user.email, 'b2b_catalog_reset', null); return j({ ok: true, catalog: DEFAULT_CATALOG }); }
   const p = CatS.safeParse(body?.catalog);
-  if (!p.success) { const i = p.error.issues[0]; return j({ error: `Bitte prüfen: ${i?.path.join(' → ')} (${i?.message})` }, 400); }
+  if (!p.success) { const i = p.error.issues[0]; return j({ error: `Please check: ${i?.path.join(' → ')} (${i?.message})` }, 400); }
   const cat = { ...p.data, version: (p.data.version || 0) + 1 } as Catalog;
   for (const b of BRANCHEN) {
     const c = cat.branchen[b];
-    if (c.selfService && !c.plans.some((x) => x.active) && !c.enterprise.active) return j({ error: `${c.label}: mindestens ein Paket muss buchbar sein.` }, 400);
-    if (c.plans.some((x) => x.active && x.monthCents < 100)) return j({ error: `${c.label}: Monatspreis aktiver Pakete mindestens 1 €.` }, 400);
+    if (c.selfService && !c.plans.some((x) => x.active) && !c.enterprise.active) return j({ error: `${c.label}: at least one plan must be available.` }, 400);
+    if (c.plans.some((x) => x.active && x.monthCents < 100)) return j({ error: `${c.label}: the monthly price of active plans must be at least $1.` }, 400);
   }
   await saveCatalog(cat, auth.user.email);
   await adminAudit(auth.user.email, 'b2b_catalog_save', null, { version: cat.version });

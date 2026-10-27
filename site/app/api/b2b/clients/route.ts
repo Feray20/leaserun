@@ -7,8 +7,9 @@ import { mailConfigured, sendMail } from '@/lib/notify/mail';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Unternehmensportal → Kunden: Kunden einladen und – nach ausdrücklicher Einwilligung des Kunden – ihren Fortschritt sehen.
-// Sichtbar sind nur Zahlen (Stufe, Bankreife, Anzahl Objekte und Unterlagen) und die Arten fehlender Unterlagen – nie Dokumente oder Inhalte.
+// Business portal → Clients: invite clients and – after the client's explicit consent – see their progress.
+// Only numbers are visible (stage, lender readiness, number of properties and documents) and the types of missing documents – never documents or content.
+// Active clients = connected clients plus open (not expired) invitations; Business Basic allows up to 25 (TIER_LIMITS.clients).
 const INVITE_DAYS = 14;
 
 type Summary = { stage?: number; level?: number; best?: number; objects?: number; docs?: number; profile?: boolean; missing?: string[]; fixEnds?: string[]; at?: string };
@@ -16,7 +17,7 @@ type Summary = { stage?: number; level?: number; best?: number; objects?: number
 export async function GET(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-clients' });
   if (ctx instanceof Response) return ctx;
-  if (moduleState(ctx.account, 'crm') === 'off') return json({ error: 'Die Mandantenverwaltung ist für Ihr Unternehmenskonto nicht freigeschaltet. Bitte wenden Sie sich an support@leaserun.com.' }, 403);
+  if (moduleState(ctx.account, 'crm') === 'off') return json({ error: 'Client management is not enabled for your business account. Please contact support@leaserun.com.' }, 403);
   const db = supabaseAdmin();
   const { data: rows } = await db.from('lr_b2b_clients').select('id, client_name, client_email, status, client_user_id, consent_at, expires_at, created_at, ended_at, last_request_at, radar_consent_at')
     .eq('account_id', ctx.account.id).neq('status', 'getrennt').order('created_at', { ascending: false }).limit(500);
@@ -44,24 +45,37 @@ const Invite = z.object({ email: z.string().trim().toLowerCase().email().max(200
 export async function POST(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-client-invite', limit: 20 });
   if (ctx instanceof Response) return ctx;
-  if (moduleState(ctx.account, 'crm') === 'off') return json({ error: 'Die Mandantenverwaltung ist für Ihr Unternehmenskonto nicht freigeschaltet. Bitte wenden Sie sich an support@leaserun.com.' }, 403);
-  if (!ctx.account.verified_at) return json({ error: 'Kunden einladen ist nach der Verifizierung Ihres Unternehmenskontos möglich.' }, 403);
+  if (moduleState(ctx.account, 'crm') === 'off') return json({ error: 'Client management is not enabled for your business account. Please contact support@leaserun.com.' }, 403);
+  if (!ctx.account.verified_at) return json({ error: 'You can invite clients once your business account is verified.' }, 403);
+  {
+    const t = effectiveTier(ctx.account);
+    const max = t ? TIER_LIMITS[t].clients : TIER_LIMITS.BASIC.clients;
+    if (max != null) {
+      const db0 = supabaseAdmin();
+      const nowIso = new Date().toISOString();
+      const [{ count: conn }, { count: open }] = await Promise.all([
+        db0.from('lr_b2b_clients').select('id', { count: 'exact', head: true }).eq('account_id', ctx.account.id).eq('status', 'verbunden'),
+        db0.from('lr_b2b_clients').select('id', { count: 'exact', head: true }).eq('account_id', ctx.account.id).neq('status', 'verbunden').neq('status', 'getrennt').gt('expires_at', nowIso),
+      ]);
+      if ((conn ?? 0) + (open ?? 0) >= max) return json({ error: `Your plan includes up to ${max} active clients. Disconnect a client you no longer work with or upgrade to Pro for unlimited clients.`, code: 'client_limit' }, 402);
+    }
+  }
   const p = Invite.safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: p.error.issues.some((i) => i.path[0] === 'consent') ? 'Bitte bestätigen Sie, dass die Einwilligung des Kunden für die Einladung vorliegt.' : 'Bitte eine gültige E-Mail-Adresse angeben.' }, 400);
+  if (!p.success) return json({ error: p.error.issues.some((i) => i.path[0] === 'consent') ? 'Please confirm that the client has agreed to receive this invitation.' : 'Please enter a valid email address.' }, 400);
   const db = supabaseAdmin();
   const token = newToken();
   const ins = await db.from('lr_b2b_clients').insert({
     account_id: ctx.account.id, invited_by: ctx.user.id, client_email: p.data.email, client_name: p.data.name || null, inviter_consent_at: new Date().toISOString(),
     token_hash: hashToken(token), expires_at: new Date(Date.now() + INVITE_DAYS * 864e5).toISOString(),
   });
-  if (ins.error) return json({ error: 'Einladung fehlgeschlagen.' }, 500);
+  if (ins.error) return json({ error: 'The invitation failed.' }, 500);
   const link = `${new URL(req.url).origin}/app/dashboard#berater=${token}`;
   let mailed = false;
   if (mailConfigured()) {
-    mailed = await sendMail(p.data.email, `${ctx.account.company_name} lädt Sie zu LeaseRun ein`,
-      `Guten Tag${p.data.name ? ' ' + p.data.name : ''},\n\n${ctx.account.company_name} begleitet Sie bei Ihrer Immobilienfinanzierung und lädt Sie zu LeaseRun ein. Dort bereiten Sie Finanzprofil, Objekt und Unterlagen vor – Schritt für Schritt bis zur bankfertigen Kreditmappe.\n\nWenn Sie zustimmen, sieht Ihr Berater nur Ihren Fortschritt (Stufe, Bankreife in Prozent, Anzahl der Unterlagen) – keine Dokumente und keine Inhalte. Sie können die Verbindung jederzeit trennen.\n\nDer Link ist ${INVITE_DAYS} Tage gültig.`,
-      [], { title: `Einladung von ${ctx.account.company_name}`, button: { label: 'Einladung ansehen', url: link }, note: 'Kostenlos für Sie. Ohne Ihre Zustimmung wird nichts geteilt.',
-        // Kanzlei als Absendername und Antwortadresse; Hausfarbe ab Co-Branding-Tarif.
+    mailed = await sendMail(p.data.email, `${ctx.account.company_name} invited you to LeaseRun`,
+      `Hi${p.data.name ? ' ' + p.data.name : ''},\n\n${ctx.account.company_name} is helping you with your real estate financing and has invited you to LeaseRun. There you prepare your financial profile, property and documents – step by step to a lender-ready package.\n\nIf you agree, your advisor sees only your progress (stage, lender readiness in percent, number of documents) – no documents and no content. You can disconnect at any time.\n\nThe link is valid for ${INVITE_DAYS} days.`,
+      [], { title: `Invitation from ${ctx.account.company_name}`, button: { label: 'View invitation', url: link }, note: 'Free for you. Nothing is shared without your consent.',
+        // Business as sender name and reply-to; brand color from the co-branding plan.
         sender: ctx.account.company_name, replyTo: ctx.account.email, accent: canCobrand(ctx.account as B2BAccount) ? ctx.account.brand_color || undefined : undefined });
   }
   return json({ ok: true, link, mailed }, 201);
@@ -72,10 +86,10 @@ const End = z.object({ id: z.string().uuid() });
 export async function DELETE(req: Request) {
   const ctx = await requireMember(req, { bucket: 'b2b-clients' });
   if (ctx instanceof Response) return ctx;
-  if (moduleState(ctx.account, 'crm') === 'off') return json({ error: 'Die Mandantenverwaltung ist für Ihr Unternehmenskonto nicht freigeschaltet. Bitte wenden Sie sich an support@leaserun.com.' }, 403);
+  if (moduleState(ctx.account, 'crm') === 'off') return json({ error: 'Client management is not enabled for your business account. Please contact support@leaserun.com.' }, 403);
   const p = End.safeParse(await req.json().catch(() => null));
-  if (!p.success) return json({ error: 'Ungültig.' }, 400);
+  if (!p.success) return json({ error: 'Invalid request.' }, 400);
   const { error } = await supabaseAdmin().from('lr_b2b_clients').update({ status: 'getrennt', ended_at: new Date().toISOString(), ended_by: 'berater', token_hash: null })
     .eq('id', p.data.id).eq('account_id', ctx.account.id);
-  return error ? json({ error: 'Trennen fehlgeschlagen.' }, 500) : json({ ok: true });
+  return error ? json({ error: 'Disconnecting failed.' }, 500) : json({ ok: true });
 }

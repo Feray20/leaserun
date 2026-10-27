@@ -1,27 +1,20 @@
-/* Dateien senden/abholen – zwei Auftritte: LeaseRun (Markenverlauf) und Feray Korkmaz (persönlich, schlicht). */
+/* Send / download files – LeaseRun-branded file exchange (brand gradient). */
 @font-face{font-family:Inter;src:url(/fonts/Inter-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:Inter;src:url(/fonts/Inter-Bold.woff2) format("woff2");font-weight:700 800;font-display:swap}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{font:16px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0F172A;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;background:#F8FAFC}
 body[data-style="leaserun"],body[data-style="load"]{background:radial-gradient(70% 60% at 100% 0%,rgba(56,189,248,.34) 0%,rgba(56,189,248,0) 60%),radial-gradient(60% 60% at 0% 100%,rgba(2,132,199,.28) 0%,rgba(2,132,199,0) 65%),linear-gradient(140deg,#0F2C59 0%,#0B3B73 50%,#0369A1 100%) fixed}
-body[data-style="feray"]{background:#F5F5F4}
 .dt{flex:1;display:grid;place-items:center;padding:24px 16px}
 .dt-card{width:100%;max-width:520px;background:#fff;border-radius:22px;padding:28px 24px;box-shadow:0 30px 70px -36px rgba(15,23,42,.55)}
-body[data-style="feray"] .dt-card{box-shadow:0 1px 2px rgba(0,0,0,.05),0 20px 50px -30px rgba(0,0,0,.25);border:1px solid #E7E5E4}
 .dt-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
 .dt-brand img{width:44px;height:38px}
 .dt-brand b{font-size:20px;font-weight:800;color:#0F2C59;letter-spacing:-.01em}
-.dt-mono{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#1C1917;color:#fff;font-weight:700;font-size:16px;letter-spacing:.02em}
-body[data-style="feray"] .dt-brand b{color:#1C1917;font-weight:700}
 .dt h1{margin:0 0 18px;font-size:26px;font-weight:800;letter-spacing:-.015em}
-body[data-style="feray"] .dt h1{font-weight:700}
 .dt-drop{display:grid;place-items:center;align-content:center;gap:8px;width:100%;min-height:150px;border:2px dashed #93C5FD;border-radius:18px;background:#F0F9FF;color:#0F2C59;font:inherit;font-size:18px;font-weight:800;cursor:pointer;transition:background .15s,border-color .15s,transform .1s}
 .dt-drop:hover,.dt-drop.over{background:#E0F2FE;border-color:#0369A1}
 .dt-drop:active{transform:scale(.99)}
 .dt-drop svg{width:34px;height:34px}
-body[data-style="feray"] .dt-drop{border-color:#D6D3D1;background:#FAFAF9;color:#1C1917}
-body[data-style="feray"] .dt-drop:hover,body[data-style="feray"] .dt-drop.over{background:#F5F5F4;border-color:#57534E}
 .dt-drop:focus-visible,.dt-btn:focus-visible{outline:3px solid #38BDF8;outline-offset:3px}
 .dt-list{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px}
 .dt-it{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:12px 14px;border:1px solid #E2E8F0;border-radius:14px}
@@ -29,10 +22,8 @@ body[data-style="feray"] .dt-drop:hover,body[data-style="feray"] .dt-drop.over{b
 .dt-it small{color:#64748B;font-size:13px;white-space:nowrap}
 .dt-bar{grid-column:1/-1;height:6px;border-radius:99px;background:#E2E8F0;overflow:hidden}
 .dt-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0F2C59,#0369A1);transition:width .25s}
-body[data-style="feray"] .dt-bar i{background:#1C1917}
 .dt-it.ok small{color:#15803D;font-weight:700}.dt-it.bad small{color:#B91C1C;font-weight:700;white-space:normal}
 .dt-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#0F2C59;color:#fff;font:inherit;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer}
-body[data-style="feray"] .dt-btn{background:#1C1917}
 .dt-done{margin:16px 0 0;padding:12px 14px;border-radius:14px;background:#DCFCE7;color:#14532D;font-weight:700}
 .dt-msg{margin:0;color:#475569}
 .dt-legal{margin:14px 0 0;font-size:12.5px;color:#94A3B8}.dt-legal a{color:inherit}
@@ -40,15 +31,12 @@ body[data-style="feray"] .dt-btn{background:#1C1917}
 @keyframes dtSk{to{background-position:-200% 0}}
 .dt-foot{display:flex;justify-content:center;gap:18px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-size:13px}
 .dt-foot a{color:rgba(255,255,255,.75);text-decoration:none}
-body[data-style="feray"] .dt-foot a{color:#78716C}
 @media (prefers-reduced-motion:reduce){.dt-sk{animation:none}.dt-bar i{transition:none}}
-/* Kategorie zuerst wählen */
+/* Choose the category first */
 .dt-q{margin:0 0 8px;font-weight:700;color:#334155}
 .dt-cats{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;border-radius:14px}
 .dt-cats button{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid #CBD5E1;background:#fff;font:inherit;font-size:14.5px;font-weight:700;color:#0F2C59;cursor:pointer}
 .dt-cats button[aria-checked="true"]{background:#0F2C59;border-color:#0F2C59;color:#fff}
-body[data-style="feray"] .dt-cats button{color:#1C1917;border-color:#D6D3D1}
-body[data-style="feray"] .dt-cats button[aria-checked="true"]{background:#1C1917;border-color:#1C1917;color:#fff}
 .dt-cats.need{animation:dtNeed .5s ease}
 @keyframes dtNeed{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .dt-cats.need button{border-color:#F59E0B}
@@ -56,6 +44,4 @@ body[data-style="feray"] .dt-cats button[aria-checked="true"]{background:#1C1917
 .dt-cats button:focus-visible{outline:3px solid #38BDF8;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.dt-cats.need{animation:none}}
 body[data-style="load"] .dt-foot{visibility:hidden}
-body[data-style="feray"] .dt-foot{font-size:12px;opacity:.8}
-html.personal .dt-foot{display:none}
 .dt-done.dt-warn{background:#FEF3C7;color:#92400E}

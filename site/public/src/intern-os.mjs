@@ -1,6 +1,6 @@
-// Web-Admin → LeaseRun OS: Schreibtisch mit Apps (alle Bereiche an einem Ort), Statusleiste mit Ampeln und
-// „LeaseRun Intelligence“ – prüft regelbasiert (ohne KI-Kosten) Postfach, Belege & Rechnungen, Website & Technik sowie
-// eBay & Dropshipping und korrigiert Eindeutiges selbst. Jede Korrektur steht im Protokoll.
+// Web-Admin → LeaseRun OS: desktop with apps (all areas in one place), status bar with traffic lights and
+// "LeaseRun Intelligence" – checks inbox, invoices and website & tech rule-based (no AI cost) and fixes
+// unambiguous issues itself. Every correction is in the log.
 import { api, esc } from './sess.mjs?v=892f3666';
 
 const I = (p) => `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -24,19 +24,18 @@ const P = {
   bank: '<path d="M3 10l9-6 9 6"/><path d="M5 10v9M19 10v9M9.5 10v9M14.5 10v9M3 21h18"/>',
   brain: '<path d="M9 3a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5v1a3 3 0 0 0 6 0V3z"/><path d="M15 3a3 3 0 0 1 3 3v1a3 3 0 0 1 2 5 3 3 0 0 1-2 5v1a3 3 0 0 1-6 0"/>',
 };
-// [Reiter, Name, Symbol, Bereich, Farbe]
+// [tab, name, icon, area, color]
 const APPS = [
-  ['System', [['hq', 'Leitstand', 'hq', 'system', '#0F2C59'], ['postfach', 'Postfach', 'mail', 'system', '#0284C7'], ['termine', 'Termine', 'cal', 'system', '#7C3AED'], ['nutzer', 'Nutzer', 'users', 'system', '#0891B2'], ['sicherheit', 'Sicherheit', 'shield', 'system', '#B91C1C'], ['protokoll', 'Protokoll', 'log', 'system', '#475569'], ['api', 'API', 'api', 'system', '#334155'], ['einrichtung', 'Einrichtung', 'gear', 'system', '#64748B']]],
-  ['Privatkunden (B2C)', [['uebersicht', 'B2C Übersicht', 'chart', 'b2c', '#0EA5E9'], ['cockpit', 'Finanz-Cockpit', 'euro', 'b2c', '#059669'], ['analyse', 'Analyse', 'chart', 'b2c', '#2563EB'], ['probleme', 'Kundenprobleme', 'shield', 'b2c', '#DC2626']]],
-  ['Unternehmen (B2B)', [['uebersicht', 'B2B Übersicht', 'chart', 'b2b', '#0F2C59'], ['anfragen', 'Anfragen', 'mail', 'b2b', '#0369A1'], ['partner', 'Partner', 'users', 'b2b', '#7C3AED'], ['akquise', 'Akquise', 'rocket', 'b2b', '#EA580C']]],
-  ['Dropshipping & Steuern', [['st_start', 'Dropshipping', 'truck', 'steuer', '#0F766E'], ['st_verkaeufe', 'Verkäufe', 'euro', 'steuer', '#059669'], ['st_angebote', 'eBay-Angebote', 'tag', 'steuer', '#CA8A04'], ['st_skalierung', 'Skalierung', 'rocket', 'steuer', '#EA580C'], ['st_abgleich', 'Abgleich', 'receipt', 'steuer', '#0891B2'], ['st_buchhaltung', 'Buchhaltung', 'book', 'steuer', '#1D4ED8'], ['st_belege', 'Belege', 'receipt', 'steuer', '#9333EA'], ['rechnungen', 'Rechnungen', 'bank', 'steuer', '#0F2C59'], ['st_ablage', 'Meine Cloud', 'cloud', 'steuer', '#0284C7']]],
+  ['System', [['hq', 'Command Center', 'hq', 'system', '#0F2C59'], ['postfach', 'Inbox', 'mail', 'system', '#0284C7'], ['termine', 'Appointments', 'cal', 'system', '#7C3AED'], ['nutzer', 'Users', 'users', 'system', '#0891B2'], ['sicherheit', 'Security', 'shield', 'system', '#B91C1C'], ['protokoll', 'Audit log', 'log', 'system', '#475569'], ['api', 'API', 'api', 'system', '#334155'], ['einrichtung', 'Setup', 'gear', 'system', '#64748B']]],
+  ['Consumers (B2C)', [['uebersicht', 'B2C Overview', 'chart', 'b2c', '#0EA5E9'], ['cockpit', 'Finance Cockpit', 'euro', 'b2c', '#059669'], ['analyse', 'Analytics', 'chart', 'b2c', '#2563EB'], ['probleme', 'Customer issues', 'shield', 'b2c', '#DC2626']]],
+  ['Businesses (B2B)', [['uebersicht', 'B2B Overview', 'chart', 'b2b', '#0F2C59'], ['anfragen', 'Requests', 'mail', 'b2b', '#0369A1'], ['partner', 'Partners', 'users', 'b2b', '#7C3AED'], ['cockpit', 'Finance Cockpit', 'euro', 'b2b', '#059669'], ['rechnungen', 'Invoices', 'bank', 'b2b', '#0F2C59'], ['steuer', 'CPA export', 'book', 'b2b', '#1D4ED8']]],
 ];
 const DOCK_KEY = 'lr-os-dock';
-const DOCK_DEF = ['hq', 'postfach', 'st_verkaeufe', 'st_angebote', 'st_belege', 'st_skalierung'];
-const dockIds = () => { try { const x = JSON.parse(localStorage.getItem(DOCK_KEY) || 'null'); return Array.isArray(x) && x.length ? x : DOCK_DEF; } catch { return DOCK_DEF; } };
+const DOCK_DEF = ['hq', 'postfach', 'termine', 'cockpit', 'nutzer', 'sicherheit'];
+const dockIds = () => { try { const x = JSON.parse(localStorage.getItem(DOCK_KEY) || 'null'); const ok = Array.isArray(x) ? x.filter((id) => !String(id).startsWith('st_')) : []; return ok.length ? ok : DOCK_DEF; } catch { return DOCK_DEF; } };
 const allApps = APPS.flatMap(([, a]) => a);
-const LV = { bad: ['#FEF2F2', '#B91C1C', 'Fehler'], warn: ['#FFFBEB', '#B45309', 'Achtung'], info: ['#EFF6FF', '#1D4ED8', 'Hinweis'], ok: ['#F0FDF4', '#15803D', 'OK'] };
-const AREA = { postfach: 'Postfach', belege: 'Belege & Rechnungen', website: 'Website & Technik', ebay: 'eBay & Dropshipping', steuer: 'Steuer' };
+const LV = { bad: ['#FEF2F2', '#B91C1C', 'Error'], warn: ['#FFFBEB', '#B45309', 'Attention'], info: ['#EFF6FF', '#1D4ED8', 'Note'], ok: ['#F0FDF4', '#15803D', 'OK'] };
+const AREA = { postfach: 'Inbox', rechnungen: 'Invoices', website: 'Website & tech' };
 const LIGHT = { ok: '#16A34A', warn: '#F59E0B', bad: '#DC2626' };
 
 function css() {
@@ -62,37 +61,37 @@ function css() {
 export async function osDesk(v, { goTab, msg }) {
   css();
   v.innerHTML = `<div class="os" data-noklapp>
-    <div class="os-bar"><div><b>LeaseRun OS</b><br><small style="opacity:.85">LeaseRun Intelligence · prüft &amp; korrigiert nach festen Regeln · ohne KI-Kosten</small></div>
-      <div class="os-lights" id="osLights"><span class="os-light">Prüfe …</span></div><span class="os-clock" id="osClock"></span></div>
-    <section class="os-win" id="osIntel"><div class="os-win-h"><b><span class="os-dots"><i></i><i></i><i></i></span> LeaseRun Intelligence</b><span><button type="button" class="btn btn-dark btn-sm" id="osRun">Jetzt prüfen &amp; korrigieren</button></span></div><div class="os-win-b"><p class="form-note">Wird geprüft …</p></div></section>
-    ${APPS.map(([t, apps]) => `<section class="os-sec"><h3>${esc(t)}</h3><div class="os-grid">${apps.map(([id, label, ic, seg, col]) => `<button type="button" class="os-app" data-app="${id}" data-seg="${seg}" aria-label="${esc(label)} öffnen"><span class="os-ic" style="background:${col}">${I(P[ic])}</span><span>${esc(label)}</span></button>`).join('')}</div></section>`).join('')}
+    <div class="os-bar"><div><b>LeaseRun OS</b><br><small style="opacity:.85">LeaseRun Intelligence · checks &amp; fixes by fixed rules · no AI cost</small></div>
+      <div class="os-lights" id="osLights"><span class="os-light">Checking …</span></div><span class="os-clock" id="osClock"></span></div>
+    <section class="os-win" id="osIntel"><div class="os-win-h"><b><span class="os-dots"><i></i><i></i><i></i></span> LeaseRun Intelligence</b><span><button type="button" class="btn btn-dark btn-sm" id="osRun">Check &amp; fix now</button></span></div><div class="os-win-b"><p class="form-note">Checking …</p></div></section>
+    ${APPS.map(([t, apps]) => `<section class="os-sec"><h3>${esc(t)}</h3><div class="os-grid">${apps.map(([id, label, ic, seg, col]) => `<button type="button" class="os-app" data-app="${id}" data-seg="${seg}" aria-label="Open ${esc(label)}"><span class="os-ic" style="background:${col}">${I(P[ic])}</span><span>${esc(label)}</span></button>`).join('')}</div></section>`).join('')}
     <nav class="os-dock" id="osDock" aria-label="Dock">${dockIds().map((id) => { const a = allApps.find((x) => x[0] === id); return a ? `<button type="button" data-app="${a[0]}" data-seg="${a[3]}" title="${esc(a[1])}" aria-label="${esc(a[1])}" style="background:${a[4]}">${I(P[a[2]])}</button>` : ''; }).join('')}</nav>
   </div>`;
   v.querySelectorAll('[data-app]').forEach((b) => b.onclick = () => goTab(b.dataset.app, b.dataset.seg));
-  const clock = () => { const c = v.querySelector('#osClock'); if (!c || !c.isConnected) return false; c.textContent = new Date().toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); return true; };
+  const clock = () => { const c = v.querySelector('#osClock'); if (!c || !c.isConnected) return false; c.textContent = new Date().toLocaleString('en-US', { timeZone: 'Europe/Berlin', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); return true; };
   clock(); const ti = setInterval(() => { if (!clock()) clearInterval(ti); }, 30_000);
   const paint = (r) => {
     if (!v.isConnected) return;
     const L = v.querySelector('#osLights');
-    L.innerHTML = Object.entries(r.lights).map(([a, s]) => `<button type="button" class="os-light" data-area="${a}"><i style="background:${LIGHT[s]}"></i>${esc(AREA[a])}</button>`).join('');
+    L.innerHTML = Object.entries(r.lights).map(([a, s]) => `<button type="button" class="os-light" data-area="${a}"><i style="background:${LIGHT[s]}"></i>${esc(AREA[a] || a)}</button>`).join('');
     L.querySelectorAll('[data-area]').forEach((b) => b.onclick = () => v.querySelector(`[data-chk-area="${b.dataset.area}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     v.querySelectorAll('.os-badge').forEach((x) => x.remove());
     for (const [tab, n] of Object.entries(r.badges || {})) v.querySelectorAll(`[data-app="${tab}"]`).forEach((b) => { const s = document.createElement('span'); s.className = 'os-badge'; s.textContent = n > 99 ? '99+' : String(n); b.append(s); });
     const fixesNow = (r.fixes || []).filter((f) => f.at === r.at);
     const body = v.querySelector('#osIntel .os-win-b');
-    body.innerHTML = `${fixesNow.length ? `<p class="form-note" style="color:#15803D"><b>✓ ${fixesNow.length} Korrektur(en) gerade durchgeführt.</b></p>` : ''}
-      ${r.checks.map((c) => `<div class="os-chk" data-chk-area="${c.area}" style="background:${LV[c.level][0]};border-color:${LV[c.level][1]}"><div style="flex:1 1 260px;min-width:0"><small style="color:${LV[c.level][1]};font-weight:700;text-transform:uppercase;letter-spacing:.04em">${LV[c.level][2]} · ${esc(AREA[c.area])}</small><br><b>${esc(c.text)}</b>${c.detail ? `<br><small>${esc(c.detail)}</small>` : ''}</div>${c.tab ? `<button type="button" class="btn btn-outline btn-sm" data-go="${c.tab}" data-seg="${c.seg || ''}" style="min-height:44px">Öffnen</button>` : ''}</div>`).join('') || '<p>Alles in Ordnung.</p>'}
-      <details><summary>Korrektur-Protokoll (${(r.fixes || []).length})</summary><div style="display:grid;gap:4px;margin-top:6px">${(r.fixes || []).map((f) => `<small>${new Date(f.at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })} · ${esc(AREA[f.area] || f.area)} · ${esc(f.text)}${f.from ? ` (${esc(f.from)} → ${esc(f.to || '')})` : ''}</small>`).join('') || '<small>Noch keine automatischen Korrekturen.</small>'}</div></details>
-      <p class="form-note">Stand ${new Date(r.at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} · läuft zusätzlich automatisch alle 10 Minuten.</p>`;
+    body.innerHTML = `${fixesNow.length ? `<p class="form-note" style="color:#15803D"><b>✓ ${fixesNow.length} correction(s) just made.</b></p>` : ''}
+      ${r.checks.map((c) => `<div class="os-chk" data-chk-area="${c.area}" style="background:${LV[c.level][0]};border-color:${LV[c.level][1]}"><div style="flex:1 1 260px;min-width:0"><small style="color:${LV[c.level][1]};font-weight:700;text-transform:uppercase;letter-spacing:.04em">${LV[c.level][2]} · ${esc(AREA[c.area] || c.area)}</small><br><b>${esc(c.text)}</b>${c.detail ? `<br><small>${esc(c.detail)}</small>` : ''}</div>${c.tab ? `<button type="button" class="btn btn-outline btn-sm" data-go="${c.tab}" data-seg="${c.seg || ''}" style="min-height:44px">Open</button>` : ''}</div>`).join('') || '<p>All good.</p>'}
+      <details><summary>Correction log (${(r.fixes || []).length})</summary><div style="display:grid;gap:4px;margin-top:6px">${(r.fixes || []).map((f) => `<small>${new Date(f.at).toLocaleString('en-US', { timeZone: 'Europe/Berlin', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · ${esc(AREA[f.area] || f.area)} · ${esc(f.text)}${f.from ? ` (${esc(f.from)} → ${esc(f.to || '')})` : ''}</small>`).join('') || '<small>No automatic corrections yet.</small>'}</div></details>
+      <p class="form-note">As of ${new Date(r.at).toLocaleTimeString('en-US', { timeZone: 'Europe/Berlin', hour: 'numeric', minute: '2-digit' })} · also runs automatically every 10 minutes.</p>`;
     body.querySelectorAll('[data-go]').forEach((b) => b.onclick = () => goTab(b.dataset.go, b.dataset.seg || undefined));
   };
   const load = async (fix) => {
-    const b = v.querySelector('#osRun'); if (b) { b.disabled = true; b.textContent = fix ? 'Prüft & korrigiert …' : 'Prüft …'; }
+    const b = v.querySelector('#osRun'); if (b) { b.disabled = true; b.textContent = fix ? 'Checking & fixing …' : 'Checking …'; }
     const r = await api('/api/admin/os/checks', fix ? { method: 'POST', body: '{}' } : undefined);
-    if (b) { b.disabled = false; b.textContent = 'Jetzt prüfen & korrigieren'; }
-    if (!r.ok) { const body = v.querySelector('#osIntel .os-win-b'); if (body) body.innerHTML = `<p class="st-warn">${esc(r.data?.error || 'Prüfung nicht möglich.')}</p>`; return; }
+    if (b) { b.disabled = false; b.textContent = 'Check & fix now'; }
+    if (!r.ok) { const body = v.querySelector('#osIntel .os-win-b'); if (body) body.innerHTML = `<p class="st-warn">${esc(r.data?.error || 'Check not possible.')}</p>`; return; }
     paint(r.data);
-    if (fix) msg('Geprüft und korrigiert.');
+    if (fix) msg('Checked and fixed.');
   };
   v.querySelector('#osRun').onclick = () => load(true);
   load(false);

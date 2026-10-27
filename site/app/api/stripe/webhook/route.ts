@@ -12,12 +12,12 @@ import { applyPaymentMethod, PM_PURPOSE } from '@/lib/billing/payment-method';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Stripe-Webhook. Signatur wird mit dem Endpunkt-Secret (STRIPE_WEBHOOK_SECRET) geprüft.
-// Freischaltungen werden live aus Stripe gelesen; der Webhook bestätigt Ereignisse und protokolliert sie.
-// Für Unternehmenskonten (metadata.b2b_account_id) wird der Tarif übertragen und jede bezahlte
-// Rechnung ins Rechnungsarchiv übernommen; doppelte Zustellungen sind unschädlich (idempotent).
+// Stripe webhook. The signature is verified with the endpoint secret (STRIPE_WEBHOOK_SECRET).
+// Entitlements are read live from Stripe; the webhook acknowledges and logs events.
+// For business accounts (metadata.b2b_account_id) the plan is synced and every paid invoice is added to the
+// invoice archive; duplicate deliveries are harmless (idempotent).
 export async function POST(req: Request) {
-  // Übergangsweise auch die in Vercel mit Tippfehler angelegte Variable lesen (Einrichtung meldet den Tippfehler weiter).
+  // Temporarily also read the variable created with a typo in Vercel (setup check keeps reporting the typo).
   const secret = process.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRETT;
   const signature = req.headers.get('stripe-signature');
   if (!secret || !signature) return NextResponse.json({ error: 'not configured' }, { status: 400 });
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     case 'checkout.session.completed':
     case 'checkout.session.async_payment_succeeded': {
       const s = event.data.object as Stripe.Checkout.Session;
-      // Zahlungsmittel geändert (Einrichtung, keine Zahlung): als Standard setzen – keine Kauf-Meldungen, keine Bewertungsbitte.
+      // Payment method changed (setup, no payment): make it the default – no purchase notices, no review request.
       if (s.mode === 'setup') {
         if (s.metadata?.purpose === PM_PURPOSE && event.type === 'checkout.session.completed') {
           await applyPaymentMethod(stripe(), s.id).then((r) => console.info('pm_updated', { session: s.id, ok: r.ok })).catch((e) => console.warn('pm_update_webhook', e instanceof Error ? e.message : e));
@@ -49,9 +49,9 @@ export async function POST(req: Request) {
         break;
       }
       console.info('billing_paid', { session: s.id, plan: s.metadata?.plan, status: s.payment_status });
-      if (s.payment_status === 'paid' && s.metadata?.leaserun_test !== '1') await pushAdmins('payment', 'Neue Zahlung', 'Ein Kauf wurde bezahlt.');
+      if (s.payment_status === 'paid' && s.metadata?.leaserun_test !== '1') await pushAdmins('payment', 'New payment', 'A purchase was paid.');
       await sendReviewRequest(s).catch((e) => console.warn('review_mail', e instanceof Error ? e.message : e));
-      // Creator-Zuordnung (Vorteilscode oder Creator-Link) – Fehler dürfen den Webhook nie scheitern lassen.
+      // Creator attribution (promo code or creator link) – errors must never fail the webhook.
       await import('@/lib/creator/attribution').then((x) => x.recordCheckoutConversion(stripe(), s)).catch((e) => console.warn('creator_conversion', e instanceof Error ? e.message : e));
       if (s.payment_status === 'paid' && s.metadata?.leaserun_test !== '1') await track({ seg: s.metadata?.b2b_account_id ? 'b2b' : 'b2c', ev: 'purchase', plan: s.metadata?.plan || (s.metadata?.b2b_account_id ? 'b2b' : null) });
       break;
@@ -62,8 +62,8 @@ export async function POST(req: Request) {
     case 'checkout.session.async_payment_failed':
     case 'invoice.payment_failed':
       console.warn('billing_payment_failed', { event: event.id, type: event.type });
-      // Admin-App: wichtige Mitteilung (ohne Namen oder Beträge auf dem Sperrbildschirm).
-      if (event.livemode) await pushAdmins('payment', 'Zahlung fehlgeschlagen', 'Eine Zahlung wurde abgelehnt. Details in der App unter Zahlungen.', 'payment_failed');
+      // Admin app: important notice (no names or amounts on the lock screen).
+      if (event.livemode) await pushAdmins('payment', 'Payment failed', 'A payment was declined. Details in the app under Payments.', 'payment_failed');
       break;
     case 'customer.subscription.deleted':
     case 'customer.subscription.updated':

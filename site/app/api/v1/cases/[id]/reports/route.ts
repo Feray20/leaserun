@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-// POST /api/v1/cases/{id}/reports – Bericht asynchron erzeugen (Antwort 202, Status über GET abfragen).
+// POST /api/v1/cases/{id}/reports – generate a report asynchronously (202 response, poll status via GET).
 export const POST = apiRoute({ route: '/api/v1/cases/{id}/reports', scope: 'reports:create', idempotent: true }, async (ctx) => {
   const s = { tenantId: ctx.tenantId, env: ctx.env, actor: ctx.actor, requestId: ctx.requestId };
   const p = ReportInput.safeParse(ctx.body ?? {});

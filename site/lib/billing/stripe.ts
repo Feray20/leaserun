@@ -1,35 +1,36 @@
 import Stripe from 'stripe';
 
-// Zentrale Stripe-Logik. Stripe ist die einzige Quelle der Wahrheit für Käufe:
-// Es gibt keine eigene Zahlungsdatenbank, Freischaltungen werden aus Stripe gelesen.
+// Central Stripe logic. Stripe is the single source of truth for purchases:
+// there is no separate payment database; entitlements are read from Stripe.
 
 import PRICES from '@/public/data/preise.json';
 
-// Angebote kommen aus public/data/preise.json (eine Quelle für Website und Abrechnung).
-// Buchbar: Kreditmappe (Einzelkauf), Käufer-Pass (90 Tage, inkl. 1 Kreditmappe), Investor Pro (monatlich).
+// Offers come from public/data/preise.json (one source for website and billing). All prices in USD.
+// Purchasable: Lender Package (one-time), Buyer Pass (90 days, incl. 1 Lender Package), Investor Pro (monthly).
 export type Plan = 'credit-map' | 'buyer-pass' | 'pro-monthly';
 
 type PlanDef = {
   lookupKey: string;
   name: string;
   description: string;
-  amount: number; // Bruttobetrag in Cent inkl. 19 % USt
+  amount: number; // price in US cents (sales tax, if any, is added on top by Stripe Tax)
   mode: 'payment' | 'subscription';
 };
 
 type JsonPlan = { id: string; name: string; cents: number; intervall: string; mode: string; features: string[] };
 const ALL: JsonPlan[] = PRICES.privat.plans;
 const KEYS: Record<Plan, string> = { 'credit-map': 'leaserun_credit_map', 'buyer-pass': 'leaserun_buyer_pass_90d', 'pro-monthly': 'leaserun_pro_monthly' };
-// Frühere Tarife (nur noch zum Erkennen bestehender Käufe, nicht mehr buchbar).
+// Legacy plans (only used to recognize existing purchases; no longer for sale).
 const LEGACY_STARTER_SUB = 'leaserun_starter_monthly';
 const PASS_MS = 90 * 24 * 60 * 60 * 1000;
+export const CURRENCY = 'usd';
 
 export const PLANS = Object.fromEntries(
   (Object.keys(KEYS) as Plan[]).map((id) => {
     const p = ALL.find((x) => x.id === id);
-    if (!p) throw new Error(`Preis fehlt in preise.json: ${id}`);
-    // Der Betrag steckt im Lookup-Key: Eine Preisänderung legt bei Stripe automatisch einen neuen Preis an.
-    return [id, { lookupKey: `${KEYS[id]}_${p.cents}`, name: `LeaseRun ${p.name}`, description: `${p.name} – ${p.intervall}.`, amount: p.cents, mode: p.mode === 'subscription' ? 'subscription' : 'payment' }];
+    if (!p) throw new Error(`Price missing in preise.json: ${id}`);
+    // Currency and amount are part of the lookup key: a price change automatically creates a new Stripe price.
+    return [id, { lookupKey: `${KEYS[id]}_${CURRENCY}_${p.cents}`, name: `LeaseRun ${p.name}`, description: `${p.name} – ${p.intervall}.`, amount: p.cents, mode: p.mode === 'subscription' ? 'subscription' : 'payment' }];
   }),
 ) as Record<Plan, PlanDef>;
 
@@ -42,13 +43,13 @@ export function billingEnabled(): boolean {
 let client: Stripe | null = null;
 export function stripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY fehlt');
+  if (!key) throw new Error('STRIPE_SECRET_KEY is missing');
   if (!client) client = new Stripe(key, { timeout: 20000, maxNetworkRetries: 1 });
   return client;
 }
 
-// Testkauf im Web-Admin: eigener Testschlüssel (STRIPE_TEST_SECRET_KEY) – oder der Hauptschlüssel, falls er ein Testschlüssel ist.
-// Testkäufe laufen über ein getrenntes Stripe-Testkonto und schalten nie echte Leistungen frei.
+// Test purchase in the Web-Admin: dedicated test key (STRIPE_TEST_SECRET_KEY) – or the main key if it is a test key.
+// Test purchases run through a separate Stripe test account and never unlock real access.
 let testClient: Stripe | null = null;
 export function testKeyMode(): 'test-key' | 'main-is-test' | null {
   if ((process.env.STRIPE_TEST_SECRET_KEY || '').startsWith('sk_test_')) return 'test-key';
@@ -57,20 +58,21 @@ export function testKeyMode(): 'test-key' | 'main-is-test' | null {
 }
 export function testStripe(): Stripe {
   const mode = testKeyMode();
-  if (!mode) throw new Error('Kein Stripe-Testschlüssel');
+  if (!mode) throw new Error('No Stripe test key');
   if (!testClient) testClient = new Stripe(mode === 'test-key' ? String(process.env.STRIPE_TEST_SECRET_KEY) : String(process.env.STRIPE_SECRET_KEY));
   return testClient;
 }
 
-// Preis per lookup_key holen oder einmalig anlegen.
+// Fetch the price by lookup_key or create it once.
 export async function ensurePrice(plan: Plan, s: Stripe = stripe()): Promise<string> {
   const def = PLANS[plan];
   const found = await s.prices.list({ lookup_keys: [def.lookupKey], active: true, limit: 1 });
   if (found.data[0]) return found.data[0].id;
   const price = await s.prices.create({
-    currency: 'eur',
+    currency: CURRENCY,
     unit_amount: def.amount,
-    tax_behavior: 'inclusive',
+    // US style: list prices exclude sales tax; Stripe Tax adds it at checkout only where it applies.
+    tax_behavior: 'exclusive',
     lookup_key: def.lookupKey,
     product_data: { name: def.name, metadata: { leaserun_plan: plan } },
     ...(def.mode === 'subscription' ? { recurring: { interval: 'month' as const } } : {}),
@@ -79,39 +81,33 @@ export async function ensurePrice(plan: Plan, s: Stripe = stripe()): Promise<str
   return price.id;
 }
 
-// Zusatzprodukt (Order-Bump) zu Kreditmappe oder Käufer-Pass: Notar-Checkliste & Banken-Verhandlungsleitfaden.
+// Add-on (order bump) for the Lender Package or Buyer Pass: Closing Checklist & Lender Negotiation Guide.
 type JsonAddon = { id: string; name: string; cents: number };
 const ADDONS: JsonAddon[] = ((PRICES.privat as unknown as { addons?: JsonAddon[] }).addons) || [];
 export const ADDON_LEITFADEN = ADDONS.find((a) => a.id === 'leitfaden') || null;
 export async function ensureAddonPrice(s: Stripe = stripe()): Promise<string | null> {
   const a = ADDON_LEITFADEN;
   if (!a) return null;
-  const key = `leaserun_addon_leitfaden_${a.cents}`;
+  const key = `leaserun_addon_leitfaden_${CURRENCY}_${a.cents}`;
   const found = await s.prices.list({ lookup_keys: [key], active: true, limit: 1 });
   if (found.data[0]) return found.data[0].id;
-  const price = await s.prices.create({ currency: 'eur', unit_amount: a.cents, tax_behavior: 'inclusive', lookup_key: key, product_data: { name: `LeaseRun ${a.name}`, metadata: { leaserun_addon: 'leitfaden' } }, metadata: { leaserun_addon: 'leitfaden' } });
+  const price = await s.prices.create({ currency: CURRENCY, unit_amount: a.cents, tax_behavior: 'exclusive', lookup_key: key, product_data: { name: `LeaseRun ${a.name}`, metadata: { leaserun_addon: 'leitfaden' } }, metadata: { leaserun_addon: 'leitfaden' } });
   return price.id;
 }
 
-// Steuersatz 19 % USt (inklusive) holen oder anlegen, damit Rechnungen die Umsatzsteuer ausweisen.
-export async function ensureTaxRate(s: Stripe = stripe()): Promise<string> {
-  const list = await s.taxRates.list({ active: true, inclusive: true, limit: 100 });
-  const hit = list.data.find((t) => t.metadata?.leaserun === 'ust19');
-  if (hit) return hit.id;
-  const t = await s.taxRates.create({
-    display_name: 'USt',
-    description: 'Umsatzsteuer 19 %',
-    percentage: 19,
-    inclusive: true,
-    country: 'DE',
-    jurisdiction: 'DE',
-    metadata: { leaserun: 'ust19' },
-  });
-  return t.id;
+// Sales tax: no fixed tax rate (no VAT in the US). If Stripe Tax is enabled (STRIPE_TAX_ENABLED=true and set up in the
+// Stripe dashboard with the states where LeaseRun is registered), checkout calculates sales tax automatically and
+// receipts show a tax line only when tax was actually charged. Returns null = no manual tax rate on line items.
+export function stripeTaxEnabled(): boolean {
+  return process.env.STRIPE_TAX_ENABLED === 'true';
+}
+export async function ensureTaxRate(_s: Stripe = stripe()): Promise<string | null> {
+  void _s;
+  return null;
 }
 
-// Genau einen Stripe-Kunden je Supabase-Nutzer verwenden.
-// Kunde je Nutzer 10 Minuten merken: Tarif, Rechnungen und Zahlungsmittel fragen ihn oft gleichzeitig ab.
+// Use exactly one Stripe customer per Supabase user.
+// Cache the customer per user for 10 minutes: plan, invoices and payment methods often ask at the same time.
 const CUST_CACHE = new Map<string, { at: number; c: Stripe.Customer }>();
 export async function findCustomer(userId: string, email: string): Promise<Stripe.Customer | null> {
   const hit = CUST_CACHE.get(userId);
@@ -127,7 +123,7 @@ export async function ensureCustomer(userId: string, email: string): Promise<Str
   if (existing) return existing;
   return stripe().customers.create({
     email,
-    preferred_locales: ['de'],
+    preferred_locales: ['en-US'],
     metadata: { supabase_user_id: userId },
   });
 }
@@ -146,8 +142,8 @@ export type Entitlements = {
 
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
-// Freischaltungen = Stripe-Käufe + manuelle Freischaltung durch den Web-Admin (lr_access_grants).
-// Die höhere Stufe gewinnt; Kreditmappen-Guthaben werden addiert. Ohne Stripe gilt nur die manuelle Freischaltung.
+// Entitlements = Stripe purchases + manual grants from the Web-Admin (lr_access_grants).
+// The higher tier wins; Lender Package credits are added up. Without Stripe only the manual grant counts.
 const TIER_RANK = { free: 0, starter: 1, pro: 2 } as const;
 const FREE: Entitlements = { pro: false, proSource: null, proUntil: null, starter: false, starterUntil: null, tier: 'free', creditMaps: 0, hasCustomer: false };
 export type AccessGrant = { tier: 'free' | 'starter' | 'pro'; credit_maps: number; leitfaden: boolean; valid_until: string | null; note: string | null; granted_by: string; updated_at: string; features?: Record<string, 'on' | 'off'> };
@@ -164,7 +160,7 @@ export async function accessGrant(userId: string): Promise<AccessGrant | null> {
 export async function entitlementsFor(userId: string, email: string, fresh = false): Promise<Entitlements & { grant?: AccessGrant | null }> {
   if (fresh) forgetEntitlements(userId);
   const [base, grant] = await Promise.all([
-    // Stripe-Fehler (Zeitüberschreitung, Limit) dürfen eine manuelle Freischaltung nie aufheben.
+    // Stripe errors (timeout, rate limit) must never cancel a manual grant.
     process.env.STRIPE_SECRET_KEY ? cachedStripeEntitlements(userId, email).catch((e) => { console.error('stripe_entitlements_error', e instanceof Error ? e.message : e); return FREE; }) : Promise.resolve(FREE),
     accessGrant(userId),
   ]);
@@ -182,8 +178,8 @@ export async function entitlementsFor(userId: string, email: string, fresh = fal
   };
 }
 
-// Kurzer Zwischenspeicher je Nutzer (30 s, nur im laufenden Server): Konto, Angebote und Navigation fragen den
-// Tarif oft gleichzeitig ab – so wartet die Seite nicht mehrfach auf Stripe. Höchstens 8 s auf Stripe warten.
+// Short per-user cache (30 s, in-process only): account, offers and navigation often ask for the plan at the
+// same time – so the page does not wait on Stripe several times. Wait at most 8 s for Stripe.
 const ENT_CACHE = new Map<string, { at: number; p: Promise<Entitlements> }>();
 export function forgetEntitlements(userId: string) { ENT_CACHE.delete(userId); }
 function cachedStripeEntitlements(userId: string, email: string): Promise<Entitlements> {
@@ -199,7 +195,7 @@ function cachedStripeEntitlements(userId: string, email: string): Promise<Entitl
   return p;
 }
 
-// Freischaltungen aus Stripe ableiten (bezahlte Checkout-Sessions und aktive Abos).
+// Derive entitlements from Stripe (paid checkout sessions and active subscriptions).
 async function stripeEntitlements(userId: string, email: string): Promise<Entitlements> {
   const customer = await findCustomer(userId, email);
   if (!customer) return { pro: false, proSource: null, proUntil: null, starter: false, starterUntil: null, tier: 'free', creditMaps: 0, hasCustomer: false };
@@ -215,7 +211,7 @@ async function stripeEntitlements(userId: string, email: string): Promise<Entitl
   const starterSub = live.find((x) => subKey(x).startsWith(LEGACY_STARTER_SUB));
 
   const paid = sessions.data.filter((x) => x.payment_status === 'paid' && x.metadata?.supabase_user_id === userId);
-  // Jede Kreditmappe und jeder Käufer-Pass (enthält 1 Mappe) gibt ein Kreditmappen-Guthaben.
+  // Every Lender Package and every Buyer Pass (includes 1 package) gives one Lender Package credit.
   const creditMaps = paid.filter((x) => ['credit-map', 'credit-map-starter', 'buyer-pass'].includes(String(x.metadata?.plan))).length;
   const starterPass = paid
     .filter((x) => x.metadata?.plan === 'starter-yearly' || x.metadata?.plan === 'buyer-pass')

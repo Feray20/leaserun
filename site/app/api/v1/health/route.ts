@@ -7,7 +7,7 @@ import { anonymizedIpHash } from '@/lib/supabase/admin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// GET /api/v1/health – öffentlicher Status je Komponente, ohne interne Details (keine Fehlertexte, keine Konfiguration).
+// GET /api/v1/health – public status per component, without internal details (no error texts, no configuration).
 export async function GET(req: Request) {
   if (!allowRequest(`apihealth:${anonymizedIpHash(req) ?? 'x'}`, 30, 60_000)) return NextResponse.json({ status: 'unknown', code: 'RATE_LIMIT_EXCEEDED' }, { status: 429 });
   const h = await healthCheck();

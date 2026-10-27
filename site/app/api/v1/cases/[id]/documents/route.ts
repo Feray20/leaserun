@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-// POST /api/v1/cases/{id}/documents – multipart/form-data mit den Feldern "file" und "type".
+// POST /api/v1/cases/{id}/documents – multipart/form-data with the fields "file" and "type".
 export const POST = apiRoute({ route: '/api/v1/cases/{id}/documents', scope: 'documents:write', idempotent: true, multipart: true, maxBody: 4_400_000 }, async (ctx) => {
   const s = { tenantId: ctx.tenantId, env: ctx.env, actor: ctx.actor, requestId: ctx.requestId };
   const c = await getCase(s, ctx.params.id);

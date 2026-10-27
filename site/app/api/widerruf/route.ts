@@ -9,49 +9,52 @@ import { logSecurity } from '@/lib/security/seclog';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Widerrufsfunktion nach § 356a BGB (seit 19.06.2026): Widerruf ohne Anmeldung; Eingangsbestätigung mit Inhalt
-// und Zeitpunkt unverzüglich auf einem dauerhaften Datenträger (E-Mail). Es wird kein Grund abgefragt.
+// "Request a refund" (LeaseRun refund policy, see /refund): available without login; the confirmation with content and
+// time of receipt is sent right away by email. No reason is required. There is no statutory withdrawal right in the US –
+// this is LeaseRun's own, voluntary policy.
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const clean = (v: unknown, max = 300) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const j = (b: unknown, s = 200) => NextResponse.json(b, { status: s, headers: { 'Cache-Control': 'no-store' } });
 
 export async function POST(req: Request) {
   const ip = anonymizedIpHash(req) ?? 'x';
-  if (!allowRequest(`widerruf:${ip}`, 5, 60_000)) return j({ error: 'Zu viele Anfragen. Bitte in einer Minute erneut versuchen.' }, 429);
+  if (!allowRequest(`widerruf:${ip}`, 5, 60_000)) return j({ error: 'Too many requests. Please try again in a minute.' }, 429);
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!body) return j({ error: 'Ungültige Anfrage.' }, 400);
+  if (!body) return j({ error: 'Invalid request.' }, 400);
   const name = clean(body.name, 120), email = clean(body.email, 200).toLowerCase();
-  const contract = clean(body.contract, 120) || 'LeaseRun-Vertrag', ref = clean(body.ref, 80);
+  const contract = clean(body.contract, 120) || 'LeaseRun purchase', ref = clean(body.ref, 80);
+  const reason = clean(body.reason, 1000);
   const date = /^\d{4}-\d{2}-\d{2}$/.test(clean(body.date, 10)) ? clean(body.date, 10) : '';
-  if (name.length < 2 || !EMAIL_RE.test(email)) return j({ error: 'Bitte Name und gültige E-Mail-Adresse angeben.' }, 400);
-  // Widerruf ist eine Erklärung: nur eindeutige Bot-Signale verwerfen, nie wegen Inhalt ablehnen.
-  const guard = await guardSubmission({ email, name, message: '', website: body.website, ts: undefined, bucket: 'widerruf' }); // Zeitstempel bewusst nicht prüfen: eine lange offene Seite darf eine Erklärung nie still verwerfen – nur das Bot-Feld zählt
+  if (name.length < 2 || !EMAIL_RE.test(email)) return j({ error: 'Please enter your name and a valid email address.' }, 400);
+  // A refund request is a customer request: only drop clear bot signals, never reject because of content.
+  const guard = await guardSubmission({ email, name, message: '', website: body.website, ts: undefined, bucket: 'widerruf' }); // timestamp deliberately not checked: a page left open for long must never silently drop a request – only the bot field counts
   if (guard.action === 'drop') return j({ ok: true, receivedAt: '' });
-  if (!mailConfigured()) return j({ error: 'Die Online-Widerrufsfunktion ist gerade nicht erreichbar. Bitte widerrufen Sie formlos per E-Mail an support@leaserun.com – das ist ebenso wirksam.' }, 503);
+  if (!mailConfigured()) return j({ error: 'Online refund requests are temporarily unavailable. Please email support@leaserun.com – that works just as well.' }, 503);
 
-  const receivedAt = new Intl.DateTimeFormat('de-DE', { dateStyle: 'long', timeStyle: 'medium', timeZone: 'Europe/Berlin' }).format(new Date()) + ' Uhr (MEZ/MESZ)';
+  const receivedAt = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeStyle: 'long', timeZone: 'America/New_York' }).format(new Date());
   const text = [
-    'Widerrufserklärung',
+    'Refund request',
     '',
-    'Hiermit widerrufe ich den von mir abgeschlossenen Vertrag.',
+    'I am requesting a refund for the following purchase.',
     '',
-    `Eingang: ${receivedAt}`,
+    `Received: ${receivedAt}`,
     `Name: ${name}`,
-    `E-Mail: ${email}`,
-    `Vertrag: ${contract}`,
-    ref ? `Rechnungs-/Bestellnummer: ${ref}` : '',
-    date ? `Bestellt am: ${new Date(date + 'T12:00:00Z').toLocaleDateString('de-DE')}` : '',
+    `Email: ${email}`,
+    `Purchase: ${contract}`,
+    ref ? `Receipt or order number: ${ref}` : '',
+    date ? `Purchased on: ${new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', { timeZone: 'UTC' })}` : '',
+    reason ? `Comment: ${reason}` : '',
   ].filter(Boolean).join('\n');
-  if (hasLink(name) || hasLink(contract) || hasLink(ref)) return j({ error: 'Bitte die Angaben ohne Internetadressen eintragen.' }, 400);
-  if (!(await mailToAllowed('widerruf', email))) { logSecurity('mail_abuse', `widerruf:${ip}`, { detail: 'Grenze je Empfänger' }); return j({ error: 'Für diese Adresse sind heute schon Widerrufe eingegangen. Bitte bei Bedarf an support@leaserun.com schreiben.' }, 429); }
+  if (hasLink(name) || hasLink(contract) || hasLink(ref)) return j({ error: 'Please enter the details without web addresses.' }, 400);
+  if (!(await mailToAllowed('widerruf', email))) { logSecurity('mail_abuse', `widerruf:${ip}`, { detail: 'limit per recipient' }); return j({ error: 'We already received refund requests for this address today. If you need anything else, please email support@leaserun.com.' }, 429); }
   const to = process.env.CANCEL_TO_EMAIL || 'support@leaserun.com';
   try {
-    if (!(await sendMail(to, `Widerruf: ${contract} – ${name}`, text, [], { title: 'Neuer Widerruf' }))) throw Error('mail');
-    if (!(await sendMail(email, 'Eingangsbestätigung Ihres Widerrufs bei LeaseRun',
-      `Guten Tag ${name},\n\nwir haben Ihren Widerruf erhalten. Diese E-Mail ist Ihre Eingangsbestätigung (§ 356a BGB); sie bestätigt den Eingang, nicht bereits die Prüfung des Widerrufs. Steht Ihnen ein Widerrufsrecht zu, erstatten wir bereits gezahlte Beträge nach den gesetzlichen Regeln unverzüglich, spätestens binnen 14 Tagen, über das ursprüngliche Zahlungsmittel.\n\n${text}`,
-      [], { title: 'Ihr Widerruf ist eingegangen' }))) throw Error('mail');
+    if (!(await sendMail(to, `Refund request: ${contract} – ${name}`, text, [], { title: 'New refund request' }))) throw Error('mail');
+    if (!(await sendMail(email, 'We received your LeaseRun refund request',
+      `Hi ${name},\n\nWe received your refund request. This email confirms receipt; it is not yet the decision on the refund. We review every request within 2 business days under our Refund Policy (leaserun.com/refund). Approved refunds go back to your original payment method; banks usually post them within 5–10 business days.\n\n${text}`,
+      [], { title: 'Your refund request was received' }))) throw Error('mail');
   } catch {
-    return j({ error: 'Der Widerruf konnte nicht übermittelt werden. Bitte widerrufen Sie per E-Mail an support@leaserun.com.' }, 502);
+    return j({ error: 'Your refund request could not be sent. Please email support@leaserun.com.' }, 502);
   }
   return j({ ok: true, receivedAt });
 }

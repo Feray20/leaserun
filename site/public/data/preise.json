@@ -1,237 +1,237 @@
 {
- "stand": "Oktober 2026",
- "hinweis": "Alle Preise sind Endpreise inkl. 19 % USt. Kreditmappe und Käufer-Pass sind Einmalkäufe ohne Abo – der Pass endet automatisch nach 90 Tagen. Investor Pro ist monatlich kündbar zum Ende des Abrechnungsmonats.",
+ "stand": "October 2026",
+ "hinweis": "All prices in US dollars. Sales tax is added only where it applies and is shown before you pay. The Lender Package and Buyer Pass are one-time purchases with no subscription – the pass simply ends after 90 days. Investor Pro renews monthly until you cancel; cancel anytime online and keep access until the end of the paid month.",
  "kostenlos": {
-  "name": "Kostenlos",
+  "name": "Free",
   "features": [
-   "Rechner als Vorschau mit Beispielwerten, Grundlagen der Wissenszentrale",
-   "Konto mit 2 Objekten, Exposé-Scan und Stresstest",
-   "Software-Tools: Kaufnebenkosten, Kaufpreis-Check, Sondertilgung",
-   "Kreditmappe als vollständiger Entwurf mit Wasserzeichen – Freischaltung mit einem Klick"
+   "Calculators as a preview with sample numbers, Learn center basics",
+   "Account with 2 properties, listing scan and stress test",
+   "Software tools: closing costs, price check, extra principal payments",
+   "Lender Package as a complete draft with watermark – unlock with one click"
   ]
  },
  "privat": {
-  "name": "Privat",
-  "zielgruppe": "Wählen Sie nach Ihrer Situation: ein Objekt finanzieren, in Ruhe suchen oder dauerhaft investieren. Kreditmappe und Käufer-Pass sind Einmalkäufe ohne Abo.",
+  "name": "Personal",
+  "zielgruppe": "Choose by where you are: financing one property, searching for the right one, or investing for the long run. The Lender Package and Buyer Pass are one-time purchases with no subscription.",
   "plans": [
    {
     "id": "credit-map",
-    "name": "BankReady Kreditmappe",
-    "badge": "Einzelkauf · kein Abo",
+    "name": "Lender Package",
+    "badge": "One-time · no subscription",
     "highlight": true,
     "cents": 3900,
-    "intervall": "einmalig je Objekt",
+    "intervall": "one-time per property",
     "mode": "payment",
     "features": [
-     "Bankfertige Kreditmappe für ein Objekt als PDF",
-     "Finanzierung, Haushaltsrechnung, Stresstest und Prüfpunkte",
-     "Unterlagenindex und Echtheitsprüfung per QR-Code",
-     "Kein Abo · Geld zurück, wenn Ihre Bank das Format ablehnt"
+     "Lender-ready PDF package for one property",
+     "Sources & uses, PITIA, DSCR, DTI, reserves and stress test",
+     "Document checklist and authenticity check via QR code",
+     "No subscription · money back if your lender rejects the format"
     ],
-    "fuer": "Für Eigennutzer mit konkretem Objekt: einmal sauber vorbereitet zur Bank."
+    "fuer": "For buyers with a specific property: show up to your lender prepared, once."
    },
    {
     "id": "buyer-pass",
-    "name": "Käufer-Pass (3 Monate)",
-    "badge": "Für die Suchphase",
+    "name": "Buyer Pass (90 days)",
+    "badge": "For the search phase",
     "cents": 4900,
-    "intervall": "einmalig für 90 Tage",
+    "intervall": "one-time for 90 days",
     "mode": "payment",
     "features": [
-     "Alle Rechner mit eigenen Zahlen und die komplette Wissenszentrale",
-     "90 Tage unbegrenzt Objekte, Exposé-Analysen und Vergleich",
-     "Kauf-Tools: Bankangebote vergleichen, Bankgespräch, Angebotsschreiben",
-     "Druck und PDF für alle Kauf-Tools und Analysen",
-     "1 Kreditmappe inklusive (Wert 39 €)",
-     "Endet automatisch – kein Abo, keine Kündigung"
+     "All calculators with your own numbers and the full Learn center",
+     "90 days of unlimited properties, listing analyses and comparisons",
+     "Buying tools: compare Loan Estimates, lender meeting prep, offer letter",
+     "Print and PDF for all buying tools and analyses",
+     "1 Lender Package included ($39 value)",
+     "Ends automatically – no subscription, nothing to cancel"
     ],
-    "basis": "Alles aus Kostenlos, plus:",
-    "fuer": "Für die Suchphase: mehrere Objekte prüfen und vergleichen – 90 Tage, kein Abo."
+    "basis": "Everything in Free, plus:",
+    "fuer": "For the search phase: review and compare several properties – 90 days, no subscription."
    },
    {
     "id": "pro-monthly",
     "name": "Investor Pro",
-    "badge": "Für Vermieter",
+    "badge": "For landlords",
     "cents": 2900,
-    "intervall": "pro Monat",
+    "intervall": "per month",
     "mode": "subscription",
     "features": [
-     "Alle Rechner mit eigenen Zahlen und die komplette Wissenszentrale",
-     "Unbegrenzt Objekte und Kreditmappen",
-     "Portfolio-Kennzahlen mit Zinsschock-Test",
-     "Anschluss & Forward, Betriebskostenabrechnung",
-     "Fristenwächter mit E-Mail-Erinnerung",
-     "CSV-Export für die Anlage V · monatlich kündbar"
+     "All calculators with your own numbers and the full Learn center",
+     "Unlimited properties and Lender Packages",
+     "Portfolio metrics with rate-shock test",
+     "Refinance & rate lock planner, operating expense reconciliation",
+     "Deadline tracker with email reminders",
+     "Schedule E CSV export for your CPA · cancel anytime"
     ],
-    "basis": "Alles aus Käufer-Pass, plus:",
-    "fuer": "Für aktive Investoren mit Bestand und mehreren Objekten · monatlich kündbar."
+    "basis": "Everything in Buyer Pass, plus:",
+    "fuer": "For active investors with several rentals · renews monthly, cancel anytime."
    }
   ],
   "vergleich": {
    "spalten": [
-    "Kostenlos",
-    "Kreditmappe",
-    "Käufer-Pass",
+    "Free",
+    "Lender Package",
+    "Buyer Pass",
     "Investor Pro"
    ],
    "zeilen": [
     [
-     "Objekte im Konto",
+     "Properties in your account",
      "2",
      "2",
-     "unbegrenzt",
-     "unbegrenzt"
+     "unlimited",
+     "unlimited"
     ],
     [
-     "Kreditmappe (PDF)",
-     "Vorschau",
-     "1 Objekt",
-     "1 inklusive",
-     "unbegrenzt"
+     "Lender Package (PDF)",
+     "Preview",
+     "1 property",
+     "1 included",
+     "unlimited"
     ],
     [
-     "Kaufnebenkosten, Kaufpreis-Check, Sondertilgung",
+     "Closing costs, price check, extra principal",
      "✓",
      "✓",
      "✓",
      "✓"
     ],
     [
-     "Bankangebote, Bankgespräch, Angebotsschreiben",
+     "Loan Estimate comparison, lender meeting, offer letter",
      "–",
      "–",
      "✓",
      "✓"
     ],
     [
-     "Druck und PDF der Tools",
+     "Print and PDF of the tools",
      "–",
      "–",
      "✓",
      "✓"
     ],
     [
-     "Portfolio, Anschluss & Forward, Betriebskosten",
+     "Portfolio, refinance & rate lock, operating expenses",
      "–",
      "–",
      "–",
      "✓"
     ],
     [
-     "Fristenwächter, CSV-Export Anlage V",
+     "Deadline tracker, Schedule E CSV export",
      "–",
      "–",
      "–",
      "✓"
     ],
     [
-     "Laufzeit",
-     "dauerhaft",
-     "einmalig",
-     "90 Tage",
-     "monatlich kündbar"
+     "Term",
+     "ongoing",
+     "one-time",
+     "90 days",
+     "monthly, cancel anytime"
     ]
    ]
   },
-  "demo": "Erst testen, dann entscheiden: Kostenlos erstellen Sie Ihre komplette Kreditmappe als Entwurf mit Wasserzeichen. Gefällt sie Ihnen, schalten Sie sie mit einem Klick frei – Ihre Eingaben bleiben erhalten.",
+  "demo": "Try first, then decide: for free, you can build your complete Lender Package as a watermarked draft. If you like it, unlock it with one click – everything you entered is kept.",
   "addons": [
    {
     "id": "leitfaden",
-    "name": "Notar-Checkliste & Banken-Verhandlungsleitfaden",
+    "name": "Closing Checklist & Lender Negotiation Guide",
     "cents": 900,
     "zu": [
      "credit-map",
      "buyer-pass"
     ],
-    "beschreibung": "Checkliste für Bankgespräch, Notartermin und die Zeit danach – als druckbare Seite in Ihrem Konto."
+    "beschreibung": "Checklist for your lender meeting, closing day and the weeks after – as a printable page in your account."
    }
   ]
  },
  "b2b": {
-  "name": "Für Unternehmen",
-  "hinweis": "Nur für Unternehmer im Sinne des § 14 BGB. Alle Preise netto zzgl. 19 % USt. Monatsabos monatlich kündbar, Jahresabos zum Ende der Laufzeit. Kein Widerrufsrecht für Unternehmer.",
+  "name": "For Business",
+  "hinweis": "For businesses only. All prices in US dollars, plus sales tax where applicable. Monthly plans renew monthly and can be canceled anytime; annual plans renew yearly and can be canceled before the renewal date.",
   "plans": [
    {
     "id": "b2b-basic-monthly",
     "tier": "BASIC",
-    "name": "Makler & Vermittler Basic",
-    "netto_cents": 5900,
-    "intervall": "pro Monat",
+    "name": "Agents & Brokers Basic",
+    "netto_cents": 7900,
+    "intervall": "per month",
     "interval": "month",
     "seats": 1,
     "dossiers": 20,
     "features": [
-     "1 Berater-Zugang",
-     "Unbegrenzt: Schnell-Checks (Fall-Analysen), Kunden-Einladungen und Anfragen",
-     "20 Kreditmappen und 3 Kunden-Präsentationen (PDF) pro Monat",
-     "Software-Tools: Haushaltsrechnung, Unterlagen-Anforderung, Provision, GEG-Inserat, Ertragswert",
-     "Pipeline mit CSV-Export, Website-Widget, Exposé-QR-Codes",
-     "Beratungskompass mit Präsentationsmodus"
+     "1 advisor seat",
+     "Unlimited: quick checks (case analyses), client invitations and inquiries",
+     "20 Lender Packages and 3 client presentations (PDF) per month",
+     "Software tools: monthly budget, document request, commission, listing disclosures, income approach",
+     "Pipeline with CSV export, website widget, listing QR codes",
+     "Advisory compass with presentation mode"
     ]
    },
    {
     "id": "b2b-basic-yearly",
     "tier": "BASIC",
-    "name": "Makler & Vermittler Basic (Jahr)",
-    "netto_cents": 59000,
-    "intervall": "pro Jahr",
+    "name": "Agents & Brokers Basic (annual)",
+    "netto_cents": 79000,
+    "intervall": "per year",
     "interval": "year",
     "seats": 1,
     "dossiers": 20,
     "features": [
-     "Alle Leistungen von Basic",
-     "2 Monate geschenkt – entspricht ca. 49 € netto pro Monat"
+     "Everything in Basic",
+     "2 months free – about $66 per month"
     ]
    },
    {
     "id": "b2b-pro-monthly",
     "tier": "PRO",
-    "name": "Kanzlei & Baufi Pro",
-    "netto_cents": 13900,
-    "intervall": "pro Monat",
+    "name": "Lending Teams Pro",
+    "netto_cents": 14900,
+    "intervall": "per month",
     "interval": "month",
     "seats": 3,
     "dossiers": null,
     "features": [
-     "Bis zu 3 Berater-Zugänge",
-     "Kreditmappen ohne Limit, Gesamtdossier mit Unterlagen",
-     "Präsentationen unbegrenzt – mit Ihrem Logo, Ihren Farben und Ihrer Schrift",
-     "Zusätzliche Tools: Beratungsprotokoll (§ 511 BGB), Angebotsvergleich, Vorfälligkeit & Anschluss",
-     "Bestandskunden-Radar: Zinsbindungsenden Ihrer Kunden (mit Einwilligung)",
-     "Eigene Partnerseite mit Terminlink",
-     "REST-API v1 für Ihr CRM: Fälle anlegen und lesen, Vorprüfung, Schnell-Check und Unterlagenprüfung · 60 Anfragen pro Minute (Frühzugang auf Anfrage)"
+     "Up to 3 advisor seats",
+     "Unlimited Lender Packages, complete file with documents",
+     "Unlimited presentations – with your logo, colors and font",
+     "Extra tools: consultation notes, Loan Estimate comparison, prepayment & refinance",
+     "Client radar: upcoming ARM resets and refinance windows of your clients (with consent)",
+     "Your own partner page with booking link",
+     "REST API v1 for your CRM: create and read cases, pre-check, quick check and document review · 60 requests per minute (early access on request)"
     ],
-    "basis": "Alles aus Basic, plus:"
+    "basis": "Everything in Basic, plus:"
    },
    {
     "id": "b2b-pro-yearly",
     "tier": "PRO",
-    "name": "Kanzlei & Baufi Pro (Jahr)",
-    "netto_cents": 139000,
-    "intervall": "pro Jahr",
+    "name": "Lending Teams Pro (annual)",
+    "netto_cents": 149000,
+    "intervall": "per year",
     "interval": "year",
     "seats": 3,
     "dossiers": null,
     "features": [
-     "Alle Leistungen von Pro",
-     "2 Monate geschenkt – entspricht ca. 116 € netto pro Monat"
+     "Everything in Pro",
+     "2 months free – about $124 per month"
     ]
    }
   ],
   "enterprise": {
    "tier": "ENTERPRISE",
-   "name": "Bank & Filiale Enterprise",
-   "preis": "ab 349 € netto pro Monat",
+   "name": "Lenders & Branches Enterprise",
+   "preis": "Custom pricing",
    "seats": 10,
    "features": [
-    "Ab 10 Berater-Zugängen, erweiterbar",
-    "Kreditmappen und Präsentationen unbegrenzt",
-    "White-Label: Unterlagen vollständig im Erscheinungsbild Ihres Hauses, ohne LeaseRun",
-    "Volle REST-API v1 mit API-Webhooks, White-Label-Berichten sowie Mandanten- und Berater-Routing · Anfragelimit nach Vertrag (Frühzugang auf Anfrage)",
-    "Teamverwaltung mit Berater-Zuordnung",
-    "Kauf auf Rechnung, Angebot nach Filialgröße"
+    "10+ advisor seats, expandable",
+    "Unlimited Lender Packages and presentations",
+    "White label: documents fully in your brand, without LeaseRun",
+    "Full REST API v1 with webhooks, white-label reports and client/advisor routing · rate limit per contract (early access on request)",
+    "Team management with advisor assignment",
+    "Pay by invoice (ACH), quote based on branch size"
    ],
-   "basis": "Alles aus Pro, plus:"
+   "basis": "Everything in Pro, plus:"
   },
   "vergleich": {
    "spalten": [
@@ -241,61 +241,61 @@
    ],
    "zeilen": [
     [
-     "Berater-Zugänge",
+     "Advisor seats",
      "1",
-     "bis 3",
-     "ab 10"
+     "up to 3",
+     "10+"
     ],
     [
-     "Schnell-Checks, Einladungen, Anfragen",
-     "unbegrenzt",
-     "unbegrenzt",
-     "unbegrenzt"
+     "Quick checks, invitations, inquiries",
+     "unlimited",
+     "unlimited",
+     "unlimited"
     ],
     [
-     "Kreditmappen (PDF) pro Monat",
+     "Lender Packages (PDF) per month",
      "20",
-     "unbegrenzt",
-     "unbegrenzt"
+     "unlimited",
+     "unlimited"
     ],
     [
-     "Kunden-Präsentationen (PDF)",
-     "3 pro Monat",
-     "unbegrenzt, mit Logo",
-     "unbegrenzt, White-Label"
+     "Client presentations (PDF)",
+     "3 per month",
+     "unlimited, with logo",
+     "unlimited, white label"
     ],
     [
-     "Haushaltsrechnung, Unterlagen, Provision, GEG, Ertragswert",
+     "Budget, documents, commission, disclosures, income approach",
      "✓",
      "✓",
      "✓"
     ],
     [
-     "Beratungsprotokoll, Angebotsvergleich, Vorfälligkeit",
+     "Consultation notes, Loan Estimate comparison, prepayment",
      "–",
      "✓",
      "✓"
     ],
     [
-     "Bestandskunden-Radar, Partnerseite",
+     "Client radar, partner page",
      "–",
      "✓",
      "✓"
     ],
     [
-     "REST-API v1 (Fälle, Vorprüfung, Unterlagen)",
-     "– (CSV-Export)",
-     "60 Anfragen/Min.",
-     "voll, Limit nach Vertrag"
+     "REST API v1 (cases, pre-check, documents)",
+     "– (CSV export)",
+     "60 requests/min",
+     "full, limit per contract"
     ],
     [
-     "API-Webhooks, White-Label-Berichte, Routing",
+     "API webhooks, white-label reports, routing",
      "–",
      "–",
      "✓"
     ],
     [
-     "Teamverwaltung, Kauf auf Rechnung",
+     "Team management, pay by invoice",
      "–",
      "–",
      "✓"

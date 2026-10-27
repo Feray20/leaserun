@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const RANGES: Record<string, { ms: number; bucket: 'hour' | 'day' }> = { '24h': { ms: 864e5, bucket: 'hour' }, '7d': { ms: 7 * 864e5, bucket: 'day' }, '30d': { ms: 30 * 864e5, bucket: 'day' }, '90d': { ms: 90 * 864e5, bucket: 'day' } };
 
-// GET /api/v1/usage?range=24h|7d|30d|90d – Nutzung der eigenen Umgebung (Grundlage für spätere nutzungsbasierte Abrechnung).
+// GET /api/v1/usage?range=24h|7d|30d|90d – usage of the own environment (basis for future usage-based billing).
 export const GET = apiRoute({ route: '/api/v1/usage', scope: 'usage:read' }, async (ctx) => {
   const range = ctx.url.searchParams.get('range') || '30d';
   const R = RANGES[range];

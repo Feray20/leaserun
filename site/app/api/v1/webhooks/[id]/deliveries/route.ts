@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 type Row = { id: string; event: string; status: string; attempts: number; last_status: number | null; last_error: string | null; duration_ms: number | null; is_test: boolean; created_at: string; delivered_at: string | null; next_attempt_at: string };
 
-// GET /api/v1/webhooks/{id}/deliveries – Zustellverlauf (ohne Nutzdaten und ohne Antworttexte der Empfänger).
+// GET /api/v1/webhooks/{id}/deliveries – delivery history (without payloads and without receiver response bodies).
 export const GET = apiRoute({ route: '/api/v1/webhooks/{id}/deliveries', scope: 'webhooks:read' }, async (ctx) => {
   const w = await loadWebhook(ctx);
   const { limit, cursor } = pageParams(ctx.url);

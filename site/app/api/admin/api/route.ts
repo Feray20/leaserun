@@ -21,7 +21,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-// Web-Admin → API Management. Nur Administratoren (ADMIN_EMAILS + zweiter Faktor). Jede Änderung wird auditiert.
+// Web-Admin → API Management. Administrators only (ADMIN_EMAILS + second factor). Every change is audited.
 const j = (b: unknown, s = 200) => NextResponse.json(b, { status: s, headers: { 'Cache-Control': 'no-store' } });
 const uuid = z.string().uuid();
 const TEST_REFERRAL = 'api-test';
@@ -70,9 +70,9 @@ export async function GET(req: Request) {
     }
     if (view === 'health') return j(await healthCheck());
     if (view === 'changelog') return j({ version: API_VERSION, changelog: CHANGELOG });
-    if (!tenant || !uuid.safeParse(tenant).success) return j({ error: 'Mandant wählen.' }, 400);
+    if (!tenant || !uuid.safeParse(tenant).success) return j({ error: 'Please choose a tenant.' }, 400);
     const t = await tenantWithPolicy(tenant);
-    if (!t) return j({ error: 'Mandant nicht gefunden.' }, 404);
+    if (!t) return j({ error: 'Tenant not found.' }, 404);
 
     if (view === 'overview') {
       const dayStart = new Date(); dayStart.setUTCHours(0, 0, 0, 0);
@@ -147,7 +147,7 @@ export async function GET(req: Request) {
     return j({ error: 'Unbekannte Ansicht.' }, 400);
   } catch (e) {
     console.error('admin_api_get', view, e instanceof Error ? e.message : e);
-    return j({ error: 'Daten konnten nicht geladen werden.' }, 500);
+    return j({ error: 'Data could not be loaded.' }, 500);
   }
 }
 
@@ -164,26 +164,26 @@ export async function POST(req: Request) {
   if (auth instanceof NextResponse) return auth;
   if (!adminConfigured()) return j({ error: 'Nicht konfiguriert.' }, 503);
   const b = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!b || typeof b.action !== 'string') return j({ error: 'Ungültige Anfrage.' }, 400);
+  if (!b || typeof b.action !== 'string') return j({ error: 'Invalid request.' }, 400);
   const actor = `admin:${auth.user.email}`;
   const db = supabaseAdmin();
   try {
-    // Testmandant: eigenes Unternehmenskonto (Enterprise, manuell) für Sandbox, Playground und E2E-Test.
+    // Test tenant: own business account (Enterprise, manual) for sandbox, playground and E2E test.
     if (b.action === 'test_tenant') {
       const { data: existing } = await db.from('lr_b2b_accounts').select('id').eq('referral', TEST_REFERRAL).limit(1).maybeSingle();
       let id = existing?.id as string | undefined;
       if (!id) {
         const email = `api-test+${randomBytes(4).toString('hex')}@leaserun.com`;
-        const user = await db.auth.admin.createUser({ email, email_confirm: true, password: randomBytes(24).toString('base64url'), user_metadata: { purpose: 'LeaseRun API-Testmandant (ohne Anmeldung)' } });
-        if (user.error || !user.data.user) return j({ error: 'Test-Benutzer konnte nicht angelegt werden.' }, 500);
+        const user = await db.auth.admin.createUser({ email, email_confirm: true, password: randomBytes(24).toString('base64url'), user_metadata: { purpose: 'LeaseRun API test tenant (no sign-in)' } });
+        if (user.error || !user.data.user) return j({ error: 'The test user could not be created.' }, 500);
         const now = new Date().toISOString();
         const ins = await db.from('lr_b2b_accounts').insert({
-          owner_id: user.data.user.id, company_name: 'LeaseRun API-Testmandant (TEST)', legal_form: 'Test', institution_type: 'OTHER', tax_id: 'TEST-0000',
-          advisor_name: 'API Test', email, postal_code: '64354', city: 'Reinheim', street: 'Teststraße 1 (TEST)', status: 'active', plan_tier: 'ENTERPRISE', plan_source: 'manual',
-          referral: TEST_REFERRAL, verified_at: now, verification_status: 'geprueft', verification_decided_at: now, verification_note: 'Interner API-Testmandant, keine Echtdaten.',
+          owner_id: user.data.user.id, company_name: 'LeaseRun API Test Tenant (TEST)', legal_form: 'Test', institution_type: 'OTHER', tax_id: 'TEST-0000',
+          advisor_name: 'API Test', email, postal_code: '78701', city: 'Austin', street: '100 Test St (TEST)', status: 'active', plan_tier: 'ENTERPRISE', plan_source: 'manual',
+          referral: TEST_REFERRAL, verified_at: now, verification_status: 'geprueft', verification_decided_at: now, verification_note: 'Internal API test tenant, no real data.',
           unternehmer_confirmed_at: now, avv_accepted_at: now, avv_version: 'TEST',
         }).select('id').single();
-        if (ins.error || !ins.data) { await db.auth.admin.deleteUser(user.data.user.id).catch(() => null); return j({ error: 'Testmandant konnte nicht angelegt werden.' }, 500); }
+        if (ins.error || !ins.data) { await db.auth.admin.deleteUser(user.data.user.id).catch(() => null); return j({ error: 'The test tenant could not be created.' }, 500); }
         id = ins.data.id as string;
         await db.from('api_tenant_policies').upsert({ tenant_id: id, enabled: true, live_enabled: false, updated_by: actor, updated_at: now, note: 'Testmandant: nur Testumgebung.' });
         await apiAudit({ tenantId: id, actor, action: 'api.access.enabled', resourceType: 'tenant', resourceId: id, meta: { test_tenant: true } });
@@ -192,16 +192,16 @@ export async function POST(req: Request) {
     }
 
     const tenant = typeof b.tenant === 'string' && uuid.safeParse(b.tenant).success ? b.tenant : null;
-    if (!tenant) return j({ error: 'Mandant wählen.' }, 400);
+    if (!tenant) return j({ error: 'Please choose a tenant.' }, 400);
     const t = await tenantWithPolicy(tenant);
-    if (!t) return j({ error: 'Mandant nicht gefunden.' }, 404);
+    if (!t) return j({ error: 'Tenant not found.' }, 404);
 
     if (b.action === 'policy') {
       const p = PolicyBody.safeParse(b.policy ?? {});
-      if (!p.success) return j({ error: 'Ungültige Einstellungen.', details: p.error.issues.map((i) => i.path.join('.')) }, 422);
+      if (!p.success) return j({ error: 'Invalid settings.', details: p.error.issues.map((i) => i.path.join('.')) }, 422);
       const before = t.row;
       const next = { tenant_id: tenant, enabled: before?.enabled ?? false, live_enabled: before?.live_enabled ?? false, rate_limit: before?.rate_limit ?? null, burst_limit: before?.burst_limit ?? null, max_document_bytes: before?.max_document_bytes ?? null, webhooks_allowed: before?.webhooks_allowed ?? null, white_label_allowed: before?.white_label_allowed ?? null, routing_enabled: before?.routing_enabled ?? false, note: before?.note ?? null, ...p.data, updated_at: new Date().toISOString(), updated_by: actor };
-      if (next.enabled && !t.policy.plan_includes_api) return j({ error: 'Der Tarif des Mandanten enthält keine API (erforderlich: Pro oder Enterprise).' }, 409);
+      if (next.enabled && !t.policy.plan_includes_api) return j({ error: 'The tenant\'s plan does not include API access (Pro or Enterprise required).' }, 409);
       const { error } = await db.from('api_tenant_policies').upsert(next);
       if (error) return j({ error: 'Speichern fehlgeschlagen.' }, 500);
       const changed = Object.keys(p.data).filter((k) => (before as Record<string, unknown> | null)?.[k] !== (p.data as Record<string, unknown>)[k]);
@@ -212,12 +212,12 @@ export async function POST(req: Request) {
     if (b.action === 'key_create') {
       const K = z.object({ name: z.string().trim().min(1).max(80), environment: z.enum(['test', 'live']), scopes: z.array(z.enum(SCOPES)).min(1), expires_at: z.string().datetime({ offset: true }).nullable().optional(), allowed_ips: z.array(z.string().max(50)).max(20).optional() }).strict();
       const p = K.safeParse(b.key ?? {});
-      if (!p.success) return j({ error: 'Bitte Name, Umgebung und mindestens einen Scope angeben.' }, 422);
+      if (!p.success) return j({ error: 'Please enter a name, environment and at least one scope.' }, 422);
       const r = await createKey({ tenantId: tenant, env: p.data.environment, name: p.data.name, scopes: p.data.scopes as Scope[], expiresAt: p.data.expires_at ?? null, allowedIps: p.data.allowed_ips, createdBy: actor, policy: t.policy });
       return j({ ok: true, key: r.key, secret: r.secret });
     }
     if (['key_rotate', 'key_revoke', 'key_disable', 'key_enable', 'key_expire'].includes(b.action)) {
-      if (typeof b.id !== 'string' || !uuid.safeParse(b.id).success) return j({ error: 'Schlüssel fehlt.' }, 400);
+      if (typeof b.id !== 'string' || !uuid.safeParse(b.id).success) return j({ error: 'Key is missing.' }, 400);
       if (b.action === 'key_rotate') { const r = await rotateKey({ tenantId: tenant, id: b.id, actor, policy: t.policy }); return j({ ok: true, key: r.key, secret: r.secret }); }
       const action = (b.action as string).slice(4) as 'revoke' | 'disable' | 'enable' | 'expire';
       return j({ ok: true, key: await setKeyState({ tenantId: tenant, id: b.id, actor, action, reason: typeof b.reason === 'string' ? b.reason : 'Web-Admin' }) });
@@ -225,7 +225,7 @@ export async function POST(req: Request) {
     if (b.action === 'delivery_retry') {
       if (typeof b.id !== 'string' || !uuid.safeParse(b.id).success) return j({ error: 'Zustellung fehlt.' }, 400);
       const { data: d } = await db.from('api_webhook_deliveries').select('*').eq('id', b.id).eq('tenant_id', tenant).maybeSingle();
-      if (!d) return j({ error: 'Zustellung nicht gefunden.' }, 404);
+      if (!d) return j({ error: 'Delivery not found.' }, 404);
       if (d.status === 'delivered') return j({ error: 'Bereits zugestellt.' }, 409);
       const r = await deliver(d as never, { manual: true });
       await apiAudit({ tenantId: tenant, environment: d.environment, actor, action: 'webhook.delivery_retried', resourceType: 'webhook_delivery', resourceId: d.id, result: r.ok ? 'success' : 'failure', meta: { status: r.status } });
@@ -234,7 +234,7 @@ export async function POST(req: Request) {
     if (b.action === 'webhook_test' || b.action === 'webhook_toggle') {
       if (typeof b.id !== 'string' || !uuid.safeParse(b.id).success) return j({ error: 'Webhook fehlt.' }, 400);
       const { data: w } = await db.from('api_webhook_endpoints').select('*').eq('id', b.id).eq('tenant_id', tenant).maybeSingle();
-      if (!w) return j({ error: 'Webhook nicht gefunden.' }, 404);
+      if (!w) return j({ error: 'Webhook not found.' }, 404);
       if (b.action === 'webhook_toggle') {
         await db.from('api_webhook_endpoints').update({ enabled: !w.enabled, updated_at: new Date().toISOString(), ...(!w.enabled ? { failure_count: 0 } : {}) }).eq('id', w.id);
         await apiAudit({ tenantId: tenant, environment: w.environment, actor, action: 'webhook.updated', resourceType: 'webhook', resourceId: w.id, meta: { enabled: !w.enabled } });
@@ -245,7 +245,7 @@ export async function POST(req: Request) {
       return j({ ...r });
     }
     if (b.action === 'sandbox_seed') {
-      if (!t.policy.enabled) return j({ error: 'API für diesen Mandanten zuerst aktivieren.' }, 409);
+      if (!t.policy.enabled) return j({ error: 'Enable the API for this tenant first.' }, 409);
       const n = Math.min(5, Math.max(1, Number(b.count || 1)));
       const ids: string[] = [];
       for (let i = 0; i < n; i++) {
@@ -256,7 +256,7 @@ export async function POST(req: Request) {
       return j({ ok: true, cases: ids });
     }
     if (b.action === 'sandbox_reset') {
-      // Ausschließlich Testumgebung: environment = 'test' ist in jeder Abfrage fest gesetzt.
+      // Test environment only: environment = 'test' is fixed in every query.
       const keys = b.include_keys === true;
       const [{ data: docs }, { data: reps }] = await Promise.all([
         db.from('api_documents').select('storage_path').eq('tenant_id', tenant).eq('environment', 'test'),
@@ -266,7 +266,7 @@ export async function POST(req: Request) {
       for (let i = 0; i < paths.length; i += 100) await db.storage.from(API_BUCKET).remove(paths.slice(i, i + 100));
       const del = async (tb: string) => (await db.from(tb).delete({ count: 'exact' }).eq('tenant_id', tenant).eq('environment', 'test')).count ?? 0;
       const deliveries = await del('api_webhook_deliveries');
-      const cases = await del('api_cases'); // Unterlagen, Prüfläufe, Berichte folgen per Fremdschlüssel (ON DELETE CASCADE)
+      const cases = await del('api_cases'); // documents, validation runs, reports follow via foreign key (ON DELETE CASCADE)
       const idem = await del('api_idempotency_keys');
       const webhooks = b.include_webhooks === true ? await del('api_webhook_endpoints') : 0;
       let revoked = 0;

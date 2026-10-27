@@ -9,7 +9,7 @@ import { cursorFilter, pageOf, pageParams } from '@/lib/api/pagination';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// GET /api/v1/cases – Fälle des Mandanten (Cursor-Paginierung, optional ?status= und ?external_reference=)
+// GET /api/v1/cases – the tenant's cases (cursor pagination, optional ?status= and ?external_reference=)
 export const GET = apiRoute({ route: '/api/v1/cases', scope: 'cases:read' }, async (ctx) => {
   const { limit, cursor } = pageParams(ctx.url);
   let q = supabaseAdmin().from('api_cases').select('*').eq('tenant_id', ctx.tenantId).eq('environment', ctx.env).is('deleted_at', null)
@@ -28,7 +28,7 @@ export const GET = apiRoute({ route: '/api/v1/cases', scope: 'cases:read' }, asy
   return { status: 200, body: { object: 'list', data: page.data.map(publicCase), pagination: page.pagination } };
 });
 
-// POST /api/v1/cases – Fall anlegen (Idempotency-Key empfohlen)
+// POST /api/v1/cases – create a case (Idempotency-Key recommended)
 export const POST = apiRoute({ route: '/api/v1/cases', scope: 'cases:write', idempotent: true }, async (ctx) => {
   const p = CaseInput.safeParse(ctx.body ?? {});
   if (!p.success) throw new ApiError('VALIDATION_ERROR', 'The request contains invalid data.', { errors: zodErrors(p.error.issues) });

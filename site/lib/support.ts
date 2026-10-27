@@ -1,20 +1,20 @@
 import { z } from 'zod';
 
-// „Technisches Problem melden“: gemeinsame Definitionen für Kunden-Schnittstelle, Web-Admin und Oberfläche.
+// "Report a technical problem": shared definitions for the customer API, the Web-Admin and the UI.
 export const SUP_CATEGORIES = {
-  anmeldung: 'Anmeldung & Konto',
-  zahlung: 'Bezahlung & Tarif',
-  anzeige: 'Darstellung & Bedienung',
-  werkzeug: 'Rechner & Werkzeuge',
-  dokument: 'PDF, Kreditmappe & Dokumente',
-  langsam: 'Langsam / lädt nicht',
-  sonstiges: 'Sonstiges',
+  anmeldung: 'Sign-in & account',
+  zahlung: 'Payment & plan',
+  anzeige: 'Display & usability',
+  werkzeug: 'Calculators & tools',
+  dokument: 'PDF, Lender Package & documents',
+  langsam: "Slow / won't load",
+  sonstiges: 'Other',
 } as const;
-export const SUP_SEVERITY = { blockiert: 'Ich komme nicht weiter', stoert: 'Stört, geht aber', klein: 'Kleinigkeit' } as const;
-export const SUP_STATUS = { neu: 'Eingegangen', in_arbeit: 'In Bearbeitung', rueckfrage: 'Rückfrage an Sie', geloest: 'Gelöst', geschlossen: 'Geschlossen' } as const;
+export const SUP_SEVERITY = { blockiert: "I'm stuck", stoert: 'Annoying, but works', klein: 'Minor issue' } as const;
+export const SUP_STATUS = { neu: 'Received', in_arbeit: 'In progress', rueckfrage: 'Waiting for your reply', geloest: 'Resolved', geschlossen: 'Closed' } as const;
 export const SUP_SLA_HOURS = 12;
 export const SUP_MAX_SHOTS = 3;
-export const SUP_MAX_SHOT_BYTES = 1_400_000; // nach Verkleinerung im Browser; Vercel-Anfragen bleiben unter 4,5 MB
+export const SUP_MAX_SHOT_BYTES = 1_400_000; // after downscaling in the browser; Vercel requests stay under 4.5 MB
 
 type K<T> = [keyof T & string, ...(keyof T & string)[]];
 const keys = <T extends object>(o: T) => Object.keys(o) as K<T>;
@@ -23,8 +23,8 @@ export const SupportIn = z.object({
   area: z.enum(['b2c', 'b2b']),
   category: z.enum(keys(SUP_CATEGORIES)),
   severity: z.enum(keys(SUP_SEVERITY)),
-  title: z.string().trim().min(3, 'Bitte einen kurzen Betreff (mind. 3 Zeichen).').max(140),
-  text: z.string().trim().min(10, 'Bitte beschreiben Sie das Problem in mindestens 10 Zeichen.').max(4000),
+  title: z.string().trim().min(3, 'Please enter a short subject (at least 3 characters).').max(140),
+  text: z.string().trim().min(10, 'Please describe the problem in at least 10 characters.').max(4000),
   expected: z.string().trim().max(2000).optional(),
   page: z.string().trim().max(300).optional(),
   device: z.object({
@@ -42,7 +42,7 @@ export const SupportAdmin = z.object({
   notify: z.boolean().optional(),
 });
 
-// Bilddatei an den ersten Bytes erkennen (nicht am Dateinamen): nur JPEG, PNG, WebP.
+// Detect the image type from the first bytes (not the file name): JPEG, PNG, WebP only.
 export function imageType(b: Uint8Array): 'image/jpeg' | 'image/png' | 'image/webp' | null {
   if (b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
   if (b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'image/png';

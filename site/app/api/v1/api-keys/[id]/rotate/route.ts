@@ -5,7 +5,7 @@ import { loadKey, rotateKey } from '@/lib/api/key-admin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Rotation: liefert einmalig den neuen Schlüssel; der alte ist ab sofort ungültig.
+// Rotation: returns the new key once; the old one is invalid immediately.
 export const POST = apiRoute({ route: '/api/v1/api-keys/{id}/rotate', scope: 'api_keys:write', idempotent: true }, async (ctx) => {
   const k = await loadKey(ctx.tenantId, ctx.params.id);
   if (k.environment !== ctx.env) throw new ApiError('RESOURCE_NOT_FOUND', 'API key not found.');

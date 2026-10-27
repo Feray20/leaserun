@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto';
 import { panicLevel, panicState } from '@/lib/security/panic';
 
-// Prüft das Supabase-Zugriffstoken serverseitig und liefert den angemeldeten Nutzer.
+// Verifies the Supabase access token on the server and returns the signed-in user.
 export type AuthUser = { id: string; email: string };
 
-// Kurzzeit-Cache (30 s) je Token-Hash: spart bei mehreren Aufrufen hintereinander
-// (Dashboard lädt Dokumente, Freigaben, Abrechnung) je einen Rundweg zu Supabase.
-// Abgelehnte Tokens werden nicht zwischengespeichert.
+// Short cache (30 s) per token hash: saves a round trip to Supabase on back-to-back calls
+// (dashboard loads documents, shares, billing). Rejected tokens are not cached.
 const TTL_MS = 30_000;
 const cache = new Map<string, { user: AuthUser; until: number }>();
 
@@ -18,12 +17,12 @@ function remember(key: string, user: AuthUser, now: number) {
   cache.set(key, { user, until: now + TTL_MS });
 }
 
-// allowAal1: nur für Stellen, die selbst den zweiten Faktor abfragen (Admin-Prüfung) – liefert den Nutzer auch vor der Code-Eingabe.
+// allowAal1: only for callers that ask for the second factor themselves (admin check) – returns the user before the code is entered.
 export async function userFromRequest(req: Request, opts: { allowAal1?: boolean } = {}): Promise<AuthUser | null> {
   const user = await verifiedUser(req, Boolean(opts.allowAal1));
   if (!user) return null;
-  // Not-Aus: nur Administratoren bleiben angemeldet.
-  // Stufe 1: Nicht-Administratoren nur lesend; Stufe 2: Nicht-Administratoren abgewiesen.
+  // Emergency stop: only administrators stay signed in.
+  // Level 1: non-admins read-only; level 2: non-admins rejected.
   const lvl = panicLevel(await panicState().catch(() => ({ active: false })));
   if (lvl) {
     const admins = (process.env.ADMIN_EMAILS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
@@ -60,8 +59,8 @@ async function verifiedUser(req: Request, allowAal1 = false): Promise<AuthUser |
   }
   const u = (await r.json().catch(() => ({}))) as { id?: string; email?: string; factors?: { status?: string }[] };
   if (!u.id || !u.email) return null;
-  // Zwei-Faktor-Schutz: Hat das Konto einen bestätigten zweiten Faktor (App oder SMS), gilt die Sitzung erst
-  // nach Eingabe des Codes (aal2). Eine Sitzung nur mit Passwort (aal1) erhält dann keinen Zugriff.
+  // Two-factor protection: if the account has a verified second factor (app or SMS), the session only counts after
+  // the code was entered (aal2). A password-only session (aal1) then gets no access.
   if (!allowAal1 && (u.factors || []).some((f) => f.status === 'verified') && tokenAalOf(header) !== 'aal2') return null;
   const user = { id: u.id, email: u.email.toLowerCase() };
   remember(cacheKey, user, now);

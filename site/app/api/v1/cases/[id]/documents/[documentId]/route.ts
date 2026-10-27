@@ -5,7 +5,7 @@ import { publicDocument } from '@/lib/api/serialize';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// GET – Metadaten plus kurzlebiger, signierter Download-Link (5 Minuten).
+// GET – metadata plus a short-lived signed download link (5 minutes).
 export const GET = apiRoute({ route: '/api/v1/cases/{id}/documents/{documentId}', scope: 'documents:read' }, async (ctx) => {
   const s = { tenantId: ctx.tenantId, env: ctx.env, actor: ctx.actor, requestId: ctx.requestId };
   await getCase(s, ctx.params.id);

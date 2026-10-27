@@ -1,12 +1,12 @@
-// Vorschau für Nicht-Kunden: Rechner laufen nur mit Beispielwerten, die Wissenszentrale zeigt nur Allgemeines –
-// die ausführlichen Antworten (Rechenweg, Rechtsgrundlage, Bankpraxis) lädt nur ein zahlender Kunde vom Server.
-// Kunden erkennt menu.js (Klasse lr-paid am <html>, Zwischenspeicher lr-access); sobald sie gesetzt ist, ist alles offen.
+// Preview for non-customers: calculators run with sample values only, Learn shows general info only –
+// the full answers (formula, legal basis, lender practice) are loaded from the server for paying customers only.
+// menu.js detects customers (class lr-paid on <html>, cache lr-access); once set, everything is open.
 (() => {
   if (window.__iaGate) return;
   window.__iaGate = true;
   const P = location.pathname.replace(/\/+$/, '') || '/';
-  const CALC = /^\/rechner\/[a-z-]+$/.test(P) && P !== '/calculators/closing-costs';
-  const WISSEN = (P === '/learn' || /^\/wissen\/[a-z0-9-]+$/.test(P)) && !/^\/wissen\/(glossar|erwerbsstatus|warum-investieren)$/.test(P);
+  const CALC = /^\/calculators\/[a-z-]+$/.test(P) && P !== '/calculators/closing-costs';
+  const WISSEN = (P === '/learn' || /^\/learn\/[a-z0-9-]+$/.test(P)) && !/^\/learn\/(glossar|glossary|erwerbsstatus|employment-types|warum-investieren|why-invest)$/.test(P);
   const MUSTER = P === '/sample-loan-package';
   if (!CALC && !WISSEN && !MUSTER) return;
   const root = document.documentElement;
@@ -38,19 +38,19 @@
   html.lr-demo .report .route-a .lr-gate-hook{margin:4px 0 8px}`;
   document.head.append(css);
 
-  // Eine kurze Anleitung ganz oben – und nur dort ein Knopf „Zugang freischalten“ (keine Wiederholung je Eintrag).
-  const OPEN = CALC ? 'jeder Rechner mit Ihren eigenen Zahlen – speichern, drucken, teilen.' : MUSTER ? 'die komplette Mustermappe und Ihre eigene Kreditmappe.' : 'alle Antworten mit Kernaussage, nächstem Schritt, Rechenweg und Rechtsgrundlage.';
+  // One short note at the top – and only there an "Unlock access" button (not repeated per entry).
+  const OPEN = CALC ? 'every calculator with your own numbers – save, print, share.' : MUSTER ? 'the complete sample lender package and your own Lender Package.' : 'every answer with the short answer, next step, formula and legal basis.';
   const guide = () => {
     const d = document.createElement('div');
     d.className = 'lr-gate-box lr-gate-bar'; d.setAttribute('role', 'note');
-    d.innerHTML = `<span><strong>Vorschau.</strong> Mit Zugang sofort offen: ${OPEN}</span>
-      <span class="lr-gate-act"><a class="btn btn-dark" href="/pricing">Zugang freischalten</a>${user() ? '' : '<a class="ck-link" href="/auth/login">Schon Kunde? Anmelden</a>'}</span>`;
+    d.innerHTML = `<span><strong>Preview.</strong> Unlocked right away with access: ${OPEN}</span>
+      <span class="lr-gate-act"><a class="btn btn-dark" href="/pricing">Unlock access</a>${user() ? '' : '<a class="ck-link" href="/auth/login">Already a customer? Sign in</a>'}</span>`;
     return d;
   };
-  // Kopftext der Seite als kleiner Vorgeschmack (ohne Zugang) – mit Zugang wieder der normale Text.
-  const TEASE = WISSEN ? (P === '/learn' ? '63 Antworten in vier Phasen – von „Was kann ich mir leisten?“ bis zum Bankgespräch. Einige Antworten sind als Leseprobe frei; alle Antworten mit Rechenweg und Rechtsgrundlage gibt es mit Zugang.' : 'Eine Frage aus der LeaseRun-Wissenszentrale. Die Antwort mit Rechenweg, Beispiel und nächstem Schritt gibt es mit Zugang.')
-    : MUSTER ? 'So sehen die Unterlagen aus, die LeaseRun für Ihre Bank erstellt – Kennzahlen und der erste Abschnitt als Vorschau, die PDFs als Leseprobe.'
-      : 'Rechnen Sie den Musterfall durch und sehen Sie, wie das Ergebnis aussieht – mit Ihren eigenen Zahlen nach der Freischaltung.';
+  // Page intro as a small teaser (without access) – with access the normal text returns.
+  const TEASE = WISSEN ? (P === '/learn' ? 'Answers in four stages – from "What can I afford?" to your lender meeting. Some answers are free samples; every answer with formula and legal basis comes with access.' : 'A question from the LeaseRun Learn center. The answer with formula, example and next step comes with access.')
+    : MUSTER ? 'This is what LeaseRun prepares for your lender – key metrics and the first section as a preview, the PDFs as a sample.'
+      : 'Run the sample case and see what the result looks like – with your own numbers once unlocked.';
   const heroText = (demo) => {
     const p = document.querySelector('.route-hero .container > p, .route-hero p');
     if (!p) return;
@@ -64,14 +64,14 @@
     if (host && host.classList.contains('crumbs')) host.after(g); else if (host && host.classList.contains('calc-pages')) host.prepend(g); else if (host) host.before(g); else main.prepend(g);
   };
 
-  // ---------- Wissenszentrale: auf der Website nur Frage, Kernaussage und nächster Schritt ----------
-  // Die ausführliche Antwort steht nicht im Seitenquelltext; Kunden laden sie nach der Anmeldung vom Server.
+  // ---------- Learn: the website shows only question, short answer and next step ----------
+  // The full answer is not in the page source; customers load it from the server after signing in.
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const lnk = (t) => esc(t).replace(/https:\/\/[^\s<]*[^\s<.,;)]/g, (u) => `<a class="ck-link" href="${u}" target="_blank" rel="noopener noreferrer">${u.replace(/^https:\/\/(www\.)?/, '')}</a>`);
-  // Einstellungen aus dem Web-Admin (Freischaltung): welche Bereiche ohne Zugang nur Vorschau sind.
+  // Web-Admin settings (unlocking): which areas are preview-only without access. ('vorschau' = preview, 'offen' = open; stored values.)
   let GATE = { wissen: 'vorschau', rechner: 'vorschau', beispiele: 'vorschau' };
-  // Öffentliche Einstellungen (/api/site-config) robust abrufen: höchstens 5 s warten, bei Fehler ein Wiederholversuch nach 2 s,
-  // sonst still der zuletzt gespeicherte Stand (sessionStorage) bzw. die eingebauten Standardwerte. Ein Abruf je Seite, geteilt mit hinweis.js.
+  // Fetch public settings (/api/site-config) robustly: wait at most 5 s, retry once after 2 s on error,
+  // otherwise silently use the last stored value (sessionStorage) or built-in defaults. One request per page, shared with hinweis.js.
   const siteConfig = () => window.__iaCfgP || (window.__iaCfgP = (() => {
     const SK = 'lr-site-config';
     const once = () => {
@@ -80,11 +80,11 @@
       return fetch('/api/site-config', { credentials: 'omit', signal: ac.signal }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`site-config ${r.status}`)))).finally(() => clearTimeout(t));
     };
     return once().catch(() => new Promise((ok) => setTimeout(ok, 2000)).then(once))
-      .then((c) => { try { sessionStorage.setItem(SK, JSON.stringify(c)); } catch { /* ohne Speicher */ } return c; })
+      .then((c) => { try { sessionStorage.setItem(SK, JSON.stringify(c)); } catch { /* no storage */ } return c; })
       .catch(() => { try { return JSON.parse(sessionStorage.getItem(SK) || 'null') || {}; } catch { return {}; } });
   })());
   const areaOpen = () => (WISSEN && GATE.wissen === 'offen') || (CALC && GATE.rechner === 'offen') || (MUSTER && GATE.beispiele === 'offen');
-  // Freigabe je Bereich (Tarif oder Einzelfreigabe im Web-Admin) – lr-open-wissen / -beispiele / -rechner von menu.js
+  // Access per area (plan or individual unlock in the Web-Admin) – lr-open-wissen / -beispiele / -rechner from menu.js
   const granted = () => root.classList.contains('lr-open-' + (WISSEN ? 'wissen' : MUSTER ? 'beispiele' : 'rechner')) || (() => { try { const a = JSON.parse(localStorage.getItem('lr-access') || 'null'); return !!(a && (a.areas ? a.areas[WISSEN ? 'wissen' : MUSTER ? 'beispiele' : 'rechner'] : a.paid)); } catch { return false; } })();
   const full = () => granted() || areaOpen();
   let DET = null, detP = null, PREV = null, prevP = null;
@@ -108,29 +108,29 @@
       const host = el.closest('article, .wq-art');
       const tag = host?.querySelector('.wq-tag');
       host?.querySelector('.wq-teaser')?.remove();
-      // Öffentliche Kurzantwort (fest im HTML): mit Zugang steht sie im vollständigen Teil – dann ausblenden, nicht doppeln.
+      // Public short answer (static in the HTML): with access it is part of the full answer – hide it then, don't duplicate.
       const kurz = host?.querySelector('.wq-kurz');
       if (kurz) kurz.hidden = want === 'paid';
       if (want === 'free' && kurz) {
-        if (tag) { tag.textContent = 'Kurzantwort'; tag.className = 'wq-tag wq-free'; }
-        el.innerHTML = `<p class="wq-hook">${esc(el.dataset.hook || 'Die vollständige Antwort zeigt Rechenweg, Beispiel und den nächsten Schritt.')}</p>`;
+        if (tag) { tag.textContent = 'Short answer'; tag.className = 'wq-tag wq-free'; }
+        el.innerHTML = `<p class="wq-hook">${esc(el.dataset.hook || 'The full answer shows the formula, an example and the next step.')}</p>`;
         return;
       }
       if (want === 'free') {
         const t = PREV.get(el.dataset.q);
-        if (tag) { tag.textContent = t ? 'Leseprobe' : 'Mit Zugang'; tag.className = 'wq-tag ' + (t ? 'wq-free' : 'wq-lock'); }
-        el.innerHTML = `${t ? `<div class="callout wq-teaser"><strong>Leseprobe</strong><p>${esc(t)}</p></div>` : ''}<p class="wq-hook">${esc(el.dataset.hook || 'Die vollständige Antwort zeigt Rechenweg, Beispiel und den nächsten Schritt.')}</p>`;
+        if (tag) { tag.textContent = t ? 'Free sample' : 'With access'; tag.className = 'wq-tag ' + (t ? 'wq-free' : 'wq-lock'); }
+        el.innerHTML = `${t ? `<div class="callout wq-teaser"><strong>Free sample</strong><p>${esc(t)}</p></div>` : ''}<p class="wq-hook">${esc(el.dataset.hook || 'The full answer shows the formula, an example and the next step.')}</p>`;
         return;
       }
       if (tag) { tag.textContent = ''; tag.className = 'wq-tag'; }
-      if (want === 'paid') { const e = DET.get(el.dataset.q) || {}; el.innerHTML = `<div class="callout"><strong>Kurz gesagt</strong><p>${lnk(e.l1 || '')}</p></div>${e.next ? `<div class="next"><strong>Nächster Schritt:</strong> ${lnk(e.next)}</div>` : ''}${e.l2 ? `<h3 class="wq-h">Im Detail: Rechenweg, Rechtsgrundlage, Bankpraxis</h3><p class="wq-l2">${lnk(e.l2)}</p>` : ''}`; return; }
-      el.innerHTML = '<p class="form-note">Antwort wird geladen …</p>';
-      loadDetails().then(fillWissen).catch((e) => { el.dataset.state = 'err'; el.innerHTML = `<p class="form-note">${e.message === 'login' || e.message === '401' ? 'Bitte melden Sie sich erneut an, um die Antwort zu sehen.' : 'Die Antwort konnte gerade nicht geladen werden. Bitte die Seite neu laden.'}</p>`; });
+      if (want === 'paid') { const e = DET.get(el.dataset.q) || {}; el.innerHTML = `<div class="callout"><strong>In short</strong><p>${lnk(e.l1 || '')}</p></div>${e.next ? `<div class="next"><strong>Next step:</strong> ${lnk(e.next)}</div>` : ''}${e.l2 ? `<h3 class="wq-h">In detail: formula, legal basis, lender practice</h3><p class="wq-l2">${lnk(e.l2)}</p>` : ''}`; return; }
+      el.innerHTML = '<p class="form-note">Loading the answer …</p>';
+      loadDetails().then(fillWissen).catch((e) => { el.dataset.state = 'err'; el.innerHTML = `<p class="form-note">${e.message === 'login' || e.message === '401' ? 'Please sign in again to see the answer.' : 'The answer could not be loaded right now. Please reload the page.'}</p>`; });
     });
   };
 
-  // ---------- Rechner: Beispielwerte zeigen, eigene Eingaben gesperrt ----------
-  const NOFREE = /csv|herunterlad|drucken|pdf|link zum ergebnis|ins konto|kopieren/i;
+  // ---------- Calculators: show sample values, own input locked ----------
+  const NOFREE = /csv|download|print|pdf|link to (the )?result|to (my )?account|save to account|copy/i;
   const lockCalc = () => {
     const main = document.querySelector('main'); if (!main) return;
     main.querySelectorAll('input:not([type=search]):not([data-gate]), select:not([data-gate]), textarea:not([data-gate])').forEach((el) => {
@@ -144,27 +144,27 @@
       el.classList.add('lr-demo-ctl');
     });
   };
-  // ---------- Mustermappe: Kennzahlen und erster Abschnitt als Einblick, der Rest mit Zugang ----------
+  // ---------- Sample lender package: metrics and first section as a preview, the rest with access ----------
   const lockMuster = () => {
-    // Wie in der Wissenszentrale: alle Abschnitte sichtbar benannt, der erste als Leseprobe offen, die übrigen „Mit Zugang“.
+    // Like Learn: all sections named, the first open as a sample, the others "With access".
     const rep = document.querySelector('main .report');
     if (rep && !rep.dataset.gateDone) {
       rep.dataset.gateDone = '1';
-      // Abschnitte als Fragen wie in der Wissenszentrale: der erste offen als Leseprobe, die übrigen zeigen nur,
-      // was mit Zugang zu sehen wäre (Inhalt bleibt ausgeblendet).
+      // Sections as questions like in Learn: the first open as a sample, the others only show
+      // what would be visible with access (content stays hidden).
       const arts = [...rep.querySelectorAll('.route-accordion > article')];
       arts.forEach((a, k) => {
         const tag = a.querySelector('.route-q .wq-tag');
-        if (tag) { tag.textContent = k ? 'Mit Zugang' : 'Leseprobe'; tag.className = 'wq-tag lr-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); }
+        if (tag) { tag.textContent = k ? 'With access' : 'Free sample'; tag.className = 'wq-tag lr-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); }
         if (!k) return;
         const body = a.querySelector('.route-a'); if (!body) return;
         [...body.children].forEach((el) => { el.dataset.gateHid = '1'; });
-        const hook = document.createElement('p'); hook.className = 'wq-hook lr-gate-hook'; hook.textContent = a.dataset.hook || 'Diesen Abschnitt sehen Sie vollständig mit Zugang.';
+        const hook = document.createElement('p'); hook.className = 'wq-hook lr-gate-hook'; hook.textContent = a.dataset.hook || 'You can see this full section with access.';
         body.append(hook);
       });
-      // Ältere Darstellung (Überschriften statt Fragen): erster Abschnitt offen, Rest ausgeblendet.
+      // Older layout (headings instead of questions): first section open, the rest hidden.
       if (!arts.length) [...rep.querySelectorAll(':scope > h2')].forEach((h, k) => {
-        const tag = document.createElement('em'); tag.className = 'wq-tag lr-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); tag.textContent = k ? 'Mit Zugang' : 'Leseprobe';
+        const tag = document.createElement('em'); tag.className = 'wq-tag lr-gate-tag ' + (k ? 'wq-lock' : 'wq-free'); tag.textContent = k ? 'With access' : 'Free sample';
         h.append(' ', tag);
         if (!k) return;
         const labels = [];
@@ -173,15 +173,15 @@
           el.querySelectorAll('tr').forEach((tr) => { const c = tr.querySelector('th, td'); const t = (c?.textContent || '').trim(); if (t && t.length < 40 && labels.length < 5) labels.push(t); });
           el.dataset.gateHid = '1';
         }
-        // Kleiner Einblick: was der Abschnitt enthält (nur Bezeichnungen, keine Werte).
+        // Small preview: what the section contains (labels only, no values).
         const note = document.createElement('p'); note.className = 'lr-gate-note lr-gate-sec';
-        note.textContent = labels.length ? `Enthält: ${labels.join(', ')} …` : 'Mit Zugang vollständig sichtbar.';
+        note.textContent = labels.length ? `Includes: ${labels.join(', ')} …` : 'Fully visible with access.';
         h.after(note);
       });
     }
     document.querySelectorAll('main .ex-grid a[href*="/api/mustermappe"]:not([href*="download"])').forEach((a) => {
       const box = a.parentElement; if (!box || box.nextElementSibling?.classList.contains('lr-gate-note')) return;
-      const n = document.createElement('p'); n.className = 'lr-gate-note'; n.textContent = 'Ansehen zeigt eine Leseprobe – das ganze PDF gibt es mit Zugang.';
+      const n = document.createElement('p'); n.className = 'lr-gate-note'; n.textContent = 'Viewing shows a sample – the full PDF comes with access.';
       box.after(n);
     });
     document.querySelectorAll('main #print:not([data-gate])').forEach((el) => {
@@ -200,7 +200,7 @@
       const r = await fetch(a.href, { headers: { Authorization: 'Bearer ' + tok }, cache: 'no-store' });
       if (!r.ok) throw new Error();
       const url = URL.createObjectURL(await r.blob());
-      if (win) win.location.href = url; else { const d = document.createElement('a'); d.href = url; d.download = /analyse/.test(a.href) ? 'LeaseRun_Muster_Objekt-Analyse.pdf' : 'LeaseRun_Muster_Kreditmappe.pdf'; d.click(); }
+      if (win) win.location.href = url; else { const d = document.createElement('a'); d.href = url; d.download = /analyse/.test(a.href) ? 'LeaseRun_Sample_Property_Analysis.pdf' : 'LeaseRun_Sample_Lender_Package.pdf'; d.click(); }
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch { if (win) win.close(); location.href = a.href; }
   });
@@ -216,10 +216,10 @@
     document.querySelectorAll('[data-gate-hid]').forEach((e) => { delete e.dataset.gateHid; });
   };
 
-  // Wissensinhalte (auch für Kunden) nicht kopier- oder druckbar: kein Markieren, Kopieren, Rechtsklick oder Ziehen.
+  // Learn content (also for customers) cannot be copied or printed: no selecting, copying, right-click or dragging.
   if (WISSEN) {
     const pc = document.createElement('style');
-    pc.textContent = '.route-a,.wq-art{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}@media print{.route-a,.wq-art{display:none!important}main::after{content:"Die Inhalte der LeaseRun-Wissenszentrale sind nur online abrufbar.";display:block;padding:24px;font:16px/1.5 sans-serif}}';
+    pc.textContent = '.route-a,.wq-art{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}@media print{.route-a,.wq-art{display:none!important}main::after{content:"LeaseRun Learn content is available online only.";display:block;padding:24px;font:16px/1.5 sans-serif}}';
     document.head.append(pc);
     const guard = (e) => { if (e.target.closest?.('.route-a, .wq-art')) e.preventDefault(); };
     ['copy', 'cut', 'contextmenu', 'dragstart', 'selectstart'].forEach((ev) => document.addEventListener(ev, guard, true));
@@ -237,7 +237,7 @@
   const start = () => {
     apply();
     siteConfig().then((c) => { if (c && c.gate) { GATE = { ...GATE, ...c.gate }; detP = null; DET = null; document.querySelectorAll('.wq-detail').forEach((el) => { delete el.dataset.state; }); apply(); } }).catch(() => {});
-    // Inhalte entstehen teils per Skript, und der Kundenstatus kommt erst nach der Prüfung – beides beobachten.
+    // Content is partly created by scripts and customer status arrives after the check – observe both.
     new MutationObserver(() => { if (on || WISSEN) apply(); }).observe(document.querySelector('main') || document.body, { childList: true, subtree: true });
     new MutationObserver(apply).observe(root, { attributes: true, attributeFilter: ['class'] });
   };

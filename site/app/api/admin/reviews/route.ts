@@ -18,16 +18,16 @@ export async function GET(req: Request) {
 }
 
 const In = z.object({
-  reviewUrl: z.string().trim().max(300).refine((u) => u === '' || /^https:\/\/(g\.page|search\.google\.com|www\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl)\//.test(u), 'Bitte den Google-Bewertungslink (https://g.page/r/… oder https://search.google.com/local/writereview?…) eintragen.'),
-  placeId: z.string().trim().max(200).regex(/^$|^[A-Za-z0-9_-]{10,200}$/, 'Place-ID ungültig.'),
+  reviewUrl: z.string().trim().max(300).refine((u) => u === '' || /^https:\/\/(g\.page|search\.google\.com|www\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl)\//.test(u), 'Please enter the Google review link (https://g.page/r/… or https://search.google.com/local/writereview?…).'),
+  placeId: z.string().trim().max(200).regex(/^$|^[A-Za-z0-9_-]{10,200}$/, 'Invalid Place ID.'),
 });
 
 export async function POST(req: Request) {
   const auth = await requireAdmin(req, 'support');
   if (auth instanceof NextResponse) return auth;
-  if (!adminConfigured()) return j({ error: 'Nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return j({ error: 'Not configured.' }, 503);
   const p = In.safeParse(await req.json().catch(() => null));
-  if (!p.success) return j({ error: p.error.issues[0]?.message || 'Ungültig.' }, 400);
+  if (!p.success) return j({ error: p.error.issues[0]?.message || 'Invalid.' }, 400);
   const value = { reviewUrl: p.data.reviewUrl || null, placeId: p.data.placeId || null };
   const r = await supabaseAdmin().from('lr_settings').upsert({ key: REVIEW_KEY, value, updated_at: new Date().toISOString(), updated_by: auth.user.email });
   if (r.error) return j({ error: r.error.message }, 500);

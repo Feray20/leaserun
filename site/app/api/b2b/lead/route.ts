@@ -23,8 +23,8 @@ const Schema = z.object({
   phone: z.string().trim().max(40).optional().default(''),
   message: z.string().trim().max(2000).optional().default(''),
   consent: z.literal(true),
-  website: z.string().optional().default(''), // Honigtopf-Feld, bleibt bei Menschen leer
-  ts: z.coerce.number().optional(), // Zeitpunkt des Formularaufbaus (Zeitfalle gegen Bots)
+  website: z.string().optional().default(''), // honeypot field, stays empty for humans
+  ts: z.coerce.number().optional(), // time the form was rendered (timing trap against bots)
   property: z.object({
     ref: z.string().trim().max(80).optional(),
     address: z.string().trim().max(160).optional(),
@@ -35,60 +35,60 @@ const Schema = z.object({
 });
 
 const consentText = (company: string) =>
-  `Ich willige ein, dass meine Angaben (Name, Kontaktdaten, Objekt- und Finanzierungsdaten) an ${company} übermittelt werden, ` +
-  `damit ${company} mich zu meiner Anfrage kontaktiert. LeaseRun verarbeitet die Daten im Auftrag von ${company}. ` +
-  `Ich kann die Einwilligung jederzeit gegenüber ${company} widerrufen.`;
+  `I agree that my details (name, contact information, property and financing details) are sent to ${company} ` +
+  `so that ${company} can contact me by email or phone about my inquiry. Consent is not a condition of any purchase. ` +
+  `LeaseRun processes the data on behalf of ${company} and does not sell it. I can withdraw my consent at any time by contacting ${company}.`;
 
-// Öffentliche Anfrage über Partnerseite, Widget oder Exposé-QR. Geht ausschließlich an das jeweilige Unternehmen.
+// Public inquiry via partner page, widget or listing QR. Goes only to that business.
 export async function POST(req: Request) {
-  if (!adminConfigured()) return json({ error: 'Nicht verfügbar.' }, 503);
+  if (!adminConfigured()) return json({ error: 'Not available.' }, 503);
   const ip = anonymizedIpHash(req) ?? 'x';
-  if (!allowRequest(`lead:${ip}`, 5, 10 * 60_000)) return json({ error: 'Zu viele Anfragen. Bitte später erneut versuchen.' }, 429);
+  if (!allowRequest(`lead:${ip}`, 5, 10 * 60_000)) return json({ error: 'Too many requests. Please try again later.' }, 429);
   const parsed = Schema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     const f = String(parsed.error.issues[0]?.path[0] ?? '');
-    const msg: Record<string, string> = { consent: 'Bitte der Weitergabe an den Partner zustimmen.', email: 'Bitte eine gültige E-Mail-Adresse angeben.', name: 'Bitte Ihren Namen angeben.' };
-    return json({ error: msg[f] ?? 'Bitte die Angaben prüfen.' }, 400);
+    const msg: Record<string, string> = { consent: 'Please agree to share your details with this partner.', email: 'Please enter a valid email address.', name: 'Please enter your name.' };
+    return json({ error: msg[f] ?? 'Please check your entries.' }, 400);
   }
   const b = parsed.data;
-  // Bot- und Fake-Abwehr: Honigtopf, Zeitfalle, Wegwerf-Adresse, nicht empfangsfähige Domain, Spam-Inhalt.
+  // Bot and fake protection: honeypot, timing trap, disposable address, undeliverable domain, spam content.
   const guard = await guardSubmission({ email: b.email, name: b.name, message: b.message, website: b.website, ts: b.ts, bucket: 'lead' });
-  if (guard.action === 'drop') return json({ ok: true }, 201); // Bot: stillschweigend verwerfen
+  if (guard.action === 'drop') return json({ ok: true }, 201); // bot: silently discard
   if (guard.action === 'reject') return json({ error: guard.error, field: guard.field, suggestion: guard.suggestion }, 400);
-  if ((await panicState()).active) return json({ error: 'Anfragen sind vorübergehend nicht möglich (Wartung).' }, 503);
+  if ((await panicState()).active) return json({ error: 'Inquiries are temporarily unavailable (maintenance).' }, 503);
   const db = supabaseAdmin();
   const { data } = await db.from('lr_b2b_accounts').select('*').eq('slug', b.slug).maybeSingle();
   const a = data as B2BAccount | null;
-  if (!a || a.status !== 'active' || !a.verified_at || !a.widget_active || !effectiveTier(a)) return json({ error: 'Dieser Partner nimmt derzeit keine Anfragen an.' }, 404);
+  if (!a || a.status !== 'active' || !a.verified_at || !a.widget_active || !effectiveTier(a)) return json({ error: 'This partner is not accepting inquiries right now.' }, 404);
 
   const p = b.property;
   let metrics: Record<string, unknown> | null = null;
   if (p.price && p.land) {
-    const r = analyse({ price: p.price, rent: p.rent ?? 0, area: p.area ?? 0, land: p.land, equity: p.equity ?? 0, ratePct: p.ratePct ?? 3.8, repaymentPct: p.repaymentPct ?? 2, brokerPct: p.brokerPct ?? 0, maintenanceQm: 1, vacancyPct: 2 });
+    const r = analyse({ price: p.price, rent: p.rent ?? 0, area: p.area ?? 0, land: p.land, equity: p.equity ?? 0, ratePct: p.ratePct ?? 6.5, repaymentPct: p.repaymentPct ?? 2, brokerPct: p.brokerPct ?? 0, maintenanceQm: 1, vacancyPct: 2 });
     if (r) metrics = { allIn: r.allIn, nebenkosten: r.nebenkosten, loan: r.loan, ltv: r.ltv, rate: r.rate, noi: r.noi, cashflow: r.cashflow, dscr: r.dscr, grossYield: r.grossYield, netYield: r.netYield };
   }
-  // Auffällige Anfrage trotzdem zustellen, aber für den Partner sichtbar markieren.
+  // Still deliver a suspicious inquiry, but flag it visibly for the partner.
   if (guard.action === 'allow' && guard.flagged) metrics = { ...(metrics ?? {}), spamVerdacht: true };
   const ct = consentText(a.company_name);
   const ins = await db.from('lr_b2b_leads').insert({
     account_id: a.id, source: b.source, client_name: b.name, client_email: b.email, client_phone: b.phone || null, message: b.message || null,
     property_data: p, metrics, consent_at: new Date().toISOString(), consent_text: ct, ip_hash: ip,
   }).select('id').single();
-  if (ins.error) return json({ error: 'Anfrage konnte nicht gespeichert werden.' }, 500);
+  if (ins.error) return json({ error: 'Your inquiry could not be saved.' }, 500);
 
   if (a.webhook_url) await sendWebhook(a, 'lead.created', { id: ins.data.id, source: b.source, name: b.name, email: b.email, phone: b.phone || null, message: b.message || null, property: p, metrics, consentAt: new Date().toISOString() });
   if (mailConfigured()) {
-    const eur = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('de-DE', { maximumFractionDigits: 0 }) + ' €' : '–');
-    await sendMail(a.email, `Neue Finanzierungsanfrage über LeaseRun (${b.source})`,
-      `Neue Anfrage für ${a.company_name}\n\nName: ${b.name}\nE-Mail: ${b.email}\nTelefon: ${b.phone || '–'}\n` +
-      `Objekt: ${p.address || p.ref || '–'}\nKaufpreis: ${eur(p.price)} · Kaltmiete: ${eur(p.rent)} · Eigenkapital: ${eur(p.equity)}\n` +
-      (metrics ? `Gesamtkosten: ${eur(metrics.allIn)} · Darlehen: ${eur(metrics.loan)} · DSCR: ${metrics.dscr ?? '–'}\n` : '') +
-      `\nNachricht: ${b.message || '–'}\n\nAlle Angaben im Portal: https://leaserun.com/business-portal#anfragen\n\nRechnerische Orientierungswerte, keine Kreditentscheidung.`, [], { area: 'b2b' });
-    // Eingangsbestätigung an den Interessenten (nicht bei Links im Namen, gegen Missbrauch als Spam-Versand).
-    if (!/https?:|www\.|:\/\/|\.[a-z]{2,}\//i.test(b.name)) await sendMail(b.email, `Ihre Anfrage an ${a.company_name}`,
-      `Guten Tag ${b.name},\n\nIhre Finanzierungsanfrage ist bei ${a.company_name} (${a.postal_code} ${a.city}) eingegangen. ${a.company_name} meldet sich direkt bei Ihnen.\n\n` +
-      `Verantwortlich für Ihre Daten ist ${a.company_name}; LeaseRun verarbeitet sie nur im Auftrag. Ihre Einwilligung können Sie jederzeit gegenüber ${a.company_name} widerrufen (Kontakt: ${a.email}).\n\n` +
-      'Die angezeigten Werte sind rechnerische Orientierungswerte, keine Kreditzusage.');
+    const eur = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) : '–');
+    await sendMail(a.email, `New financing inquiry via LeaseRun (${b.source})`,
+      `New inquiry for ${a.company_name}\n\nName: ${b.name}\nEmail: ${b.email}\nPhone: ${b.phone || '–'}\n` +
+      `Property: ${p.address || p.ref || '–'}\nPurchase price: ${eur(p.price)} · Rent: ${eur(p.rent)} · Down payment: ${eur(p.equity)}\n` +
+      (metrics ? `Total cost: ${eur(metrics.allIn)} · Loan: ${eur(metrics.loan)} · DSCR: ${metrics.dscr ?? '–'}\n` : '') +
+      `\nMessage: ${b.message || '–'}\n\nAll details in the portal: https://leaserun.com/business-portal#anfragen\n\nEstimates only, not a credit decision. Please follow TCPA and CAN-SPAM rules when you follow up.`, [], { area: 'b2b' });
+    // Confirmation to the prospect (not if the name contains links, against abuse as spam relay).
+    if (!/https?:|www\.|:\/\/|\.[a-z]{2,}\//i.test(b.name)) await sendMail(b.email, `Your inquiry to ${a.company_name}`,
+      `Hi ${b.name},\n\nYour financing inquiry has reached ${a.company_name} (${a.city}). ${a.company_name} will contact you directly.\n\n` +
+      `${a.company_name} is responsible for your data; LeaseRun processes it only on their behalf and does not sell it. You can withdraw your consent at any time by contacting ${a.company_name} (${a.email}).\n\n` +
+      'The figures shown are estimates for planning only, not a loan offer or commitment to lend.');
   }
   return json({ ok: true, id: ins.data.id, pdf: p.price ? `/api/b2b/lead/pdf?id=${ins.data.id}&t=${leadToken(ins.data.id)}` : null }, 201);
 }

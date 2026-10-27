@@ -1,7 +1,7 @@
 import { adminConfigured, supabaseAdmin } from '@/lib/supabase/admin';
 
-// Echte Google-Bewertungen: Link zum Bewertungsformular und – wenn GOOGLE_PLACES_API_KEY und Place-ID gesetzt –
-// Sternedurchschnitt und Anzahl live aus der Google Places API. Keine eigenen oder ausgewählten Bewertungen.
+// Real Google reviews: link to the review form and – when GOOGLE_PLACES_API_KEY and a Place ID are set – the average
+// star rating and count live from the Google Places API. No self-written or hand-picked reviews.
 export const REVIEW_KEY = 'google_reviews';
 export type ReviewCfg = { reviewUrl: string | null; placeId: string | null };
 export type ReviewInfo = ReviewCfg & { rating: number | null; count: number | null; mapsUrl: string | null; at: string | null };
@@ -32,7 +32,7 @@ export async function reviewInfo(): Promise<ReviewInfo> {
         rating = typeof j.rating === 'number' ? j.rating : null; count = typeof j.userRatingCount === 'number' ? j.userRatingCount : null;
         mapsUrl = j.googleMapsUri || null; at = new Date().toISOString();
       }
-    } catch { /* Google nicht erreichbar – nur Link anzeigen */ }
+    } catch { /* Google not reachable – show the link only */ }
   }
   const v = { ...cfg, rating, count, mapsUrl, at };
   cache = { until: Date.now() + 6 * 3600_000, v };

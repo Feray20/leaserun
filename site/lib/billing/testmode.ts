@@ -3,9 +3,9 @@ import { adminConfigured, supabaseAdmin } from '@/lib/supabase/admin';
 import { adminList } from '@/lib/security/admin';
 import { testKeyMode, testStripe } from '@/lib/billing/stripe';
 
-// Testkauf-Schalter (Web-Admin → System): Ist er an, laufen Käufe von Administratoren über den Stripe-Testmodus –
-// dieselbe Bezahlseite, aber Testkarte 4242 4242 4242 4242 (beliebiges Datum in der Zukunft, beliebige Prüfziffer).
-// Kunden kaufen immer echt. Ist der Schalter aus, prüft Stripe alle Angaben wie im Live-Betrieb.
+// Test purchase switch (Web-Admin → System): when on, purchases by administrators run in Stripe test mode –
+// same checkout, but test card 4242 4242 4242 4242 (any future date, any CVC).
+// Customers always buy for real. When off, Stripe checks everything as in live mode.
 export const TESTKAUF_KEY = 'testkauf_mode';
 export type TestkaufState = { on: boolean; by?: string; at?: string };
 
@@ -17,7 +17,7 @@ export async function testkaufState(): Promise<TestkaufState> {
   } catch { return { on: false }; }
 }
 
-// Stripe-Client für diesen Käufer: Testmodus nur, wenn der Schalter an ist, ein Testschlüssel existiert und ein Admin kauft.
+// Stripe client for this buyer: test mode only if the switch is on, a test key exists and an admin is buying.
 export async function testStripeFor(email: string): Promise<Stripe | null> {
   if (!testKeyMode()) return null;
   if (!adminList().includes(String(email || '').toLowerCase())) return null;
@@ -28,5 +28,5 @@ export async function testCustomer(s: Stripe, email: string): Promise<string> {
   const list = await s.customers.list({ email, limit: 10 });
   const hit = list.data.find((c) => c.metadata?.leaserun_test === '1');
   if (hit) return hit.id;
-  return (await s.customers.create({ email, name: 'LeaseRun Testkauf', preferred_locales: ['de'], metadata: { leaserun_test: '1' } })).id;
+  return (await s.customers.create({ email, name: 'LeaseRun test purchase', preferred_locales: ['en-US'], metadata: { leaserun_test: '1' } })).id;
 }

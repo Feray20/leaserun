@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-// POST /api/v1/webhooks/{id}/test – sendet sofort ein signiertes Testereignis (type "webhook.test").
+// POST /api/v1/webhooks/{id}/test – immediately sends a signed test event (type "webhook.test").
 export const POST = apiRoute({ route: '/api/v1/webhooks/{id}/test', scope: 'webhooks:test' }, async (ctx) => {
   const w = await loadWebhook(ctx);
   const r = await sendTest(ctx.tenantId, ctx.env, w.id);

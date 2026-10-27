@@ -1,88 +1,94 @@
-// Erklärung an jedem Eingabefeld: „?“ neben der Beschriftung öffnet eine kurze Antwort mit Link in den Wissensbereich.
-// Funktioniert für alle Formulare im Konto (Finanzprofil, Objekte, Steuer), auch wenn sie später nachgeladen werden.
-const W = (slug) => `/learn/${slug}`;
+// Help for every input field: a "?" next to the label opens a short answer with a link into Learn.
+// Works for all forms in the account (financial profile, properties, taxes), also when they are loaded later.
+// Links go to the site search so they keep working when Learn articles are renamed.
+const W = (q) => `/search?q=${encodeURIComponent(q)}`;
 const H = {
-  // Finanzprofil
-  employment: ['Ihre Einkommensart. Banken bewerten Angestellte, Beamte und Selbstständige unterschiedlich – das beeinflusst Unterlagen und Konditionen.', 'warum-unterscheidet-die-bank-nach-beruf-und-einkommensart'],
-  netIncome: ['Was monatlich auf Ihrem Konto ankommt (bei Paaren zusammen), ohne Kindergeld und Einmalzahlungen. Selbstständige: Gewinn nach Steuern der letzten Jahre ÷ 12.', 'was-trage-ich-bei-nettoeinkommen-und-eigenkapital-ein'],
-  equity: ['Geld, das Sie in den Kauf stecken können, ohne Ihren Notgroschen (3–6 Monatsausgaben) anzutasten: Guthaben, Tagesgeld, Wertpapiere, Bausparguthaben.', 'was-trage-ich-bei-nettoeinkommen-und-eigenkapital-ein'],
-  targetPrice: ['Der Kaufpreis, den Sie anpeilen – ohne Nebenkosten. LeaseRun rechnet die Nebenkosten und die Rate dazu.', 'wie-viel-immobilie-kann-ich-mir-leisten'],
-  householdSize: ['Alle Personen, die von Ihrem Einkommen leben. Banken setzen pro Person eine Pauschale für Lebenshaltung an.', 'was-ist-eine-haushaltsrechnung-und-was-gehoert-hinein'],
-  // Objekt
-  objName: ['Ein Name, an dem Sie das Objekt wiedererkennen, z. B. Straße und Ort.', null],
-  objPrice: ['Kaufpreis laut Exposé oder Kaufvertrag, ohne Nebenkosten.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  objRent: ['Monatliche Kaltmiete (ohne Nebenkosten). Bei Eigennutzung die Miete, die Sie sparen, oder 0.', 'wie-verdient-eine-vermietete-immobilie-geld'],
-  of_area: ['Wohnfläche laut Wohnflächenberechnung oder Exposé in m².', null],
-  of_yearBuilt: ['Jahr der Fertigstellung. Bestimmt den AfA-Satz (2 %, 2,5 % oder 3 %).', 'wie-funktioniert-die-afa'],
-  of_purchaseCostPct: ['Summe aus Grunderwerbsteuer, Notar/Grundbuch und Makler in Prozent des Kaufpreises, meist 7–15 %.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  of_nonRecoverable: ['Kosten, die Sie als Vermieter selbst tragen (z. B. Verwaltergebühr) – pro Monat.', 'was-sind-nicht-umlagefaehige-kosten-und-instandhaltung-pro-monat'],
-  of_maintenance: ['Rücklage für Reparaturen pro Monat, typisch 0,80–1,50 € je m², bei Altbau mehr.', 'was-sind-nicht-umlagefaehige-kosten-und-instandhaltung-pro-monat'],
-  of_vacancyPct: ['Puffer für Leerstand und ausfallende Mieten, üblich 2–4 % der Jahresmiete.', 'was-ist-ein-mietausfallwagnis'],
-  of_loan: ['Darlehensbetrag. Leer lassen: LeaseRun rechnet Kaufpreis + Nebenkosten − Eigenkapital.', 'was-bedeuten-die-felder-sollzins-tilgung-und-zinsbindung'],
-  of_interestPct: ['Vereinbarter Zinssatz pro Jahr (Sollzins) aus dem Bankangebot.', 'was-bedeuten-die-felder-sollzins-tilgung-und-zinsbindung'],
-  of_repaymentPct: ['Prozentsatz, mit dem Sie im ersten Jahr tilgen – üblich 1,5–3 %.', 'was-bedeuten-die-felder-sollzins-tilgung-und-zinsbindung'],
-  of_lendingValue: ['Vorsichtiger Wert, mit dem die Bank rechnet – steht im Angebot bzw. Wertgutachten.', 'was-sind-beleihungswert-marktwert-und-miteigentumsanteil'],
-  of_equity: ['Eigenkapital, das Sie in genau dieses Objekt stecken.', 'wie-viel-eigenkapital-brauche-ich'],
-  of_buildingSharePct: ['Anteil des Gebäudes am Kaufpreis (ohne Grundstück). Nur dieser Teil wird abgeschrieben.', 'wie-ermittle-ich-den-gebaeudeanteil-am-kaufpreis'],
-  of_marginalTaxPct: ['Steuersatz auf Ihren nächsten Euro Einkommen – bestimmt, wie viel Steuer Werbungskosten sparen.', 'was-ist-mein-grenzsteuersatz-und-wo-finde-ich-ihn'],
-  of_renovationNet3y: ['Was Sie in den ersten drei Jahren nach dem Kauf netto für Instandsetzung ausgeben (wichtig für die 15-%-Grenze).', 'was-ist-die-15-grenze-bei-renovierungen'],
-  of_meaShare: ['Zähler Ihres Miteigentumsanteils aus der Teilungserklärung, z. B. 85 bei 85/1.000.', 'was-sind-beleihungswert-marktwert-und-miteigentumsanteil'],
-  of_meaTotal: ['Nenner des Miteigentumsanteils, meist 1.000 oder 10.000.', 'was-sind-beleihungswert-marktwert-und-miteigentumsanteil'],
-  of_wegReserveTotal: ['Stand der gesamten Erhaltungsrücklage der Eigentümergemeinschaft (Jahresabrechnung).', 'eigentumswohnung-was-sagen-teilungserklaerung-protokolle-und-ruecklage'],
-  of_wegPlannedTotal: ['Summe der in Protokollen genannten geplanten Maßnahmen der Gemeinschaft.', 'eigentumswohnung-was-sagen-teilungserklaerung-protokolle-und-ruecklage'],
-  of_wegSpecialTotal: ['Bereits beschlossene Sonderumlage der Gemeinschaft insgesamt.', 'eigentumswohnung-was-sagen-teilungserklaerung-protokolle-und-ruecklage'],
-  of_grestPct: ['Grunderwerbsteuer Ihres Bundeslands: 3,5–6,5 % des Kaufpreises.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  of_notaryPct: ['Notar und Grundbuch zusammen, meist rund 1,5–2 % des Kaufpreises.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  of_brokerPct: ['Ihr Anteil an der Maklerprovision inkl. USt – bei Wohnungen höchstens die Hälfte der Gesamtprovision.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  of_marketValue: ['Heute am Markt erzielbarer Preis (Verkehrswert), z. B. aus einem Gutachten.', 'was-sind-beleihungswert-marktwert-und-miteigentumsanteil'],
-  of_grundbuchAmt: ['Amtsgericht, bei dem das Grundbuch geführt wird – steht oben auf dem Grundbuchauszug.', 'was-gehoert-in-eine-kreditmappe'],
-  of_grundbuchBlatt: ['Blattnummer aus dem Grundbuchauszug.', 'was-gehoert-in-eine-kreditmappe'],
-  of_flur: ['Flur aus dem Bestandsverzeichnis des Grundbuchs bzw. der Flurkarte.', 'was-gehoert-in-eine-kreditmappe'],
-  of_flurstueck: ['Flurstücksnummer aus dem Bestandsverzeichnis.', 'was-gehoert-in-eine-kreditmappe'],
-  of_ownership: ['Wem das Objekt gehört, z. B. Alleineigentum oder je zur Hälfte.', 'was-gehoert-in-eine-kreditmappe'],
-  of_landArea: ['Grundstücksgröße in m² (Grundbuch, Bestandsverzeichnis).', null],
-  of_usableArea: ['Flächen, die nicht zur Wohnfläche zählen, z. B. Keller, Hobbyraum.', null],
-  of_renovationYear: ['Jahr der letzten umfassenden Modernisierung – wichtig für Bewertung und Restnutzungsdauer.', null],
-  of_heatingType: ['Z. B. Gas, Öl, Wärmepumpe, Fernwärme – aus Energieausweis oder Exposé.', null],
-  of_heatingYear: ['Einbaujahr des Wärmeerzeugers – alte Heizungen können Austauschpflichten auslösen.', null],
-  of_energyConsumption: ['Endenergie-Kennwert aus dem Energieausweis in kWh/(m²·a).', null],
-  of_primaryEnergy: ['Primärenergie-Kennwert aus dem Energieausweis.', null],
-  of_efficiencyClass: ['Klasse A+ bis H aus dem Energieausweis.', null],
-  of_purchaseDate: ['Tag der notariellen Beurkundung – Start der 10-Jahres-Frist und der 15-%-Frist.', 'welches-datum-trage-ich-bei-kaufvertrag-und-darlehensauszahlung-ein'],
-  of_payoutDate: ['Tag der vollständigen Auszahlung des Darlehens – Start der Zinsbindung.', 'welches-datum-trage-ich-bei-kaufvertrag-und-darlehensauszahlung-ein'],
-  of_fixedYears: ['Jahre, für die der Zins fest vereinbart ist.', 'was-passiert-wenn-die-zinsbindung-endet'],
-  of_lastRentChange: ['Datum der letzten Mieterhöhung – bestimmt, wann die nächste möglich ist.', 'was-ist-die-kappungsgrenze'],
-  of_vergleichsmieteQm: ['Ortsübliche Vergleichsmiete je m² aus dem Mietspiegel.', 'was-ist-die-kappungsgrenze'],
-  of_mietpreisbremse: ['Gilt in Ihrer Gemeinde die Mietpreisbremse? Die Landesverordnung bzw. der Mietspiegel sagt es.', 'wie-funktioniert-die-mietpreisbremse'],
-  of_abt2Open: ['Gibt es Einträge in Abteilung II des Grundbuchs (z. B. Wegerecht, Wohnrecht), die noch nicht geklärt sind?', 'wie-pruefe-ich-eine-eigentumswohnung'],
-  of_liegenschaftszinsPct: ['Zinssatz des Gutachterausschusses für die Ertragswertberechnung, meist 1,5–4 %.', 'wie-bewerte-ich-ein-portfolio'],
-  of_restnutzungsdauer: ['Wie viele Jahre das Gebäude wirtschaftlich noch genutzt werden kann.', 'wie-bewerte-ich-ein-portfolio'],
-  // Werbungskosten-Checkliste
-  wk_zins: ['Gezahlte Darlehenszinsen des Jahres (Zinsbescheinigung der Bank) – nicht die Tilgung.', 'welche-werbungskosten-kann-ich-bei-einer-vermieteten-wohnung-absetzen'],
-  wk_haus: ['Hausgeld ohne Zuführung zur Erhaltungsrücklage (Jahresabrechnung der Verwaltung).', 'welcher-teil-des-hausgelds-ist-absetzbar'],
-  wk_grundst: ['Grundsteuer laut Bescheid der Gemeinde (auch wenn der Mieter sie über die Nebenkosten zahlt).', 'welcher-teil-des-hausgelds-ist-absetzbar'],
-  wk_vers: ['Wohngebäude- und Haus-/Grundbesitzerhaftpflicht, ggf. Vermieterrechtsschutz.', 'welche-werbungskosten-kann-ich-bei-einer-vermieteten-wohnung-absetzen'],
-  wk_verw: ['Kosten einer Hausverwaltung oder Mietverwaltung, die nicht im Hausgeld enthalten sind.', 'welche-werbungskosten-kann-ich-bei-einer-vermieteten-wohnung-absetzen'],
-  wk_erhalt: ['Reparaturen, Wartung, Austausch vorhandener Teile – Material und Handwerker, nicht eigene Arbeitszeit.', 'was-ist-der-unterschied-zwischen-erhaltungsaufwand-und-herstellungskosten'],
-  wk_fahrt: ['Gefahrene Kilometer zum Objekt × 0,30 € (Besichtigung, Übergabe, Reparatur, Eigentümerversammlung).', 'wie-setze-ich-fahrten-zu-meiner-vermieteten-wohnung-ab'],
-  wk_konto: ['Kontoführung des Mietkontos, Porto, Telefon für die Vermietung.', 'welche-werbungskosten-kann-ich-bei-einer-vermieteten-wohnung-absetzen'],
-  wk_beratung: ['Steuerberatung für die Anlage V (anteilig, wenn die Rechnung mehr umfasst).', 'welche-werbungskosten-kann-ich-bei-einer-vermieteten-wohnung-absetzen'],
-  wk_makler: ['Makler oder Inserate für die Suche nach einem Mieter (nicht der Makler beim Kauf).', 'gehoeren-die-kaufnebenkosten-zu-den-werbungskosten'],
-  // Steuer-Werkzeuge
-  s_inv_land: ['Bundesland des Objekts – bestimmt den Grunderwerbsteuersatz.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  s_inv_wert: ['Wert mitgekaufter beweglicher Gegenstände (z. B. Einbauküche, Markise) – darauf fällt keine Grunderwerbsteuer an.', 'kann-ich-die-kosten-einer-neuen-einbaukueche-absetzen'],
-  s_vm_ist: ['Miete, die Ihr Angehöriger zahlt. Für die 66-%-Grenze zählt Kaltmiete plus umlagefähige Nebenkosten – beide Felder gleich (kalt oder warm) befüllen.', 'was-gilt-bei-vermietung-an-angehoerige'],
-  s_vm_markt: ['Ortsübliche Miete laut Mietspiegel für eine vergleichbare Wohnung (gleich gerechnet wie das Feld links).', 'was-gilt-bei-vermietung-an-angehoerige'],
-  s_eh_betrag: ['Kosten einer größeren Reparatur, die Sie verteilen möchten.', 'kann-ich-groessere-reparaturen-auf-mehrere-jahre-verteilen'],
-  s_eh_jahre: ['Auf wie viele Jahre (2–5) der Betrag gleichmäßig verteilt wird.', 'kann-ich-groessere-reparaturen-auf-mehrere-jahre-verteilen'],
-  s_15_price: ['Kaufpreis des Objekts.', 'was-ist-die-15-grenze-bei-renovierungen'],
-  s_15_nk: ['Kaufnebenkosten in Prozent.', 'welche-nebenkosten-kommen-zum-kaufpreis-dazu'],
-  s_15_geb: ['Gebäudeanteil am Kaufpreis in Prozent.', 'wie-ermittle-ich-den-gebaeudeanteil-am-kaufpreis'],
-  s_15_spent: ['Seit dem Kauf ausgegebene Instandsetzungskosten ohne Umsatzsteuer.', 'was-ist-die-15-grenze-bei-renovierungen'],
-  s_sp_kauf: ['Datum des notariellen Kaufvertrags.', 'wann-ist-ein-verkauf-steuerfrei'],
-  s_sp_verkauf: ['Geplantes Datum des Verkaufsvertrags.', 'wann-ist-ein-verkauf-steuerfrei'],
+  // Financial profile
+  employment: ['How you earn your income. Lenders treat W-2 employees, self-employed borrowers (2 years of tax returns), 1099 contractors and retirees differently – it changes the documents they ask for.', 'employment type'],
+  netIncome: ['Your gross monthly income before taxes (both borrowers together). Lenders qualify you on gross income. Self-employed: average net profit from the last two tax returns ÷ 12.', 'gross income'],
+  equity: ['Cash you can put into the purchase (down payment + closing costs) without touching your emergency fund: checking, savings, brokerage, retirement funds you can access.', 'down payment'],
+  targetPrice: ['The purchase price you are aiming for – without closing costs. LeaseRun adds closing costs and the monthly payment.', 'how much house can I afford'],
+  householdSize: ['Everyone who lives on your income. Used for your monthly budget; lenders look mainly at your debt-to-income ratio (DTI).', 'monthly budget'],
+  creditScore: ['Your FICO score range. Most conventional loans need 620+, FHA 580+; the best rates usually start around 740–760.', 'credit score'],
+  monthlyDebts: ['Minimum monthly payments on car loans, student loans, credit cards and other debts. Lenders use them for your back-end DTI.', 'debt-to-income'],
+  // Property
+  objName: ['A name you recognize the property by, e.g. street and city.', null],
+  objPrice: ['Purchase price from the listing or purchase agreement, without closing costs.', 'closing costs'],
+  objRent: ['Monthly rent. If you will live there, the rent you save, or 0.', 'rental income'],
+  of_area: ['Finished living area in square feet (listing or appraisal).', null],
+  of_units: ['Number of units: 1 for a single-family home or condo, 2–4 for a duplex to fourplex.', 'investment property down payment'],
+  of_yearBuilt: ['Year the home was built. Homes built before 1978 need a lead-based paint disclosure for tenants.', null],
+  of_purchaseCostPct: ['Total closing costs as a percent of the price: transfer tax (buyer share), title insurance, escrow/settlement, recording, lender fees and prepaids – often 2–5%.', 'closing costs'],
+  of_taxesAnnual: ['Annual property tax from the listing or county tax bill. It is usually reassessed after a sale.', 'property tax'],
+  of_insuranceAnnual: ['Annual homeowners or landlord (DP-3) insurance premium – get a real quote; flood insurance is extra.', 'homeowners insurance'],
+  of_hoaMonthly: ['Monthly HOA or condo dues. Lenders count them in your housing payment (PITIA).', 'hoa dues'],
+  of_mgmtPct: ['Property management fee as a percent of collected rent, typically 8–10% for single-family rentals. Enter 0 if you self-manage.', 'property management'],
+  of_nonRecoverable: ['Other monthly costs you pay as the owner (e.g. utilities, lawn care, pest control) – not taxes, insurance or HOA.', 'operating expenses'],
+  of_maintenance: ['Monthly budget for repairs and capital expenses (roof, HVAC, water heater). A common rule is 5–10% of rent each, more for older homes.', 'repairs and capex'],
+  of_vacancyPct: ['Allowance for vacancy and unpaid rent, typically 5–8% of annual rent.', 'vacancy rate'],
+  of_loan: ['Loan amount. Leave blank: LeaseRun uses price + closing costs − your cash invested.', 'loan to value'],
+  of_interestPct: ['Note rate per year from your Loan Estimate (not the APR).', 'interest rate'],
+  of_termYears: ['Length of the loan in years – 30 is the US standard, 15 builds equity faster.', 'amortization'],
+  of_lendingValue: ['Appraised value from the lender\'s appraisal. LTV is based on the lower of price and appraised value.', 'appraisal'],
+  of_equity: ['Cash you put into exactly this property (down payment plus closing costs).', 'down payment'],
+  of_buildingSharePct: ['Share of the price that is the building (land is not depreciable). Often taken from the county assessor\'s land/improvement split.', 'depreciation'],
+  of_marginalTaxPct: ['Your combined federal and state tax rate on your next dollar of income – shows what deductions and depreciation are worth.', 'marginal tax rate'],
+  of_renovationNet3y: ['What you plan to spend on repairs and improvements in the first three years. Improvements are depreciated, repairs deducted – ask your CPA.', 'repairs vs improvements'],
+  of_meaShare: ['Condo/HOA: units you own in the association (usually 1). Used for your share of reserves and special assessments.', 'hoa reserves'],
+  of_meaTotal: ['Condo/HOA: total number of units in the association.', 'hoa reserves'],
+  of_wegReserveTotal: ['Balance of the association\'s reserve fund (HOA budget or resale certificate).', 'hoa reserves'],
+  of_wegPlannedTotal: ['Total of projects the HOA plans (reserve study, meeting minutes).', 'hoa reserves'],
+  of_wegSpecialTotal: ['Total special assessments the HOA has already approved.', 'special assessment'],
+  of_grestPct: ['Transfer or recordation tax the buyer pays in your state, as a percent of the price (0 in many states).', 'transfer tax'],
+  of_notaryPct: ['Title insurance, escrow/settlement and recording fees together, often around 1–2% of the price.', 'title insurance'],
+  of_brokerPct: ['What you pay your buyer\'s agent, if the seller does not cover it. Since 2024 this is agreed in a written buyer agreement and negotiable.', 'buyer agent commission'],
+  of_marketValue: ['What the property would sell for today, e.g. from an appraisal or a broker price opinion.', 'appraisal'],
+  of_county: ['County where the deed is recorded – shown on the title commitment and the tax bill.', null],
+  of_parcelId: ['Assessor\'s parcel number (APN) from the tax bill or county records.', null],
+  of_legalDescription: ['Legal description from the deed or title commitment (lot, block, subdivision).', null],
+  of_ownership: ['How title is held (vesting), e.g. sole owner, joint tenancy, tenants in common or an LLC.', null],
+  of_landArea: ['Lot size in square feet (1 acre = 43,560 sq ft).', null],
+  of_usableArea: ['Area not counted as living area, e.g. unfinished basement or garage.', null],
+  of_renovationYear: ['Year of the last major renovation – matters for value and remaining life.', null],
+  of_heatingType: ['E.g. gas furnace, heat pump, central air, baseboard – from the listing or inspection.', null],
+  of_heatingYear: ['Year the HVAC system was installed – most systems last about 15–20 years.', null],
+  of_purchaseDate: ['Closing date of your purchase – starts the capital gains holding period.', 'capital gains'],
+  of_payoutDate: ['Date your loan funded – the first payment is usually due on the 1st of the second month after.', null],
+  of_fixedYears: ['For an ARM: years until the rate first adjusts (e.g. 5, 7 or 10). Enter 0 for a fixed-rate loan.', 'adjustable rate mortgage'],
+  of_lastRentChange: ['Date of the last rent change or lease start – rent increases usually take effect at renewal with written notice.', 'rent increase'],
+  of_exchangeSaleDate: ['Only for a 1031 exchange: the closing date of the property you sold. Starts the 45-day and 180-day deadlines.', '1031 exchange'],
+  of_vergleichsmieteQm: ['Market rent per square foot per month for comparable rentals nearby.', 'market rent'],
+  of_mietpreisbremse: ['Is the unit covered by state or local rent control or rent stabilization (e.g. California AB 1482, Oregon, NYC)? Check your state and city.', 'rent control'],
+  of_abt2Open: ['Are there open title issues (liens, easements, lis pendens, encroachments) not yet resolved?', 'title commitment'],
+  of_ownerOccupied: ['Will you live in the home? Owner-occupied loans allow lower down payments; PMI applies below 20% down.', 'pmi'],
+  of_floodZone: ['Is the property in a FEMA Special Flood Hazard Area? Lenders then require flood insurance.', 'flood insurance'],
+  of_liegenschaftszinsPct: ['Market cap rate for the income approach to value, e.g. from an appraiser or local sales.', 'cap rate'],
+  of_restnutzungsdauer: ['How many more years the building can economically be used.', null],
+  // Deductible rental expenses (Schedule E checklist)
+  wk_zins: ['Mortgage interest paid during the year (Form 1098 from your lender) – not the principal.', 'schedule e'],
+  wk_haus: ['HOA dues for the rental (special assessments for improvements are capitalized instead).', 'hoa dues'],
+  wk_grundst: ['Property taxes paid for the rental (county tax bill).', 'property tax'],
+  wk_vers: ['Landlord (DP-3), liability and flood insurance for the rental.', 'landlord insurance'],
+  wk_verw: ['Property management fees and leasing fees.', 'property management'],
+  wk_erhalt: ['Repairs and maintenance that keep the property in working order – materials and contractors, not your own time.', 'repairs vs improvements'],
+  wk_fahrt: ['Miles driven for the rental × the IRS standard mileage rate (showings, repairs, collecting rent).', 'mileage'],
+  wk_konto: ['Bank fees, software, postage and phone costs for the rental.', 'schedule e'],
+  wk_beratung: ['CPA and legal fees for the rental (prorated if the bill covers more).', 'cpa'],
+  wk_makler: ['Advertising and leasing fees to find a tenant (not the agent fees when buying).', 'closing costs'],
+  // Tax tools
+  s_inv_land: ['State of the property – sets the transfer tax.', 'transfer tax'],
+  s_inv_wert: ['Value of personal property bought with the home (e.g. appliances, furniture) – depreciated faster (5 years) than the building.', 'cost segregation'],
+  s_vm_ist: ['Rent your relative pays. Renting below fair rental value to family can turn the rental into personal use for tax purposes.', 'renting to family'],
+  s_vm_markt: ['Fair market rent for a comparable home nearby.', 'renting to family'],
+  s_eh_betrag: ['Cost of a larger project you want to classify.', 'repairs vs improvements'],
+  s_eh_jahre: ['Over how many years the amount is spread.', 'repairs vs improvements'],
+  s_15_price: ['Purchase price of the property.', 'depreciation'],
+  s_15_nk: ['Closing costs in percent (title, recording and transfer tax add to basis; loan costs do not).', 'closing costs'],
+  s_15_geb: ['Building share of the price in percent.', 'depreciation'],
+  s_15_spent: ['What you have spent on repairs and improvements since the purchase.', 'repairs vs improvements'],
+  s_sp_kauf: ['Closing date of your purchase.', 'capital gains'],
+  s_sp_verkauf: ['Planned closing date of the sale.', 'capital gains'],
 };
-
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let n = 0;
 export function attachHelp(root = document) {
@@ -95,12 +101,12 @@ export function attachHelp(root = document) {
     if (!host) continue;
     const bid = 'fh' + (++n);
     const btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'fh-btn'; btn.textContent = '?'; btn.setAttribute('aria-label', 'Was bedeutet das?'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', bid);
+    btn.type = 'button'; btn.className = 'fh-btn'; btn.textContent = '?'; btn.setAttribute('aria-label', 'What does this mean?'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-controls', bid);
     const box = document.createElement('span');
     box.className = 'fh-box'; box.id = bid; box.hidden = true;
-    box.innerHTML = `${esc(text)}${slug ? ` <a href="${W(slug)}" target="_blank" rel="noopener">Ausführlich im Wissen →</a>` : ''}`;
+    box.innerHTML = `${esc(text)}${slug ? ` <a href="${W(slug)}" target="_blank" rel="noopener">Learn more →</a>` : ''}`;
     btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const on = box.hidden; box.hidden = !on; btn.setAttribute('aria-expanded', String(on)); });
-    // Knopf direkt hinter den Beschriftungstext, Erklärung unter das Feld.
+    // Button right after the label text, explanation below the field.
     const textNode = label ? [...label.childNodes].find((x) => x.nodeType === 3 && x.textContent.trim()) || label.querySelector('span') : null;
     if (textNode && textNode.nodeType === 3) textNode.after(btn); else if (textNode) textNode.append(btn); else host.insertBefore(btn, el);
     el.after(box);

@@ -11,9 +11,9 @@ import { mailConfigured, sendMail } from '@/lib/notify/mail';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Web-Admin: Unternehmenskonto mit Zugang anlegen (aus einer Anfrage oder direkt).
-// Das Startpasswort wird einmalig angezeigt (und auf Wunsch per E-Mail gesendet); es muss beim ersten Login geändert werden.
-// § 14 BGB und AVV bestätigt der Inhaber selbst bei der ersten Anmeldung.
+// Web-Admin: create a business account with login (from a request or directly).
+// The initial password is shown once (and emailed on request); it must be changed at first sign-in.
+// The owner confirms business use and the DPA themselves at first sign-in.
 const j = (b: unknown, s = 200) => NextResponse.json(b, { status: s, headers: { 'Cache-Control': 'no-store' } });
 const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
 const Body = z.object({
@@ -24,7 +24,7 @@ const Body = z.object({
   email: z.string().trim().toLowerCase().email().max(200),
   phone: z.string().trim().max(40).optional().default(''),
   street: z.string().transform(clean).pipe(z.string().min(3).max(120)),
-  postalCode: z.string().trim().regex(/^[0-9]{5}$/),
+  postalCode: z.string().trim().regex(/^[0-9]{5}(-[0-9]{4})?$/),
   city: z.string().transform(clean).pipe(z.string().min(2).max(80)),
   registerNumber: z.string().trim().max(40).optional().default(''),
   taxId: z.string().trim().max(30).optional().default(''),
@@ -33,7 +33,7 @@ const Body = z.object({
   requestId: z.string().uuid().optional(),
   password: z.string().max(72).optional().nullable(),
   mustChange: z.boolean().optional().default(true),
-  // Zugriff direkt bei der Anlage: Tarif (manuell, optional befristet) und Module (auto = nach Tarif, on/off = fest).
+  // Access set at creation: plan (manual, optionally time-limited) and modules (auto = per plan, on/off = fixed).
   plan: z.enum(['BASIC', 'PRO', 'ENTERPRISE']).nullable().optional(),
   planUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   modules: z.record(z.enum(['schnellrechner', 'kreditmappe', 'stresstest', 'whitelabel', 'crm']), z.enum(['auto', 'on', 'off'])).optional(),
@@ -42,15 +42,17 @@ const Body = z.object({
 export async function POST(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof NextResponse) return auth;
-  if (!adminConfigured()) return j({ error: 'Nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return j({ error: 'Not configured.' }, 503);
   const p = Body.safeParse(await req.json().catch(() => null));
   if (!p.success) {
     const f = String(p.error.issues[0]?.path[0] ?? '');
-    const label: Record<string, string> = { companyName: 'Firmenname', legalForm: 'Rechtsform', advisorName: 'Ansprechpartner', email: 'E-Mail', street: 'Straße und Hausnummer', postalCode: 'Postleitzahl (5 Ziffern)', city: 'Ort' };
-    return j({ error: `Bitte „${label[f] || f}“ prüfen.` }, 400);
+    const label: Record<string, string> = { companyName: 'Business name', legalForm: 'Entity type', advisorName: 'Contact person', email: 'Email', street: 'Street address', postalCode: 'ZIP code (5 digits)', city: 'City' };
+    return j({ error: `Please check "${label[f] || f}".` }, 400);
   }
   const b = p.data;
-  if (!b.registerNumber && !b.taxId) return j({ error: 'Bitte Handelsregisternummer oder USt-IdNr./Steuernummer angeben (eines von beiden ist Pflicht).' }, 400);
+  // NMLS ID / license number or EIN – one of the two is required so the business can be identified.
+  if (!b.registerNumber && !b.taxId) return j({ error: 'Please enter an NMLS ID / license number or an EIN (one of the two is required).' }, 400);
+  if (b.taxId && !/^[0-9]{2}-?[0-9]{7}$/.test(b.taxId)) return j({ error: 'Please check the EIN (format 12-3456789).' }, 400);
   const login = await createB2BLogin(b.email, b.advisorName, 'b2b', { password: b.password, mustChange: b.mustChange });
   if (!login.ok) return j({ error: login.error }, login.status);
   const db = supabaseAdmin();
@@ -61,22 +63,22 @@ export async function POST(req: Request) {
     street: b.street, postal_code: b.postalCode, city: b.city, status: 'active', slug: await freeSlug(b.companyName), widget_key: newWidgetKey(),
     ...(b.plan ? { plan_tier: b.plan, plan_source: 'manual', plan_until: b.planUntil ? `${b.planUntil}T23:59:59+01:00` : null } : {}),
     ...(b.modules && Object.values(b.modules).some((v) => v !== 'auto') ? { modules: Object.fromEntries(Object.entries(b.modules).filter(([, v]) => v !== 'auto')) } : {}),
-    referral: 'admin', ...(b.verified ? { verified_at: now, verification_status: 'geprueft', verification_decided_at: now, verification_note: 'Bei Anlage durch LeaseRun geprüft.' } : {}),
+    referral: 'admin', ...(b.verified ? { verified_at: now, verification_status: 'geprueft', verification_decided_at: now, verification_note: 'Verified by LeaseRun at account creation.' } : {}),
   }).select('id, customer_number').single();
   if (ins.error || !ins.data) {
     await db.auth.admin.deleteUser(login.userId).catch(() => null);
     console.error('admin_b2b_create', ins.error?.message);
-    return j({ error: 'Unternehmenskonto konnte nicht angelegt werden.' }, 500);
+    return j({ error: 'The business account could not be created.' }, 500);
   }
   const mem = await db.from('lr_b2b_members').insert({ account_id: ins.data.id, user_id: login.userId, role: 'owner' });
   if (mem.error) {
     await db.from('lr_b2b_accounts').delete().eq('id', ins.data.id);
     await db.auth.admin.deleteUser(login.userId).catch(() => null);
-    return j({ error: 'Unternehmenskonto konnte nicht angelegt werden.' }, 500);
+    return j({ error: 'The business account could not be created.' }, 500);
   }
   if (b.requestId) {
     await db.from('lr_b2b_contact').update({ status: 'erledigt', account_id: ins.data.id }).eq('id', b.requestId);
-    // Nachweis aus der Anfrage in die Verifizierungsunterlagen des neuen Kontos übernehmen.
+    // Copy the document from the request into the new account's verification documents.
     const { data: rq } = await db.from('lr_b2b_contact').select('proof_kind, proof_path, proof_name, proof_size, proof_sha256').eq('id', b.requestId).maybeSingle();
     if (rq?.proof_path) {
       const docId = randomUUID();
@@ -92,9 +94,9 @@ export async function POST(req: Request) {
   await adminAudit(auth.user.email, 'b2b_account_create', ins.data.id, { verified: b.verified, mailed: b.sendMail, fromRequest: Boolean(b.requestId), ownPassword: Boolean(b.password), plan: b.plan || null, modules: b.modules || null });
   let mailed = false;
   if (b.sendMail && mailConfigured()) {
-    mailed = await sendMail(b.email, 'Ihr Zugang zum LeaseRun-Unternehmensportal',
-      `Guten Tag ${b.advisorName},\n\nIhr Unternehmenskonto für ${b.companyName} ist eingerichtet (Kundennummer ${ins.data.customer_number}).\n\nPortal: https://partner.leaserun.com\nBenutzername: ${b.email}\nPasswort: ${login.password}\n\nBei der ersten Anmeldung legen Sie ein eigenes Passwort fest und bestätigen die Vertragsunterlagen (Unternehmereigenschaft, Auftragsverarbeitungsvertrag). Das Startpasswort ist danach ungültig.`,
-      [], { area: 'b2b', title: 'Ihr Zugang ist eingerichtet', button: { label: 'Zum Unternehmensportal', url: 'https://partner.leaserun.com' }, note: 'Bitte geben Sie das Startpasswort nicht weiter. Fragen: support@leaserun.com' });
+    mailed = await sendMail(b.email, 'Your LeaseRun business portal login',
+      `Hi ${b.advisorName},\n\nYour business account for ${b.companyName} is set up (customer number ${ins.data.customer_number}).\n\nPortal: https://partner.leaserun.com\nUsername: ${b.email}\nPassword: ${login.password}\n\nAt your first sign-in you choose your own password and confirm the agreements (business use, Data Processing Addendum). The initial password then stops working.`,
+      [], { area: 'b2b', title: 'Your login is ready', button: { label: 'Go to the business portal', url: 'https://partner.leaserun.com' }, note: 'Please do not share the initial password. Questions: support@leaserun.com' });
   }
   return j({ ok: true, email: b.email, password: login.password, customerNumber: ins.data.customer_number, mailed });
 }

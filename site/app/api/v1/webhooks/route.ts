@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 const MAX_ENDPOINTS = 10;
 
-// POST /api/v1/webhooks – Endpunkt anlegen. Das Signaturgeheimnis wird nur in dieser Antwort vollständig gezeigt.
+// POST /api/v1/webhooks – create an endpoint. The signing secret is shown in full only in this response.
 export const POST = apiRoute({ route: '/api/v1/webhooks', scope: 'webhooks:write', idempotent: true }, async (ctx) => {
   const p = WebhookInput.safeParse(ctx.body ?? {});
   if (!p.success) throw new ApiError('VALIDATION_ERROR', 'The request contains invalid data.', { errors: zodErrors(p.error.issues) });

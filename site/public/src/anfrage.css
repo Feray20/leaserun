@@ -1,4 +1,4 @@
-/* /request – Antwortseite für Knöpfe in Akquise-Mails. Baut auf termin.css auf (tm-card, tm-form, tm-step …). */
+/* /request – reply page for buttons in outreach emails. Builds on termin.css (tm-card, tm-form, tm-step …). */
 .af-opts{border:0;margin:4px 0 18px;padding:0;display:grid;gap:8px}
 .af-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .af-opt{display:flex!important;align-items:flex-start;gap:10px;margin:0!important;padding:12px 14px;border:1.5px solid #E2E8F0;border-radius:12px;cursor:pointer;font-weight:600;color:#1E293B;transition:border-color .15s,background-color .15s}

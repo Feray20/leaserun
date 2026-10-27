@@ -6,7 +6,7 @@ import { unsubId } from '@/lib/marketing/consent';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Ein-Klick-Abmeldung aus dem E-Mail-Programm (RFC 8058: List-Unsubscribe-Post).
+// One-click unsubscribe from the email client (RFC 8058: List-Unsubscribe-Post).
 export async function POST(req: Request) {
   const t = new URL(req.url).searchParams.get('t') || '';
   const id = adminConfigured() ? unsubId(t) : null;

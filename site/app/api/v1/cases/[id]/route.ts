@@ -13,7 +13,7 @@ export const GET = apiRoute({ route: '/api/v1/cases/{id}', scope: 'cases:read' }
   return { status: 200, body: publicCase(await getCase(scope(ctx), ctx.params.id)) };
 });
 
-// PATCH: Teilaktualisierung (verschachtelt zusammengeführt; null entfernt ein Feld).
+// PATCH: partial update (deep-merged; null removes a field).
 export const PATCH = apiRoute({ route: '/api/v1/cases/{id}', scope: 'cases:write' }, async (ctx) => {
   if (!ctx.body || typeof ctx.body !== 'object' || Array.isArray(ctx.body)) throw new ApiError('VALIDATION_ERROR', 'Send a JSON object with the fields to change.');
   const c = await getCase(scope(ctx), ctx.params.id);

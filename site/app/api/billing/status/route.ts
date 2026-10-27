@@ -5,17 +5,17 @@ import { adminConfigured, supabaseAdmin } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
-// Freischaltungen des angemeldeten Nutzers. Wird auch direkt nach der Rückkehr aus dem Checkout aufgerufen.
+// Entitlements of the signed-in user. Also called right after returning from checkout.
 export async function GET(req: Request) {
   const free = { enabled: false, pro: false, proSource: null, proUntil: null, starter: false, starterUntil: null, tier: 'free', creditMaps: 0, creditMapsUsed: 0, hasCustomer: false };
   const user = await userFromRequest(req);
   if (!billingEnabled()) {
-    // Ohne Abrechnung zählt nur die manuelle Freischaltung aus dem Web-Admin.
+    // Without billing only the manual grant from the Web-Admin counts.
     const g = user ? await accessGrant(user.id) : null;
     const out = g ? { ...free, tier: g.tier, pro: g.tier === 'pro', starter: g.tier === 'starter', proSource: g.tier === 'pro' ? 'pass' : null, proUntil: g.tier === 'pro' ? g.valid_until : null, starterUntil: g.tier === 'starter' ? g.valid_until : null, creditMaps: g.credit_maps || 0, leitfaden: g.leitfaden, grant: g, features: g.features || {} } : free;
     return NextResponse.json(out, { headers: { 'Cache-Control': 'no-store' } });
   }
-  if (!user) return NextResponse.json({ error: 'Bitte zuerst anmelden.' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: 'Please sign in first.' }, { status: 401 });
   try {
     const e = await entitlementsFor(user.id, user.email, new URL(req.url).searchParams.has('fresh'));
     let creditMapsUsed = 0;
@@ -26,6 +26,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ enabled: true, ...e, features: e.grant?.features || {}, creditMapsUsed }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     console.error('status_error', err instanceof Error ? err.message : err);
-    return NextResponse.json({ error: 'Status konnte nicht geladen werden.' }, { status: 502 });
+    return NextResponse.json({ error: 'Status could not be loaded.' }, { status: 502 });
   }
 }

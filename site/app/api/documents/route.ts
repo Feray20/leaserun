@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { userFromRequest } from '@/lib/billing/auth';
 import { allowRequest } from '@/lib/security/rate-limit';
 import { adminConfigured, anonymizedIpHash, DOCUMENT_BUCKET, supabaseAdmin } from '@/lib/supabase/admin';
-import { CATEGORIES, MAX_DOCUMENTS_PER_USER, checkFile, isCategory, safeFilename } from '@/lib/documents/files';
+import { CATEGORY_LABEL, CURRENT_CATEGORIES, MAX_DOCUMENTS_PER_USER, checkFile, isCategory, safeFilename } from '@/lib/documents/files';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,11 +12,11 @@ export const dynamic = 'force-dynamic';
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 const OBJ_RE = /^[A-Za-z0-9_-]{4,40}$/;
 
-// Liste der eigenen Dokumente, optional je Objekt.
+// List of your own documents, optionally per property.
 export async function GET(req: Request) {
-  if (!adminConfigured()) return json({ error: 'Dokumentenspeicher nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return json({ error: 'Document storage not configured.' }, 503);
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
   const objectRef = new URL(req.url).searchParams.get('objectRef');
   let q = supabaseAdmin()
     .from('lr_documents')
@@ -26,42 +26,42 @@ export async function GET(req: Request) {
     .limit(200);
   if (objectRef && OBJ_RE.test(objectRef)) q = q.eq('object_ref', objectRef);
   const { data, error } = await q;
-  if (error) return json({ error: 'Dokumente konnten nicht geladen werden.' }, 502);
-  return json({ documents: data ?? [], categories: CATEGORIES });
+  if (error) return json({ error: 'Couldn’t load documents.' }, 502);
+  return json({ documents: data ?? [], categories: CURRENT_CATEGORIES, labels: CATEGORY_LABEL });
 }
 
-// Upload: Dateityp über Magic Bytes, Größe, SHA-256; Original wird unveränderbar abgelegt.
+// Upload: file type via magic bytes, size, SHA-256; the original is stored unchanged.
 export async function POST(req: Request) {
-  if (!adminConfigured()) return json({ error: 'Dokumentenspeicher nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return json({ error: 'Document storage not configured.' }, 503);
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
-  if (!allowRequest(`upload:${user.id}`, 20, 60_000)) return json({ error: 'Zu viele Uploads. Bitte kurz warten.' }, 429);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
+  if (!allowRequest(`upload:${user.id}`, 20, 60_000)) return json({ error: 'Too many uploads. Please wait a moment.' }, 429);
 
   let form: FormData;
   try {
     form = await req.formData();
   } catch {
-    return json({ error: 'Upload fehlgeschlagen (maximal 4 MB je Datei).' }, 400);
+    return json({ error: 'Upload failed (4 MB max per file).' }, 400);
   }
   const file = form.get('file');
   const objectRef = String(form.get('objectRef') ?? '');
   const category = form.get('category');
-  if (!(file instanceof File)) return json({ error: 'Keine Datei übermittelt.' }, 400);
-  if (!OBJ_RE.test(objectRef)) return json({ error: 'Objekt fehlt.' }, 400);
-  if (!isCategory(category)) return json({ error: 'Bitte eine Kategorie wählen.' }, 400);
+  if (!(file instanceof File)) return json({ error: 'No file received.' }, 400);
+  if (!OBJ_RE.test(objectRef)) return json({ error: 'Property missing.' }, 400);
+  if (!isCategory(category)) return json({ error: 'Please choose a category.' }, 400);
 
   const db = supabaseAdmin();
   const { count } = await db.from('lr_documents').select('id', { count: 'exact', head: true }).eq('owner_id', user.id);
-  if ((count ?? 0) >= MAX_DOCUMENTS_PER_USER) return json({ error: `Maximal ${MAX_DOCUMENTS_PER_USER} Dokumente je Konto.` }, 409);
+  if ((count ?? 0) >= MAX_DOCUMENTS_PER_USER) return json({ error: `Up to ${MAX_DOCUMENTS_PER_USER} documents per account.` }, 409);
 
   const checked = checkFile(Buffer.from(await file.arrayBuffer()), file.type);
-  if (!checked.ok) { logSecurity('upload_rejected', `docs:${anonymizedIpHash(req) ?? 'x'}`, { detail: 'Dokument-Upload: ' + String(checked.reason).slice(0, 80) }); return json({ error: checked.reason }, 415); }
+  if (!checked.ok) { logSecurity('upload_rejected', `docs:${anonymizedIpHash(req) ?? 'x'}`, { detail: 'Document upload: ' + String(checked.reason).slice(0, 80) }); return json({ error: checked.reason }, 415); }
   const f = checked.file;
 
   const id = randomUUID();
   const path = `${user.id}/${id}.${f.ext}`;
   const up = await db.storage.from(DOCUMENT_BUCKET).upload(path, f.bytes, { contentType: f.mime, upsert: false });
-  if (up.error) return json({ error: 'Speichern fehlgeschlagen.' }, 502);
+  if (up.error) return json({ error: 'Saving failed.' }, 502);
 
   const row = {
     id,
@@ -75,27 +75,27 @@ export async function POST(req: Request) {
     sha256: f.sha256,
     classification: category,
     status: 'HOCHGELADEN',
-    extraction: { ocr: 'not_configured', note: 'Inhaltliche Auswertung (OCR) ist noch nicht angebunden.' },
+    extraction: { ocr: 'not_configured', note: 'Content extraction (OCR) is not connected yet.' },
   };
   const ins = await db.from('lr_documents').insert(row);
   if (ins.error) {
     await db.storage.from(DOCUMENT_BUCKET).remove([path]);
-    return json({ error: 'Speichern fehlgeschlagen.' }, 502);
+    return json({ error: 'Saving failed.' }, 502);
   }
   await db.from('lr_document_events').insert({ document_id: id, owner_id: user.id, event_type: 'upload', metadata: { sha256: f.sha256, size: f.size, mime: f.mime } });
   return json({ document: { id, filename: row.filename, category, sha256: f.sha256, size_bytes: f.size, status: row.status } }, 201);
 }
 
-// Löschen (DSGVO): Datei und Datensatz entfernen.
+// Delete (privacy right to deletion): remove file and record.
 export async function DELETE(req: Request) {
-  if (!adminConfigured()) return json({ error: 'Dokumentenspeicher nicht konfiguriert.' }, 503);
+  if (!adminConfigured()) return json({ error: 'Document storage not configured.' }, 503);
   const user = await userFromRequest(req);
-  if (!user) return json({ error: 'Bitte zuerst anmelden.' }, 401);
+  if (!user) return json({ error: 'Please sign in first.' }, 401);
   const id = new URL(req.url).searchParams.get('id') ?? '';
-  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Ungültige Anfrage.' }, 400);
+  if (!/^[0-9a-f-]{36}$/.test(id)) return json({ error: 'Invalid request.' }, 400);
   const db = supabaseAdmin();
   const { data } = await db.from('lr_documents').select('storage_key').eq('id', id).eq('owner_id', user.id).maybeSingle();
-  if (!data) return json({ error: 'Dokument nicht gefunden.' }, 404);
+  if (!data) return json({ error: 'Document not found.' }, 404);
   if (data.storage_key) await db.storage.from(DOCUMENT_BUCKET).remove([data.storage_key]);
   await db.from('lr_documents').delete().eq('id', id).eq('owner_id', user.id);
   return json({ deleted: true });

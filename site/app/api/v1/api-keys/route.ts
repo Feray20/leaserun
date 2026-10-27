@@ -10,7 +10,7 @@ import type { Scope } from '@/lib/api/entitlements';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// GET /api/v1/api-keys – Schlüssel der eigenen Umgebung (nur Präfix, nie das Geheimnis)
+// GET /api/v1/api-keys – keys of the own environment (prefix only, never the secret)
 export const GET = apiRoute({ route: '/api/v1/api-keys', scope: 'api_keys:read' }, async (ctx) => {
   const { limit, cursor } = pageParams(ctx.url);
   let q = supabaseAdmin().from('api_keys').select('*').eq('tenant_id', ctx.tenantId).eq('environment', ctx.env)
@@ -22,7 +22,7 @@ export const GET = apiRoute({ route: '/api/v1/api-keys', scope: 'api_keys:read' 
   return { status: 200, body: { object: 'list', data: page.data.map(publicKey), pagination: page.pagination } };
 });
 
-// POST /api/v1/api-keys – neuer Schlüssel in derselben Umgebung; Scopes höchstens die des aufrufenden Schlüssels.
+// POST /api/v1/api-keys – new key in the same environment; scopes at most those of the calling key.
 export const POST = apiRoute({ route: '/api/v1/api-keys', scope: 'api_keys:write', idempotent: true }, async (ctx) => {
   const p = KeyInput.safeParse(ctx.body ?? {});
   if (!p.success) throw new ApiError('VALIDATION_ERROR', 'The request contains invalid data.', { errors: zodErrors(p.error.issues) });

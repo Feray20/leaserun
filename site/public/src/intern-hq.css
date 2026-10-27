@@ -1,4 +1,4 @@
-/* LeaseRun HEADQUARTERS · Command Center im LeaseRun-Fade-Stil (Markenverlauf wie Startseite, B2B-Hero und Kasse). */
+/* LeaseRun HEADQUARTERS · Command Center in the LeaseRun fade style (brand gradient like home page, business hero and checkout). */
 .hq{--hq-ink:#0F172A;--hq-mut:#64748B;--hq-line:#E2E8F0;--hq-navy:#0F2C59;--hq-sky:#0369A1;display:grid;gap:16px}
 .hq-hero{position:relative;overflow:hidden;border-radius:20px;padding:22px 24px 54px;color:#fff;
   background:radial-gradient(70% 90% at 100% 0%,rgba(56,189,248,.34) 0%,rgba(56,189,248,0) 60%),radial-gradient(60% 70% at 0% 100%,rgba(2,132,199,.28) 0%,rgba(2,132,199,0) 65%),linear-gradient(140deg,#0F2C59 0%,#0B3B73 50%,#0369A1 100%);
@@ -79,7 +79,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 @media (prefers-reduced-motion:no-preference){.hq-card,.hq-kpi{animation:hqIn .3s ease-out both}@keyframes hqIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
 @media (prefers-reduced-motion:reduce){.hq-sk{animation:none}}
 
-/* Headquarters-Gebäude (isometrische Spielwelt-Optik) */
+/* Headquarters building (isometric game-world look) */
 .hq-world{margin:18px -8px 0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.08) 60%,rgba(187,247,208,.18) 100%)}
 .hq-world::-webkit-scrollbar{display:none}
 .hq-world-svg{display:block;width:100%;min-width:680px;height:auto;max-height:620px}
@@ -101,7 +101,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 }
 @media (max-width:900px){.hq-world{margin:14px -16px 0;border-radius:0}}
 
-/* VR-Raum: 3D-Gebäude mit Überblick, Rundgang und VR-Brille */
+/* VR room: 3D building with overview, walkthrough and VR headset */
 .hq-vrbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:18px}
 .hq-seg,.hq-zoom{display:flex;gap:4px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:4px}
 .hq-seg button,.hq-zoom button{font:inherit;font-size:13.5px;font-weight:800;color:#fff;background:transparent;border:0;border-radius:999px;padding:7px 14px;min-height:36px;min-width:36px;cursor:pointer}
@@ -131,7 +131,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 .hq-rc-a{display:flex;flex-wrap:wrap;gap:8px}
 @media (max-width:900px){.hq-stage{margin:10px -16px 0;border-radius:0;height:56vh;min-height:340px}.hq-vrbar{gap:6px}.hq-seg button{padding:7px 11px}}
 
-/* Sicherheits-Check im Web-Admin: „Jetzt prüfen“ / „Alles erledigen“ (Markenverlauf oben) */
+/* Security check in the Web-Admin: "Check now" / "Fix all" (brand gradient on top) */
 .ck-panel{position:relative;overflow:hidden;border-radius:18px;padding:18px;margin-bottom:16px;color:#fff;background:radial-gradient(70% 90% at 100% 0%,rgba(56,189,248,.3) 0%,rgba(56,189,248,0) 60%),linear-gradient(140deg,#0F2C59 0%,#0B3B73 50%,#0369A1 100%);box-shadow:0 24px 60px -30px rgba(15,44,89,.55)}
 .ck-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
 .ck-head h2{margin:0;color:#fff;font-size:22px}
@@ -160,7 +160,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 .sec-more>section{margin:0 12px 12px}
 @media (prefers-reduced-motion:reduce){.ck-sk{animation:none}}
 
-/* Team: digitale Mitarbeiter, arbeiten parallel */
+/* Team: digital staff, working in parallel */
 .hq-team{margin-top:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:14px}
 .hq-team-h{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
 .hq-team-h h3{margin:0;color:#fff;font-size:18px}
@@ -184,7 +184,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 @media (max-width:900px){.hq-team{margin:14px -6px 0;padding:12px}.hq-go{width:100%}}
 @media (prefers-reduced-motion:reduce){.hq-ag[data-state="busy"] .hq-av{animation:none}}
 
-/* Orbit: Abteilungen um den Kern „LeaseRun Intelligence“ – helle Glas-Optik im Markenverlauf */
+/* Orbit: departments around the "LeaseRun Intelligence" core – light glass look in the brand gradient */
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .hq-orbit{position:relative;margin:18px -8px 0;border-radius:20px;padding:16px;color:#0F172A;overflow:hidden;
   background:radial-gradient(60% 55% at 50% 52%,rgba(56,189,248,.28) 0%,rgba(56,189,248,0) 70%),linear-gradient(180deg,#F8FBFF 0%,#EAF2FB 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
@@ -238,8 +238,8 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 .hq-orbit-foot{position:relative;z-index:3;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin-top:12px;font-size:13px;color:#475569}
 .hq-link{font:inherit;font-size:13px;font-weight:700;color:#0369A1;background:none;border:0;cursor:pointer;padding:6px 0}
 #hq3dWrap .hq-world-h{color:rgba(255,255,255,.72)}
-/* Elf Karten auf dem Kreis: Breite folgt der Ring-Breite (cqw), damit sich bei keiner Fensterbreite Karten überdecken
-   oder am Rand abgeschnitten werden (Abstand zweier Nachbarn ≈ 21,9 % der Ring-Breite). */
+/* Cards on the circle: width follows the ring width (cqw) so cards never overlap at any window width
+   or get cut off at the edge (distance between neighbors ≈ 21.9% of the ring width). */
 .hq-ring{container-type:inline-size}
 .hq-dep-t{min-width:0;flex:1}
 @media (min-width:901px){.hq-dep-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}.hq-dep-t small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;line-height:1.3}}
@@ -260,7 +260,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 .hq-orbit small,.hq-pill small{text-transform:none;letter-spacing:normal}
 .hq-pill{max-width:340px}
 @media (max-width:900px){.hq-dep.plan{order:2}.hq-dep{order:1}.hq-core{order:0}}
-/* Headquarters: eine Prüfstelle, Entscheidungen volle Breite, Systeme/Aktivität eingeklappt (Seite bleibt kurz). */
+/* Headquarters: one check point, decisions full width, systems/activity collapsed (page stays short). */
 .hq-check{margin:16px 0}
 .hq-grid{grid-template-columns:1fr}
 .hq-fold{margin-top:12px;padding:0}
@@ -278,7 +278,7 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 .aud-day>summary span{font-size:13px;color:#64748b}
 .aud-day>.aud-list{padding:0 14px 10px;margin:0}
 
-/* Drehbarer Ring, LeaseRun-Zeichen, Identitäten, Auftragsfeld */
+/* Rotatable ring, LeaseRun mark, identities, command field */
 @media (min-width:900px){.hq-ring{cursor:grab;touch-action:none;user-select:none}.hq-ring.drag{cursor:grabbing}.hq-ring.drag .hq-dep{transition:none}}
 .hq-rot-h{font-size:12px;color:#94a3b8}@media (max-width:899px){.hq-rot-h{display:none}}
 .hq-mk{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#0F2C59,#0369A1 60%,#38BDF8);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
@@ -299,12 +299,12 @@ button.hq-dept{cursor:pointer;background:linear-gradient(180deg,#F0F9FF,#fff)}bu
 .hq-qa{margin:10px 0 0;max-width:640px;display:grid;gap:8px}
 .hq-qa .hq-msg{max-width:100%}
 
-/* ---- Web-Admin: am Computer genauso klar wie am iPad/iPhone ----
-   Grauer Seitenhintergrund, damit weiße Karten sichtbar sind (bei Skalierung 150 % wurde der feine Rand sonst unsichtbar). */
+/* ---- Web-Admin: as clear on a computer as on iPad/iPhone ----
+   Gray page background so white cards stay visible (at 150% scaling the thin border was otherwise invisible). */
 body:has(#intern){background:#F1F5F9}
 #intern .wa-main :is(.pt-card,.us-card,.dash-card,.aud-list li,.st-card,.ag-card,.bl-card){background:#fff;border:1px solid #CBD5E1;box-shadow:0 1px 3px rgba(15,23,42,.07)}
 #intern .wa-main .aud-list li.aud-sec{border-left:4px solid #DC2626}#intern .wa-main .aud-list li:is(.aud-b2b,.aud-user){border-left:4px solid #0284C7}#intern .wa-main .aud-list li.aud-fin{border-left:4px solid #16A34A}#intern .wa-main .aud-list li.aud-sys{border-left:4px solid #94A3B8}
-/* Protokoll kompakt: Zeit · Ereignis · Wer – Ziel und Details erst beim Öffnen */
+/* Compact audit log: time · event · who – target and details only when opened */
 #intern .aud-list li{grid-template-columns:118px 1fr;align-items:start;padding:10px 14px}
 #intern .aud-main{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
 #intern .aud-more{flex-basis:100%}
@@ -313,7 +313,7 @@ body:has(#intern){background:#F1F5F9}
 #intern .aud-more>summary::after{content:"▾";font-size:11px}
 #intern .aud-more[open]>summary::after{content:"▴"}
 #intern .aud-more[open]{padding-top:6px}
-/* Knöpfe einheitlich: gleiche Höhe, Rundung und Schrift; Gefahr-Aktionen zurückhaltend rot umrandet */
+/* Consistent buttons: same height, radius and font; danger actions with a subtle red outline */
 #intern .wa-main .btn{border-radius:10px;min-height:40px;padding:8px 16px;font-size:14px;font-weight:650;line-height:1.2;box-shadow:none}
 #intern .wa-main .btn-sm{min-height:34px;padding:6px 12px;font-size:13px}
 #intern .wa-main .btn-outline,#intern .wa-main .btn-ghost{background:#fff;border:1px solid #CBD5E1;color:#0F2C59}
@@ -324,20 +324,20 @@ body:has(#intern){background:#F1F5F9}
 #intern .us-act .btn{min-height:40px;white-space:nowrap}
 #intern .wa-main .pt-danger .btn-danger{background:#B91C1C;border-color:#B91C1C;color:#fff}
 
-/* Mitte: LeaseRun-Logo statt Kugel (Ringe drehen weiter) · Founder mit Foto */
+/* Center: LeaseRun logo instead of the orb (rings keep rotating) · founder with photo */
 .hq-orb span.hq-orb-logo{inset:26px;border:0;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 4px rgba(56,189,248,.18),0 0 40px 8px rgba(56,189,248,.35);animation:hqGlow2 3s ease-in-out infinite}
 .hq-orb .hq-orb-logo img{width:58%;height:auto;display:block}
 .hq-dep-ic.hq-face{padding:0;overflow:hidden;background:#0F2C59;border:2px solid #0F2C59}
 .hq-dep-ic.hq-face img{width:100%;height:100%;object-fit:cover;display:block}
 @media (max-width:900px){.hq-orb span.hq-orb-logo{inset:20px}}
-/* Freischaltung */
+/* Paywall & previews */
 #intern .fs-grid{display:grid;gap:14px;margin-top:10px}
 #intern .fs-row{border:1px solid #E2E8F0;border-radius:12px;padding:12px 14px;margin:0;display:grid;gap:8px}
 #intern .fs-row legend{padding:0 6px}
 #intern .fs-opt{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #CBD5E1;border-radius:999px;background:#fff;cursor:pointer;font-weight:600}
 #intern .fs-opt:has(input:checked){border-color:#0F2C59;background:#EFF6FF}
 #intern .fs-row input[type=number]{max-width:120px;margin-left:8px}
-/* Web-Admin flüssig: sanftes Einblenden beim Reiterwechsel, sofortige Reaktion auf Tippen */
+/* Smooth Web-Admin: soft fade-in on tab change, instant reaction to taps */
 #intern a,#intern button,#intern summary,#intern label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:no-preference){
   @keyframes wa-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -346,7 +346,7 @@ body:has(#intern){background:#F1F5F9}
   #intern .btn:active{transform:scale(.985)}
   #intern details[open]>:not(summary){animation:wa-in .18s ease-out}
 }
-/* LeaseRun Intelligence: Lösung des Modells, Freigaben, Einstellungen, Knopf-Zustand */
+/* LeaseRun Intelligence: model solution, approvals, settings, button state */
 .hq-aist{color:#64748B;font-size:12.5px}.hq-aist a{color:#0369A1}.hq-aist b{color:#92400E;font-weight:700}
 .hq-ai{margin:10px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#EFF6FF,#F0F9FF);border:1px solid #BFDBFE}
 .hq-ai small{display:block;color:#1D4ED8;font-size:12px;font-weight:700;margin-bottom:4px}
@@ -370,7 +370,7 @@ body:has(#intern){background:#F1F5F9}
 .hq-res.run{background:#E0F2FE;color:#075985}.hq-res.bad{background:#FEF3C7;color:#92400E}
 .hq-prop li.hq-p-erledigt{opacity:.85}
 .hq-msg.wait{background:#E0F2FE;color:#075985;font-style:italic;animation:hqPulse 1.6s ease-in-out infinite}
-/* Entscheidungen: eine Warteschlange, nur Erledigen / Verwerfen */
+/* Decisions: one queue, only Do it / Dismiss */
 .hq-dec{margin-top:16px}
 .hq-dec-h{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .hq-dec-n{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;margin-left:6px;border-radius:999px;background:#D97706;color:#fff;font-size:13px;vertical-align:2px}
@@ -382,7 +382,7 @@ body:has(#intern){background:#F1F5F9}
 .hq-dec .ck-act .hq-btn{min-height:40px}
 details.hq-ai>summary{cursor:pointer;list-style:none}details.hq-ai>summary::-webkit-details-marker{display:none}
 details.hq-ai:not([open])>summary small{margin:0}
-/* Dateien (OneDrive im Hintergrund) */
+/* Files (OneDrive in the background) */
 .hq-files{margin-top:16px}
 .hq-fl-off{margin-bottom:10px}
 .hq-fnew{display:grid;gap:10px;margin:0 0 12px;padding:12px;border:1px solid #BFDBFE;border-radius:14px;background:#F0F9FF}
@@ -405,7 +405,7 @@ details.hq-ai:not([open])>summary small{margin:0}
 #sysFiles .hq-files{margin:0 0 20px}
 .hq-cat{display:inline-block;margin-right:8px;padding:2px 8px;border-radius:999px;background:#E0F2FE;color:#075985;font-style:normal;font-size:12px;font-weight:700;vertical-align:1px}
 .hq-fl3 li.vir small{color:#B91C1C;font-weight:800}
-/* Firmen-OS-Leiste: Apps, Agenten und Daten in einem Feld */
+/* Company OS bar: apps, agents and data in one field */
 .hq-q{position:relative}
 .hq-os{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;display:grid;gap:2px;max-height:min(60vh,420px);overflow:auto;background:#fff;border-radius:14px;padding:6px;box-shadow:0 24px 50px -20px rgba(15,23,42,.55);border:1px solid #E2E8F0}
 .hq-os button{display:grid;grid-template-columns:auto 1fr;gap:0 10px;align-items:center;text-align:left;font:inherit;background:none;border:0;border-radius:10px;padding:9px 10px;cursor:pointer;color:#0F172A;min-height:44px}
@@ -413,7 +413,7 @@ details.hq-ai:not([open])>summary small{margin:0}
 .hq-os b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hq-os small{grid-column:2;color:#64748B;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hq-os-k{grid-row:span 2;font-style:normal;font-size:11px;font-weight:800;color:#0369A1;background:#E0F2FE;border-radius:999px;padding:3px 8px;min-width:64px;text-align:center}
-/* ---- Handy-Modus (≤ 600 px): Entscheidungen zuerst, kompakte Abteilungen, Karten als Blatt von unten ---- */
+/* ---- Phone mode (≤ 600 px): decisions first, compact departments, cards as a bottom sheet ---- */
 @media (max-width:600px){
   .hq{gap:12px}
   .hq-hero{padding:16px 14px 18px}
@@ -445,7 +445,7 @@ details.hq-ai:not([open])>summary small{margin:0}
   .hq-phone .hq-dep-t small{display:none}
   .hq-phone .hq-dep.founder{grid-column:span 4;flex-direction:row;justify-content:center}
   .hq-phone .hq-dep.founder .hq-dep-t small{display:flex}
-  /* Agenten-Karte als Blatt von unten (wie eine App) */
+    /* Agent card as a bottom sheet (like an app) */
   .hq-phone .hq-sheet .hq-sh{position:fixed;left:0;right:0;bottom:0;z-index:60;margin:0;max-height:88vh;max-height:88dvh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px -20px rgba(15,23,42,.6);animation:hqUp .22s ease-out}
   .hq-phone .hq-sheet:has(.hq-sh)::before{content:"";position:fixed;inset:0;z-index:59;background:rgba(15,23,42,.45)}
   .hq-phone .hq-sh-a{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hq-phone .hq-sh-a .hq-btn{min-height:44px}
@@ -456,12 +456,12 @@ details.hq-ai:not([open])>summary small{margin:0}
 @keyframes hqUp{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.hq-phone .hq-sheet .hq-sh{animation:none}}
 @media (max-width:600px){.hq-phone .hq-sheet{z-index:70}.hq-phone .hq-sh-h .hq-rc-x{margin-left:auto}}
-/* Handy: Agenten-Blatt endet über der unteren Leiste (nichts verdeckt), scrollt in sich, Ring fängt die Ebene nicht ein */
+/* Phone: agent sheet ends above the bottom bar (nothing covered), scrolls internally, ring doesn't trap the layer */
 @media (max-width:900px){
   .hq-phone .hq-ring{z-index:auto}
   .hq-phone .hq-sheet .hq-sh{z-index:70;bottom:calc(64px + env(safe-area-inset-bottom));max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px - env(safe-area-inset-bottom));padding-bottom:16px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;border-radius:20px}
 }
-/* Ring mit 16 Abteilungen: schmalere Karten und höherer Ring, damit sich oben/unten nichts überlappt (Desktop) */
+/* Ring with 16 departments: narrower cards and taller ring so nothing overlaps at top/bottom (desktop) */
 @media (min-width:901px){
   .hq-ring{height:660px}
   .hq-dep{width:min(172px,14cqw);padding:8px 9px;gap:8px}
@@ -469,8 +469,8 @@ details.hq-ai:not([open])>summary small{margin:0}
   .hq-dep-t b{font-size:13px}
   .hq-dep-t small{font-size:11.5px;-webkit-line-clamp:1!important}
 }
-/* ---------- Command Center: Lage-Zeile, Jetzt wichtig (Jetzt · Freigaben · Heute · Aktiv), Kennzahlen ---------- */
-/* Farben mit Bedeutung: Rot kritisch · Gelb Aufmerksamkeit · Orange Freigabe · Blau Hinweis · Grün stabil – immer mit Text. */
+/* ---------- Command Center: status line, Now important (Now · Approvals · Today · Active), metrics ---------- */
+/* Colors with meaning: red critical · yellow attention · orange approval · blue note · green stable – always with text. */
 .hq-hero{padding-bottom:22px}
 .hq-hero[data-level="unknown"] .hq-dot{background:#94A3B8}
 .hq-bar{margin:6px 0 0;font-size:14px;font-weight:700;color:#E0F2FE;font-variant-numeric:tabular-nums}
@@ -498,7 +498,7 @@ details.hq-ai:not([open])>summary small{margin:0}
 .hq-actv .dot{grid-row:span 2;width:8px;height:8px;border-radius:50%;background:#0284C7}
 .hq-actv b{font-size:14px;color:#0F172A}.hq-actv small{font-size:12.5px;color:#64748B}
 @media (prefers-reduced-motion:no-preference){.hq-actv .dot{animation:hqPulse 1.6s ease-in-out infinite}@keyframes hqPulse{50%{opacity:.35}}}
-/* Kennzahlen unter „Jetzt wichtig“: ruhig, auf Weiß, konkurrieren nicht mit Entscheidungen */
+/* Metrics below "Now important": calm, on white, don't compete with decisions */
 .hq-met{display:grid;gap:12px}
 .hq-met .hq-kpis{margin:0;padding:0}
 .hq-met .hq-kpi{box-shadow:none}
@@ -516,7 +516,7 @@ details.hq-ai:not([open])>summary small{margin:0}
 }
 .hq [hidden]{display:none!important}
 .hq>.hq-orbit{margin:0}
-/* Umsetzung pausiert (z. B. Anthropic-Guthaben leer) */
+/* Implementation paused (e.g. Anthropic credit empty) */
 .hq .hq-block{margin:0 0 14px;padding:12px 14px;border:1px solid #fcd34d;background:#fffbeb;border-radius:12px;color:#78350f}
 .hq .hq-block strong{display:block;font-size:15px;margin:0 0 4px}
 .hq .hq-block p{margin:0 0 10px;font-size:14px;line-height:1.45}
@@ -524,7 +524,7 @@ details.hq-ai:not([open])>summary small{margin:0}
 @media (prefers-color-scheme:dark){.hq .hq-block{background:#3b2a07;border-color:#a16207;color:#fde68a}}
 .hq .hq-wait>summary{display:flex;flex-direction:column;gap:2px;padding:10px 12px;cursor:pointer;min-height:44px;justify-content:center}
 .hq .hq-wait>summary small{color:#64748b;font-size:12px}
-/* Meine Cloud (Steuersoftware) */
+/* My Cloud (files) */
 .ab-cr{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:4px 0 10px;font-size:14px}.ab-cr button{background:none;border:0;padding:6px 4px;color:#0369A1;font-weight:600;cursor:pointer;min-height:36px}.ab-cr span{color:#94A3B8}
 .ab-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}.ab-q{flex:1 1 200px;min-height:40px;border:1px solid #CBD5E1;border-radius:10px;padding:0 12px;font-size:15px}
 .ab-k{display:flex;gap:4px;flex-wrap:wrap}.ab-k button{border:1px solid #CBD5E1;background:#fff;border-radius:999px;padding:6px 12px;min-height:36px;font-size:13px;cursor:pointer}.ab-k button.on{background:#0F2C59;border-color:#0F2C59;color:#fff}
@@ -537,7 +537,7 @@ details.hq-ai:not([open])>summary small{margin:0}
 .ab-it b{font-size:13px;color:#0F172A;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.ab-it small{font-size:12px;color:#64748B}
 .ab-act{display:flex;flex-wrap:wrap;gap:4px;padding:0 10px 10px}.ab-act .hq-btn{font-size:12px;padding:4px 8px;min-height:32px;text-decoration:none;display:inline-flex;align-items:center}
 @media (max-width:480px){.ab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* Ava · Freigaben: Entwürfe als Pakete (Herkunft + Tag), Auswahl per Häkchen – Touch-Ziele ≥ 44 px */
+/* Ava · Approvals: drafts as packages (source + day), selection via checkboxes – touch targets ≥ 44 px */
 .hq-pk-n{margin:6px 0 8px;font-size:12.5px;color:#64748B}
 .hq-pk-g{border:1px solid #E2E8F0;border-radius:12px;background:#fff;margin:0 0 8px}
 .hq-pk-g>summary{cursor:pointer;min-height:44px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 12px}

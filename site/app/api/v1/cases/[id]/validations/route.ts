@@ -8,7 +8,7 @@ import { cursorFilter, pageOf, pageParams } from '@/lib/api/pagination';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// POST /api/v1/cases/{id}/validations – neuen Prüflauf anlegen (idempotent mit Idempotency-Key).
+// POST /api/v1/cases/{id}/validations – create a new validation run (idempotent with Idempotency-Key).
 export const POST = apiRoute({ route: '/api/v1/cases/{id}/validations', scope: 'validation:execute', idempotent: true }, async (ctx) => {
   const s = { tenantId: ctx.tenantId, env: ctx.env, actor: ctx.actor, requestId: ctx.requestId };
   if (ctx.body !== undefined && (typeof ctx.body !== 'object' || Array.isArray(ctx.body) || Object.keys(ctx.body as object).length)) throw new ApiError('VALIDATION_ERROR', 'The request body must be empty or {}.');
@@ -16,7 +16,7 @@ export const POST = apiRoute({ route: '/api/v1/cases/{id}/validations', scope: '
   return { status: 201, body: publicValidation(v), headers: { Location: `/api/v1/cases/${ctx.params.id}/validations/${v.id}` } };
 });
 
-// GET /api/v1/cases/{id}/validations – bisherige Prüfläufe
+// GET /api/v1/cases/{id}/validations – previous validation runs
 export const GET = apiRoute({ route: '/api/v1/cases/{id}/validations', scope: 'validation:read' }, async (ctx) => {
   const s = { tenantId: ctx.tenantId, env: ctx.env, actor: ctx.actor, requestId: ctx.requestId };
   await getCase(s, ctx.params.id);

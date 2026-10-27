@@ -2,7 +2,7 @@ import { DOCUMENT_BUCKET, supabaseAdmin } from '@/lib/supabase/admin';
 
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-// Entfernt nicht abgeschlossene Direkt-Uploads (Ordner incoming/) eines Nutzers, die älter als 24 h sind.
+// Removes a user's unfinished direct uploads (folder incoming/) older than 24 hours.
 export async function cleanupIncoming(userId: string, now = Date.now()): Promise<number> {
   const store = supabaseAdmin().storage.from(DOCUMENT_BUCKET);
   const { data, error } = await store.list(`${userId}/incoming`, { limit: 100 });
@@ -15,7 +15,7 @@ export async function cleanupIncoming(userId: string, now = Date.now()): Promise
   return rm.error ? 0 : old.length;
 }
 
-// Alle Nutzerordner durchgehen (für den täglichen Cron-Lauf).
+// Walk all user folders (for the daily cron run).
 export async function cleanupAllIncoming(): Promise<{ users: number; removed: number }> {
   const store = supabaseAdmin().storage.from(DOCUMENT_BUCKET);
   let offset = 0, users = 0, removed = 0;
@@ -23,7 +23,7 @@ export async function cleanupAllIncoming(): Promise<{ users: number; removed: nu
     const { data, error } = await store.list('', { limit: 500, offset });
     if (error || !data?.length) break;
     for (const d of data) {
-      if (d.id) continue; // Datei, kein Ordner
+      if (d.id) continue; // file, not a folder
       users++;
       removed += await cleanupIncoming(d.name);
     }

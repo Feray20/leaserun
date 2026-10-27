@@ -2,7 +2,9 @@
 // a client-ready affordability preview (closing costs, PITIA, income needed per down-payment scenario).
 // The file never leaves the device. Contact details of third parties (agents, sellers) are not taken.
 import { parseListing } from './listing-parse.mjs?v=892f3666';
-import { kaufnebenkosten, GREST, DEFAULT_STATE } from './calc.mjs?v=892f3666';
+import * as C from './calc.mjs?v=892f3666';
+const { kaufnebenkosten, GREST } = C;
+const DEFAULT_STATE = C.DEFAULT_STATE || 'texas';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const E = (v) => (Number.isFinite(v) ? v : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
