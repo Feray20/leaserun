@@ -32,13 +32,14 @@ jobs:
         continue-on-error: true
       - name: Build
         run: npm run build 2>&1 | tee ../build.log; exit ${PIPESTATUS[0]}
-      - name: Publish logs to ci-logs branch
+      - name: Report logs as annotations
         if: always()
         working-directory: .
         run: |
-          mkdir -p /tmp/ci && cp typecheck.log tests.log build.log /tmp/ci/ 2>/dev/null || true
-          echo "${{ github.sha }} ${{ job.status }}" > /tmp/ci/STATUS
-          git config user.name ci && git config user.email ci@users.noreply.github.com
-          git fetch origin ci-logs --depth 1 && git checkout -f ci-logs || git checkout --orphan ci-logs
-          git rm -rfq . >/dev/null 2>&1 || true
-          cp /tmp/ci/* . && git add -A && git commit -qm "logs ${{ github.sha }}" && git push -f origin HEAD:ci-logs
+          for f in typecheck tests build; do
+            [ -f $f.log ] || continue
+            if [ $f = build ]; then body=$(grep -nE "rror|Failed|failed|warn  -|Type error|Module not found|Cannot find" $f.log | head -n 120); else body=$(tail -n 120 $f.log); fi
+            [ -z "$body" ] && body=$(tail -n 60 $f.log)
+            body="${body//'%'/'%25'}"; body="${body//$'\n'/'%0A'}"; body="${body//$'\r'/'%0D'}"
+            echo "::warning title=LOG_$f::$body"
+          done
