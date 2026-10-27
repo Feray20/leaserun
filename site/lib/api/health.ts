@@ -43,7 +43,7 @@ export async function healthCheck(): Promise<{ status: CompStatus; checked_at: s
         db.from('api_reports').select('id', { head: true, count: 'exact' }).eq('status', 'failed').gt('created_at', new Date(Date.now() - 3600_000).toISOString()),
       ]);
       await import('@react-pdf/renderer');
-      return (waiting ?? 0) > 0 || (failed ?? 0) > 2 ? { status: 'degraded', detail: `${waiting ?? 0} waiting > 10 min, ${failed ?? 0} failed (1 h)` } : { status: 'operational', detail: 'PDF-Erzeugung bereit, keine Rückstände' };
+      return (waiting ?? 0) > 0 || (failed ?? 0) > 2 ? { status: 'degraded', detail: `${waiting ?? 0} waiting > 10 min, ${failed ?? 0} failed (1 h)` } : { status: 'operational', detail: 'PDF generation ready, no backlog' };
     }),
     timed('webhook_dispatcher', async () => {
       if (!db) return { status: 'unavailable', detail: 'Supabase not configured' };
@@ -53,7 +53,7 @@ export async function healthCheck(): Promise<{ status: CompStatus; checked_at: s
         db.from('api_webhook_deliveries').select('id', { head: true, count: 'exact' }).eq('status', 'failed').gt('created_at', new Date(Date.now() - 24 * 3600_000).toISOString()),
       ]);
       if (issues.includes('API_ENCRYPTION_KEY')) return { status: 'unavailable', detail: 'API_ENCRYPTION_KEY missing – signing not possible' };
-      return (late ?? 0) > 0 ? { status: 'degraded', detail: `${late} deliveries overdue, ${failed ?? 0} permanently failed (24 h)` } : { status: 'operational', detail: `Keine Rückstände · ${failed ?? 0} fehlgeschlagen (24 h)` };
+      return (late ?? 0) > 0 ? { status: 'degraded', detail: `${late} deliveries overdue, ${failed ?? 0} permanently failed (24 h)` } : { status: 'operational', detail: `No backlog · ${failed ?? 0} failed (24 h)` };
     }),
   ]);
   const worst: CompStatus = components.some((c) => c.status === 'unavailable') ? (components.some((c) => (c.name === 'api' || c.name === 'database') && c.status === 'unavailable') ? 'unavailable' : 'degraded') : components.some((c) => c.status === 'degraded') ? 'degraded' : 'operational';

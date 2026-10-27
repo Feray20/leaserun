@@ -62,7 +62,7 @@ const Action = z.discriminatedUnion('action', [
   z.object({ action: z.literal('invoicePayment'), id: z.string().uuid(), on: z.boolean(), limitCents: z.number().int().min(0).max(100_000_00).nullable().optional(), termsDays: z.number().int().min(0).max(90).optional() }),
   z.object({ action: z.literal('credits'), id: z.string().uuid(), add: z.number().int().min(-500).max(500) }),
   z.object({ action: z.literal('branche'), id: z.string().uuid(), branche: z.enum(['bank', 'vermittler', 'makler', 'finanzberater', 'allgemein']), extras: z.array(z.enum(['vermittler', 'makler', 'finanzberater', 'allgemein'])).max(4) }),
-  z.object({ action: z.literal('delete'), id: z.string().uuid(), confirm: z.enum(['DELETE', 'LÖSCHEN']) }), // 'LÖSCHEN' accepted until the Web-Admin UI sends 'DELETE'
+  z.object({ action: z.literal('delete'), id: z.string().uuid(), confirm: z.enum(['DELETE', 'L\u00D6SCHEN']) }), // legacy token still sent by intern.mjs (DEL_TOKEN); 'DELETE' preferred
   z.object({ action: z.literal('plan'), id: z.string().uuid(), tier: z.enum(['BASIC', 'PRO', 'ENTERPRISE']).nullable(), until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional() }),
 ]);
 
