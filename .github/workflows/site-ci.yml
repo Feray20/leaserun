@@ -3,6 +3,8 @@ on:
   push:
     branches-ignore: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,12 +32,13 @@ jobs:
         continue-on-error: true
       - name: Build
         run: npm run build 2>&1 | tee ../build.log; exit ${PIPESTATUS[0]}
-      - name: Upload logs
+      - name: Publish logs to ci-logs branch
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs
-          path: |
-            typecheck.log
-            tests.log
-            build.log
+        working-directory: .
+        run: |
+          mkdir -p /tmp/ci && cp typecheck.log tests.log build.log /tmp/ci/ 2>/dev/null || true
+          echo "${{ github.sha }} ${{ job.status }}" > /tmp/ci/STATUS
+          git config user.name ci && git config user.email ci@users.noreply.github.com
+          git fetch origin ci-logs --depth 1 && git checkout -f ci-logs || git checkout --orphan ci-logs
+          git rm -rfq . >/dev/null 2>&1 || true
+          cp /tmp/ci/* . && git add -A && git commit -qm "logs ${{ github.sha }}" && git push -f origin HEAD:ci-logs
