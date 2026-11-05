@@ -1,0 +1,46 @@
+# LeaseRun → Cloudflare Worker "leaserun" (moved from Vercel, Nov 2026).
+# Push on main: build dist/ and upload. Other branches: build only.
+# Needs repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (same values as in Feray20/ImmoAdv).
+name: Cloudflare
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloudflare-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Build
+        run: python3 build.py && python3 extra.py && python3 software.py && python3 finalize.py && rm -f dist/vercel.json
+      - name: Upload to Cloudflare
+        if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::warning::CLOUDFLARE_API_TOKEN missing – skipping upload"; exit 0; fi
+          npx --yes wrangler@latest deploy
+      - name: Check
+        if: github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && exit 0
+          BASE=https://leaserun.feray-korkmaz02.workers.dev
+          sleep 5
+          for p in / /pricing /properties /learn /login /app/tools /api/stripe-webhook /robots.txt /sitemap.xml /does-not-exist; do
+            echo "$p -> $(curl -sS -o /dev/null -w '%{http_code}' "$BASE$p")"
+          done

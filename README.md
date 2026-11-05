@@ -4,6 +4,16 @@ Website for **LeaseRun** — turnkey US rental acquisitions, full-service proper
 
 **Live:** https://leaserun.com (also https://leaserun.vercel.app)
 
+## Hosting: Cloudflare (moving from Vercel, Nov 2026)
+
+- Worker `leaserun`, config in `site/wrangler.jsonc`, entry `site/worker.mjs` (security headers, www → apex 308,
+  Stripe webhook at `/api/stripe-webhook`). Static pages are served from `site/dist/`.
+- `.github/workflows/cloudflare.yml` builds on every push and uploads on `main`
+  (repo secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`). Test address: https://leaserun.feray-korkmaz02.workers.dev
+- Worker secrets: `LR_GRANT_SECRET`, `STRIPE_WEBHOOK_SECRET`, `LR_PAYMENT_LINKS`.
+- Switch-over: add `leaserun.com` as a Cloudflare zone, change nameservers at Hostinger, then uncomment `routes`
+  in `wrangler.jsonc`. `site/vercel.json` stays until Vercel is switched off.
+
 ## Structure
 
 ```

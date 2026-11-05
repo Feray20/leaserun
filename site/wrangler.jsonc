@@ -1,0 +1,32 @@
+// LeaseRun as a Cloudflare Worker (moved from Vercel, Nov 2026).
+// `npx wrangler deploy` (run in site/) builds dist/ with the Python scripts and uploads it.
+// Secrets (Dashboard → Worker → Settings → Variables and Secrets, or `npx wrangler secret put NAME`):
+//   LR_GRANT_SECRET, STRIPE_WEBHOOK_SECRET, LR_PAYMENT_LINKS
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "leaserun",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-01",
+  // nodejs_compat: node:crypto for the Stripe signature check and process.env filled from the Worker secrets.
+  "compatibility_flags": ["nodejs_compat"],
+  "build": {
+    "command": "python3 build.py && python3 extra.py && python3 software.py && python3 finalize.py && rm -f dist/vercel.json"
+  },
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    // Every request goes through worker.mjs so the security headers and the www redirect apply like on Vercel.
+    "run_worker_first": true,
+    // Same as vercel.json cleanUrls + trailingSlash:false: /pricing serves pricing.html, /pricing/ redirects to /pricing.
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  "workers_dev": true,
+  // Custom domains leaserun.com + www.leaserun.com: switch on only after leaserun.com is an active Cloudflare zone
+  // (a deploy fails while the zone does not exist). Then uncomment:
+  // "routes": [
+  //   { "pattern": "leaserun.com", "custom_domain": true },
+  //   { "pattern": "www.leaserun.com", "custom_domain": true }
+  // ],
+  "observability": { "enabled": true }
+}
