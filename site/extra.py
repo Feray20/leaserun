@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
 EMAIL = "invest@leaserun.com"
 UPDATED = "October 18, 2026"
-ADMIN_API = "https://pxexxguhgqfxwhtnwcrj.supabase.co/functions/v1/leads-admin"
+ADMIN_API = "/api/leads-admin"  # LeaseRun Worker (formerly Supabase Edge Function leads-admin)
 
 
 # ----------------------------------------------------------------- legal pages

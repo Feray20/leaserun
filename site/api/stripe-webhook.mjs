@@ -1,10 +1,9 @@
 // Stripe webhook → unlocks LeaseRun plans in Supabase.
-// Env (Vercel): STRIPE_WEBHOOK_SECRET (whsec_...), LR_GRANT_SECRET, LR_PAYMENT_LINKS ({"plink_...":"pro", ...}).
+// Env (Worker secrets): STRIPE_WEBHOOK_SECRET (whsec_...), LR_GRANT_SECRET, LR_PAYMENT_LINKS ({"plink_...":"pro", ...}).
 // No Stripe secret key is needed: the plan comes from the payment link, the user from client_reference_id.
 import crypto from 'node:crypto';
+import { sbUrl, sbKey } from './sb.mjs';
 
-const SB_URL = 'https://pxexxguhgqfxwhtnwcrj.supabase.co';
-const SB_KEY = 'sb_publishable_7Ga_tZ-JbJyVbA5e8YaGUg_DvftkCHP';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PLANS = new Set(['loan_package', 'buyer_pass', 'pro', 'b2b_basic', 'b2b_pro']);
 
@@ -24,9 +23,10 @@ export function parseReference(ref) {
 }
 
 async function grant(args) {
-  const r = await fetch(`${SB_URL}/rest/v1/rpc/lr_grant`, {
+  const key = sbKey();
+  const r = await fetch(`${sbUrl()}/rest/v1/rpc/lr_grant`, {
     method: 'POST',
-    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+    headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ p_secret: process.env.LR_GRANT_SECRET, ...args })
   });
   const text = await r.text();

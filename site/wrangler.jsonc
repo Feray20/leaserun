@@ -1,7 +1,8 @@
 // LeaseRun as a Cloudflare Worker (moved from Vercel, Nov 2026).
 // `npx wrangler deploy` (run in site/) builds dist/ with the Python scripts and uploads it.
 // Secrets (Dashboard → Worker → Settings → Variables and Secrets, or `npx wrangler secret put NAME`):
-//   LR_GRANT_SECRET, STRIPE_WEBHOOK_SECRET, LR_PAYMENT_LINKS
+//   LR_GRANT_SECRET, STRIPE_WEBHOOK_SECRET, LR_PAYMENT_LINKS, LEASERUN_ADMIN_PASSWORD, LR_SB_SERVICE_KEY
+// Variables (only after the move to the own server, see docs/EIGENER_SERVER.md): LR_SB_URL, LR_SB_KEY
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "leaserun",
