@@ -32,7 +32,8 @@ NAV = [("/", "Home"), ("/properties", "Properties"), ("/property-management", "P
 
 
 def head(title, desc, path, auto_modal=False):
-    links = "".join(f'<a href="{h}"{" class=\"active\"" if h == path else ""}>{t}</a>' for h, t in NAV)
+    active = ' class="active"'
+    links = "".join(f'<a href="{h}"{active if h == path else ""}>{t}</a>' for h, t in NAV)
     return f'''<!doctype html>
 <html lang="en">
 <head>

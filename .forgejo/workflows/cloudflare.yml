@@ -1,7 +1,7 @@
 # LeaseRun → Cloudflare Worker "leaserun" – Forgejo version (own server, 0 € build minutes; GitHub exit Nov 2026).
 # Same steps as .github/workflows/cloudflare.yml. Push on main: build, test and upload; other branches: build + test only.
 # Switch (Forgejo → repo → Settings → Actions → Variables) so nothing is uploaded twice:
-#   FORGEJO_LIVE = ja  → main is uploaded from HERE. Set only after a green Forgejo run, and turn the GitHub workflow off.
+#   LIVE_HOCHLADEN = ja  → main is uploaded from HERE. Set only after a green Forgejo run, and turn the GitHub workflow off.
 # Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID (same values as in ImmoAdv) – never in logs.
 name: Cloudflare (Forgejo)
 on:
@@ -25,14 +25,14 @@ jobs:
         working-directory: site
         run: python3 build.py && python3 extra.py && python3 software.py && python3 finalize.py && rm -f dist/vercel.json
       - name: Upload to Cloudflare
-        if: github.ref == 'refs/heads/main' && vars.FORGEJO_LIVE == 'ja'
+        if: github.ref == 'refs/heads/main' && vars.LIVE_HOCHLADEN == 'ja'
         working-directory: site
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx --yes wrangler@4 deploy
       - name: Check
-        if: github.ref == 'refs/heads/main' && vars.FORGEJO_LIVE == 'ja'
+        if: github.ref == 'refs/heads/main' && vars.LIVE_HOCHLADEN == 'ja'
         run: |
           BASE=https://leaserun.feray-korkmaz02.workers.dev
           sleep 5
